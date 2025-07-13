@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"  android:sharedUserId="com.termux">
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <!-- Declare features that might be needed -->
     <uses-feature
@@ -38,7 +38,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
-        android:label="Winlator CMOD"
+        android:label="Winlator Cmod"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme"
@@ -159,7 +159,7 @@
         <meta-data
             android:name="android.allow_multiple_resumed_activities"
             android:value="true" />
-        >
+
 
     </application>
 </manifest>
