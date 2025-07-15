@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -317,6 +318,13 @@ public class ContainersFragment extends Fragment {
 
         private void runContainer(Container container) {
             final Context context = getContext();
+
+            File box64File = new File(context.getFilesDir(), "imagefs/usr/bin/box64");
+            if (box64File.exists()) {
+                box64File.delete();
+                Log.i("ContainersFragment", "Deleted existing box64 to ensure a clean launch.");
+            }
+
             if (!XrActivity.isEnabled(getContext())) {
                 Intent intent = new Intent(context, XServerDisplayActivity.class);
                 intent.putExtra("container_id", container.id);

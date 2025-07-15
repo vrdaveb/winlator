@@ -26,22 +26,22 @@ public abstract class ProcessHelper {
 
     public static void suspendProcess(int pid) {
         Process.sendSignal(pid, SIGSTOP);
-        Log.d("ProcessHelper", "Process suspended with pid: " + pid);
+//        Log.d("ProcessHelper", "Process suspended with pid: " + pid);
     }
 
     public static void resumeProcess(int pid) {
         Process.sendSignal(pid, SIGCONT);
-        Log.d("ProcessHelper", "Process resumed with pid: " + pid);
+//        Log.d("ProcessHelper", "Process resumed with pid: " + pid);
     }
 
     public static void terminateProcess(int pid) {
         Process.sendSignal(pid, SIGTERM);
-        Log.d("ProcessHelper", "Process terminated with pid: " + pid);
+//        Log.d("ProcessHelper", "Process terminated with pid: " + pid);
     }
 
     public static void killProcess(int pid) {
         Process.sendSignal(pid, SIGKILL);
-        Log.d("ProcessHelper", "Process killed with pid: " + pid);
+//        Log.d("ProcessHelper", "Process killed with pid: " + pid);
     }
 
     public static void terminateAllWineProcesses() {

@@ -2013,6 +2013,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         Log.d("XServerDisplayActivity", "Input controls simulated confirmation executed.");
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void startTouchscreenTimeout() {
         boolean isTimeoutEnabled = preferences.getBoolean("touchscreen_timeout_enabled", false);
 

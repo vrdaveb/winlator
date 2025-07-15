@@ -124,33 +124,34 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     private void extractBox86_64Files() {
         ImageFs imageFs = environment.getImageFs();
         Context context = environment.getContext();
-
-        // Fallback to default if the shared preference is not set or is empty
         String box64Version = container.getBox64Version();
 
-        if (shortcut != null)
+        if (shortcut != null) {
             box64Version = shortcut.getExtra("box64Version", shortcut.container.getBox64Version());
-
-        Log.d("BionicProgramLauncherComponent", "box64Version: " + box64Version);
-
-        File rootDir = imageFs.getRootDir();
-
-        if (!box64Version.equals(container.getExtra("box64Version"))) {
-            ContentProfile profile = contentsManager.getProfileByEntryName("box64-" + box64Version);
-            if (profile != null)
-                contentsManager.applyContent(profile);
-            else
-                TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, context, "box86_64/box64-" + box64Version + ".tzst", rootDir);
-            container.putExtra("box64Version", box64Version);
-            container.saveData();
         }
 
-        // Set execute permissions for box64 just in case
-        File box64File = new File(rootDir, "/usr/bin/box64");
+        Log.i("BionicProgramLauncherComponent", "Extracting required box64 version: " + box64Version);
+        File rootDir = imageFs.getRootDir();
+
+        // No more version check, just extract directly.
+        ContentProfile profile = contentsManager.getProfileByEntryName("box64-" + box64Version);
+        if (profile != null) {
+            contentsManager.applyContent(profile);
+        } else {
+            TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, context, "box86_64/box64-" + box64Version + ".tzst", rootDir);
+        }
+
+        // Update the metadata so the container knows which version is installed.
+        container.putExtra("box64Version", box64Version);
+        container.saveData();
+
+        // Set execute permissions.
+        File box64File = new File(rootDir, "usr/bin/box64");
         if (box64File.exists()) {
             FileUtils.chmod(box64File, 0755);
         }
     }
+
 
 
     private void extractEmulatorsDlls() {;
