@@ -490,7 +490,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             String creditsAndThirdPartyAppsHTML = String.join("<br />",
                     "Winlator was created by Brunodev85 (<a href=\"https://github.com/brunodev85\">Git</a>)",
-                    "Winlator Cmod by <a href=\"https://github.com/coffincolors/winlator\">coffincolors</a>, <a href=\"https://github.com/coffincolors/winlator\">Pipetto-crypto</a>",
+                    "Winlator Cmod by <a href=\"https://github.com/coffincolors/winlator\">coffincolors</a>, <a href=\"https://github.com/Pipetto-crypto/winlator\">Pipetto-crypto</a>",
                     "Winlator Glibc by longjunyu2 (<a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">Fork</a>)",
                     "Winlator OpenXR by lvanosek (<a href=\"https://github.com/Ivanosek\">Fork</a>)",
                     "Big Picture Mode Music by Fumer",

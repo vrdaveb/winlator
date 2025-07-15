@@ -422,7 +422,11 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Service.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetwork() != null) {
             ArrayList<InetAddress> dnsServers = new ArrayList<>(connectivityManager.getLinkProperties(connectivityManager.getActiveNetwork()).getDnsServers());
-            primaryDNS = dnsServers.get(0).toString().substring(1);
+
+            // Check if the dnsServers list is not empty before getting an item
+            if (!dnsServers.isEmpty()) {
+                primaryDNS = dnsServers.get(0).toString().substring(1);
+            }
         }
         envVars.put("ANDROID_RESOLV_DNS", primaryDNS);
         envVars.put("WINE_NEW_NDIS", "1");
