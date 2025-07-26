@@ -18,6 +18,7 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -218,6 +219,10 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
 //    private WinetricksFloatingView winetricksFloatingView;
 
+    private boolean capturePointerOnNextFocus = false;
+
+    private boolean capturePointerOnDrawerClose = false;
+
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -253,35 +258,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         AppUtils.keepScreenOn(this);
         setContentView(R.layout.xserver_display_activity);
 
-//        String RESTART_TRIGGER_PATH = "/data/user/0/com.winlator/files/imagefs/tmp/winlator_restart_trigger";
-//        String RESTART_TRIGGER_DIR = "/data/user/0/com.winlator/files/imagefs/tmp/";
-//
-//        restartTriggerObserver = new FileObserver(RESTART_TRIGGER_DIR, FileObserver.CLOSE_WRITE | FileObserver.CREATE) {
-//            @Override
-//            public void onEvent(int event, String path) {
-//                if (path != null && path.equals("winlator_restart_trigger") && event == FileObserver.CLOSE_WRITE) {
-//                    Log.d("XServerDisplayActivity", "Detected trigger file creation/modification, restarting wineserver.");
-//                    if (glibcLauncher != null) {
-//                        glibcLauncher.restartWineServer();
-//                        //setupWineSystemFiles();
-//                        setupXEnvironment();
-//                    } else {
-//                        Log.e("XServerDisplayActivity", "glibcLauncher is null; cannot restart wineserver.");
-//                    }
-//                }
-//            }
-//        };
-//        restartTriggerObserver.startWatching();
 
-
-//        // Test file creation right after starting the observer
-//        try {
-//            File testFile = new File(RESTART_TRIGGER_PATH);
-//            testFile.createNewFile();
-//            Log.d("XServerDisplayActivity", "Test file created to trigger observer.");
-//        } catch (IOException e) {
-//            Log.e("XServerDisplayActivity", "Failed to create test file: " + e.getMessage());
-//        }
 
 
 
@@ -360,8 +337,23 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         contentsManager.syncContents();
 
         drawerLayout = findViewById(R.id.DrawerLayout);
+
+        drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override public void onDrawerOpened(@NonNull View drawerView) {
+                // nothing; capture was already released before opening
+            }
+            @Override public void onDrawerClosed(@NonNull View drawerView) {
+                // If the user left Relative Mouse enabled, recapture.
+                if (isRelativeMouseMovement && !pointerCaptureRequested) {
+                    drawerLayout.postDelayed(() -> ensurePointerCapture("drawer-closed"), 2000);
+                }
+            }
+        });
+
+
         drawerLayout.setOnApplyWindowInsetsListener((view, windowInsets) -> windowInsets.replaceSystemWindowInsets(0, 0, 0, 0));
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
 
         NavigationView navigationView = findViewById(R.id.NavigationView);
 
@@ -377,13 +369,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setPointerIcon(PointerIcon.getSystemIcon(this, PointerIcon.TYPE_ARROW));
         navigationView.setOnFocusChangeListener((v, hasFocus) -> navigationFocused = hasFocus);
-        drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                navigationView.requestFocus();
-            }
-        });
+
+
 
         imageFs = ImageFs.find(this);
 
@@ -527,7 +514,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             screenSize = container.getScreenSize();
             winHandler.setInputType((byte) container.getInputType());
             lc_all = container.getLC_ALL();
-            isRelativeMouseMovement = container.isRelativeMouseMovement();
+//            isRelativeMouseMovement = container.isRelativeMouseMovement();
 
             // Log the entire intent to verify the extras
             Intent intent = getIntent();
@@ -546,7 +533,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 String inputType = shortcut.getExtra("inputType");
                 if (!inputType.isEmpty()) winHandler.setInputType(Byte.parseByte(inputType));
                 String xinputDisabledString = shortcut.getExtra("disableXinput", "false");
-                isRelativeMouseMovement = shortcut.getExtra("relativeMouseMovement", container.isRelativeMouseMovement() ? "1" : "0").equals("1") ? true : false;
+//                isRelativeMouseMovement = shortcut.getExtra("relativeMouseMovement", container.isRelativeMouseMovement() ? "1" : "0").equals("1") ? true : false;
                 xinputDisabledFromShortcut = parseBoolean(xinputDisabledString);
                 // Pass the value to WinHandler
                 winHandler.setXInputDisabled(xinputDisabledFromShortcut);
@@ -587,17 +574,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                     xServerView.getRenderer().setCursorVisible(true);
                     preloaderDialog.closeOnUiThread();
                     winStarted[0] = true;
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            xServer.setRelativeMouseMovement(isRelativeMouseMovement);
-                        }
-                    }, 2000);
                 }
-                    
+
                 if (frameRatingWindowId == window.id) frameRating.update();
             }
-           
+
             @Override
             public void onMapWindow(Window window) {
                 // Log the class name of the mapped window
@@ -618,7 +599,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             @Override
             public void onModifyWindowProperty(Window window, Property property) {
                 changeFrameRatingVisibility(window, property);
-            }    
+            }
 
             @Override
             public void onUnmapWindow(Window window) {
@@ -663,7 +644,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 simulateConfirmInputControlsDialog();
             }
             Executors.newSingleThreadExecutor().execute(() -> {
-                    
+
                 if (!isGenerateWineprefix()) {
 
                     setupWineSystemFiles();
@@ -739,6 +720,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private void handleCapturedPointer(MotionEvent event) {
         boolean handled = false;
 
+        // Special: mouse 'Back' -> release capture and open drawer
+        if (event.getAction() == MotionEvent.ACTION_BUTTON_PRESS
+                && event.getActionButton() == MotionEvent.BUTTON_BACK) {
+            if (pointerCaptureRequested && touchpadView != null) {
+                touchpadView.releasePointerCapture();
+                pointerCaptureRequested = false;
+//                Toast.makeText(this, "Capture released", Toast.LENGTH_SHORT).show();
+            }
+            onBackPressed();
+            return;
+        }
+
         int actionButton = event.getActionButton();
         switch (event.getAction()) {
             case MotionEvent.ACTION_BUTTON_PRESS:
@@ -809,6 +802,36 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 break;
         }
     }
+
+    private void ensurePointerCapture(String reason) {
+        if (!isRelativeMouseMovement || touchpadView == null) return;
+
+        final int[] tries = {0};
+        Runnable attempt = new Runnable() {
+            @Override public void run() {
+                if (!hasWindowFocus()) { touchpadView.postDelayed(this, 50); return; }
+                if (!touchpadView.isAttachedToWindow()) { touchpadView.postDelayed(this, 50); return; }
+
+                // Make sure the view can take focus
+                touchpadView.setFocusableInTouchMode(true);
+                touchpadView.requestFocus();
+
+                touchpadView.requestPointerCapture();
+                touchpadView.setOnCapturedPointerListener((v, e) -> { handleCapturedPointer(e); return true; });
+                pointerCaptureRequested = true;
+
+            }
+        };
+        // Try quickly a few times to dodge transient focus transitions
+        touchpadView.postDelayed(attempt, 50); // First attempt
+    }
+
+
+    public boolean onCapturedPointerEvent(MotionEvent event) {
+        handleCapturedPointer(event);
+        return true;
+    }
+
 
 
 
@@ -951,30 +974,62 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
 
+    private void releasePointerCaptureIfNeeded(String reason) {
+        if (pointerCaptureRequested && touchpadView != null) {
+            touchpadView.releasePointerCapture();
+            touchpadView.setOnCapturedPointerListener(null);
+            pointerCaptureRequested = false;
+            Log.d("PointerCapture", "Released: " + reason);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (environment != null) {
+            releasePointerCaptureIfNeeded("open-drawer/back");
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.openDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.closeDrawers();
             }
-            else drawerLayout.closeDrawers();
         }
     }
 
     private void openXServerDrawer() {
         if (environment != null) {
+            releasePointerCaptureIfNeeded("open-drawer/shortcut");
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.openDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.closeDrawers();
             }
-            else drawerLayout.closeDrawers();
         }
     }
+
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         final GLRenderer renderer = xServerView.getRenderer();
         switch (item.getItemId()) {
+            case R.id.main_menu_relative_mouse:
+                isRelativeMouseMovement = !isRelativeMouseMovement;
+                container.setRelativeMouseMovement(isRelativeMouseMovement);
+                xServer.setRelativeMouseMovement(isRelativeMouseMovement);
+                item.setChecked(isRelativeMouseMovement);
+
+                if (!isRelativeMouseMovement) {
+                    // turned OFF -> ensure capture is dropped
+                    releasePointerCaptureIfNeeded("toggle-off");
+                    touchpadView.setOnCapturedPointerListener(null);
+                    Toast.makeText(this, "Relative Mouse Movement Disabled", Toast.LENGTH_SHORT).show();
+                } else {
+                    // turned ON -> capture will be taken when the drawer closes via the global listener
+                    Toast.makeText(this, "Relative Mouse Movement Enabled", Toast.LENGTH_SHORT).show();
+                }
+
+                drawerLayout.closeDrawers();
+                return true;
             case R.id.main_menu_keyboard:
                 AppUtils.showKeyboard(this);
                 drawerLayout.closeDrawers();
@@ -1154,33 +1209,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        boolean cursorLock = preferences.getBoolean("cursor_lock", false);
-
-        if (hasFocus && !pointerCaptureRequested && cursorLock) {
-            // Ensure TouchpadView and other relevant views are focused
-            touchpadView.setFocusable(View.FOCUSABLE);
-            touchpadView.setFocusableInTouchMode(true);
-            touchpadView.requestFocus();
-            touchpadView.requestPointerCapture();
-
-            touchpadView.setOnCapturedPointerListener(new View.OnCapturedPointerListener() {
-                @Override
-                public boolean onCapturedPointer(View view, MotionEvent event) {
-                    handleCapturedPointer(event);
-                    return true;
-                }
-            });
-
-            pointerCaptureRequested = true; // Ensure this is only called once
-
-        } else if (!hasFocus) {
-            if (touchpadView != null) {
+        if (!hasFocus) {
+            if (pointerCaptureRequested && touchpadView != null) {
                 touchpadView.releasePointerCapture();
-                touchpadView.setOnCapturedPointerListener(null);
+                pointerCaptureRequested = false;
+                Log.d("PointerCapture", "Released due to focus loss.");
+            }
+        } else {
+            if (isRelativeMouseMovement && !pointerCaptureRequested) {
+                ensurePointerCapture("focus-gained");
             }
         }
     }
-
     private void setupWineSystemFiles() {
         String appVersion = String.valueOf(AppUtils.getVersionCode(this));
         String imgVersion = String.valueOf(imageFs.getVersion());
@@ -1298,7 +1338,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
             // Merge in container’s environment variables
             envVars.putAll(container.getEnvVars());
-            
+
             // Merge in shortcut environment variables if present
             if (shortcut != null) envVars.putAll(shortcut.getExtra("envVars"));
 
@@ -1410,7 +1450,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // Reset dxwrapper config
         dxwrapperConfig = null;
-        
+
     }
 
 
@@ -2160,32 +2200,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
-        boolean handledByWinHandler = false;
-        boolean handledByTouchpadView = false;
-
-        // Let winHandler process the event if available
-        if (winHandler != null) {
-            handledByWinHandler = winHandler.onGenericMotionEvent(event);
-            if (handledByWinHandler) {
-                //Log.d("XServerDisplayActivity", "Event handled by winHandler");
-            }
+        // If we hold capture, captured events will come through the listener/Activity.
+        // Skip the external path to avoid duplication.
+        if (pointerCaptureRequested &&
+                (event.getSource() & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
+            // Still allow WinHandler to see gyro/other sources if you rely on it
+            boolean handledByWinHandler = winHandler != null && winHandler.onGenericMotionEvent(event);
+            return handledByWinHandler || super.dispatchGenericMotionEvent(event);
         }
 
-        // Let touchpadView process the event if available
-        if (touchpadView != null) {
-            handledByTouchpadView = touchpadView.onExternalMouseEvent(event);
-            if (handledByTouchpadView) {
-                //Log.d("XServerDisplayActivity", "Event handled by touchpadView");
-            }
-        }
-
-        // Pass the event to the super method to ensure system-level handling
+        boolean handledByWinHandler = winHandler != null && winHandler.onGenericMotionEvent(event);
+        boolean handledByTouchpadView = touchpadView != null && touchpadView.onExternalMouseEvent(event);
         boolean handledBySuper = super.dispatchGenericMotionEvent(event);
-        if (!handledBySuper) {
-            //Log.d("XServerDisplayActivity", "Event not handled by super");
-        }
-
-        // Combine the results: any handler consuming the event indicates it was handled
         return handledByWinHandler || handledByTouchpadView || handledBySuper;
     }
 

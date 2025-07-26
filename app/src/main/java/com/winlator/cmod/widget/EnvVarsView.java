@@ -1,5 +1,6 @@
 package com.winlator.cmod.widget;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputType;
@@ -185,7 +186,7 @@ public class EnvVarsView extends FrameLayout {
                 final ToggleButton toggleButton = itemView.findViewById(R.id.ToggleButton);
                 toggleButton.setVisibility(VISIBLE);
                 toggleButton.setChecked(value.equals("1") || value.equals("true"));
-                applyDarkTheme(toggleButton); // Apply dark theme
+                applyDarkTheme(toggleButton);
                 getValueCallback = () -> toggleButton.isChecked() ? knownEnvVar[3] : knownEnvVar[2];
                 break;
             case "SELECT":
@@ -194,23 +195,59 @@ public class EnvVarsView extends FrameLayout {
                 spinner.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items));
                 AppUtils.setSpinnerSelectionFromValue(spinner, value);
                 spinner.setVisibility(VISIBLE);
-                applyDarkTheme(spinner); // Apply dark theme
+                applyDarkTheme(spinner);
                 getValueCallback = () -> spinner.getSelectedItem().toString();
                 break;
             case "SELECT_MULTIPLE":
-                final MultiSelectionComboBox comboBox = itemView.findViewById(R.id.MultiSelectionComboBox);
-                comboBox.setItems(Arrays.copyOfRange(knownEnvVar, 2, knownEnvVar.length));
-                comboBox.setSelectedItems(value.split(","));
-                comboBox.setVisibility(VISIBLE);
-                // applyDarkTheme(comboBox); // Implement if required for custom views
-                getValueCallback = comboBox::getSelectedItemsAsString;
+                final LinearLayout multiSelectArea = itemView.findViewById(R.id.LLMultiSelectArea);
+                final TextView multiSelectTextView = itemView.findViewById(R.id.TVMultiSelectValue);
+                multiSelectArea.setVisibility(VISIBLE);
+                multiSelectTextView.setText(value);
+                applyDarkTheme(multiSelectTextView);
+                if (isDarkMode) multiSelectArea.setBackgroundResource(R.drawable.edit_text_dark);
+
+
+                final String[] multiItems = Arrays.copyOfRange(knownEnvVar, 2, knownEnvVar.length);
+                final boolean[] checkedItems = new boolean[multiItems.length];
+
+                String[] selected = value.split(",");
+                for (String s : selected) {
+                    for (int i = 0; i < multiItems.length; i++) {
+                        if (multiItems[i].equals(s.trim())) {
+                            checkedItems[i] = true;
+                            break;
+                        }
+                    }
+                }
+
+                multiSelectArea.setOnClickListener(v -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle(name);
+                    builder.setMultiChoiceItems(multiItems, checkedItems, (dialog, which, isChecked) -> {
+                        checkedItems[which] = isChecked;
+                    });
+                    builder.setPositiveButton("OK", (dialog, which) -> {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < checkedItems.length; i++) {
+                            if (checkedItems[i]) {
+                                if (sb.length() > 0) sb.append(",");
+                                sb.append(multiItems[i]);
+                            }
+                        }
+                        multiSelectTextView.setText(sb.toString());
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.show();
+                });
+
+                getValueCallback = () -> multiSelectTextView.getText().toString();
                 break;
             case "TEXT":
                 EditText editText = itemView.findViewById(R.id.EditText);
                 editText.setVisibility(VISIBLE);
                 editText.setText(value);
-                // Apply specific styling for "TEXT" fields
-                editText.setBackgroundResource(isDarkMode ? R.drawable.edit_text_dark : R.drawable.edit_text); // Apply dark background resource for "TEXT"
+                editText.setBackgroundResource(isDarkMode ? R.drawable.edit_text_dark : R.drawable.edit_text);
+                applyDarkTheme(editText);
                 getValueCallback = () -> editText.getText().toString();
                 break;
             case "NUMBER":
@@ -219,7 +256,7 @@ public class EnvVarsView extends FrameLayout {
                 editTextNumber.setVisibility(VISIBLE);
                 editTextNumber.setText(value);
                 if (type.equals("NUMBER")) editTextNumber.setInputType(InputType.TYPE_CLASS_NUMBER);
-                applyDarkTheme(editTextNumber); // Apply dark theme
+                applyDarkTheme(editTextNumber);
                 getValueCallback = () -> editTextNumber.getText().toString();
                 break;
         }
@@ -232,6 +269,7 @@ public class EnvVarsView extends FrameLayout {
         container.addView(itemView);
         emptyTextView.setVisibility(View.GONE);
     }
+
 
     // Method to set the environment variables
     public void setEnvVars(EnvVars envVars) {

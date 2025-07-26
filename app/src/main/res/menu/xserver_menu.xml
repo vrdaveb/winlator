@@ -1,6 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="none">
-        <!-- Existing menu items -->
+        <item
+            android:id="@+id/main_menu_relative_mouse"
+            android:title="@string/relative_mouse_movement"
+            android:icon="@drawable/icon_mouse"
+            android:checkable="true" />
         <item
             android:icon="@drawable/icon_keyboard"
             android:id="@+id/main_menu_keyboard"

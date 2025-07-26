@@ -95,6 +95,7 @@ public class ControllerAssignmentDialog {
      * Sets up the OnClickListeners for all interactive views.
      */
     private void setupListeners() {
+
         // Set up listeners for all 4 rows
         for (int i = 0; i < 4; i++) {
             final int slotIndex = i;
@@ -127,23 +128,36 @@ public class ControllerAssignmentDialog {
 
             // "Assign" button listeners
             assignButtons[i].setOnClickListener(v -> {
+
                 // Prompt the user
                 String message = dialog.getContext().getString(R.string.press_any_button_for_player) + " " + (slotIndex + 1);
                 dialog.setMessage(message);
 
                 // Tell the ContentDialog to start listening for the next controller input.
                 dialog.setOnControllerInputListener(device -> {
-                    // When a controller event is received, this callback fires.
+                    if (!ControllerManager.isGameController(device)) {
+                        return; // ignore mice / touchpads / stylus, even if they claim JOYSTICK
+                    }
                     controllerManager.assignDeviceToSlot(slotIndex, device);
-
-                    // Clean up and exit listening mode
                     dialog.setMessage(null);
                     dialog.setOnControllerInputListener(null);
-                    populateView(); // Refresh the UI to show the new assignment
+                    populateView();
                 });
             });
         }
 
         dialog.setOnConfirmCallback(() -> controllerManager.saveAssignments());
+    }
+
+    private static boolean isPointerLike(InputDevice d) {
+        if (d == null) return false;
+        int s = d.getSources();
+        return ((s & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE)
+                || ((s & InputDevice.SOURCE_MOUSE_RELATIVE) == InputDevice.SOURCE_MOUSE_RELATIVE)
+                || ((s & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD)
+                || ((s & InputDevice.SOURCE_STYLUS) == InputDevice.SOURCE_STYLUS)
+                // Be conservative: any generic pointer without gamepad/joystick bits.
+                || (((s & InputDevice.SOURCE_CLASS_POINTER) == InputDevice.SOURCE_CLASS_POINTER)
+                && ((s & (InputDevice.SOURCE_GAMEPAD | InputDevice.SOURCE_JOYSTICK)) == 0));
     }
 }
