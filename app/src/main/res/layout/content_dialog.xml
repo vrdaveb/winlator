@@ -114,7 +114,19 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@id/BTReset"
+                    android:id="@+id/BTDisableAll"
+                    android:visibility="gone"
+                    android:text="@string/disable_all"
+                    style="@style/ButtonNeutral" />
+
+                <Button
+                    android:id="@+id/BTEnableAll"
+                    android:visibility="gone"
+                    android:text="@string/enable_all"
+                    style="@style/ButtonNeutral" />
+
+                <Button
+                    android:id="@+id/BTReset"
                     android:visibility="gone"
                     android:text="@string/reset"
                     style="@style/ButtonNeutral" />

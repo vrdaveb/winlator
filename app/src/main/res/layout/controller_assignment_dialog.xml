@@ -82,13 +82,21 @@
                 app:alignItems="center"
                 app:justifyContent="flex_end">
 
-
                 <CheckBox
                     android:id="@+id/CBVibrateP1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/vibrate"
                     app:layout_flexShrink="0"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="6dp"/>
+
+                <Button
+                    android:id="@+id/BTNMacrosP1"
+                    style="@style/ButtonNeutral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="@string/macros"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="6dp"/>
 
@@ -129,6 +137,7 @@
                 app:alignItems="center"
                 app:justifyContent="flex_start">
 
+
                 <CheckBox
                     android:id="@+id/CBPlayer2"
                     android:layout_width="wrap_content"
@@ -168,11 +177,21 @@
                 app:alignItems="center"
                 app:justifyContent="flex_end">
 
+
                 <CheckBox
                     android:id="@+id/CBVibrateP2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/vibrate"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="6dp"/>
+
+                <Button
+                    android:id="@+id/BTNMacrosP2"
+                    style="@style/ButtonNeutral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="@string/macros"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="6dp"/>
 
@@ -248,11 +267,21 @@
                 app:alignItems="center"
                 app:justifyContent="flex_end">
 
+
                 <CheckBox
                     android:id="@+id/CBVibrateP3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/vibrate"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="6dp"/>
+
+                <Button
+                    android:id="@+id/BTNMacrosP3"
+                    style="@style/ButtonNeutral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="@string/macros"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="6dp"/>
 
@@ -290,6 +319,7 @@
                 app:flexWrap="nowrap"
                 app:alignItems="center"
                 app:justifyContent="flex_start">
+
 
                 <CheckBox
                     android:id="@+id/CBPlayer4"
@@ -333,6 +363,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/vibrate"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="6dp"/>
+
+                <Button
+                    android:id="@+id/BTNMacrosP4"
+                    style="@style/ButtonNeutral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="@string/macros"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="6dp"/>
 

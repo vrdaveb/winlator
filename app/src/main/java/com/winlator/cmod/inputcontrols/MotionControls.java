@@ -191,6 +191,8 @@ public class MotionControls implements SensorEventListener {
         // Bind
         CheckBox cbEnabled = v.findViewById(R.id.cbGyroEnabled);
 
+        RadioGroup rgTarget = v.findViewById(R.id.rgGyroTarget);
+
         SeekBar sbXSens = v.findViewById(R.id.sbGyroXSensitivity);
         SeekBar sbYSens = v.findViewById(R.id.sbGyroYSensitivity);
         SeekBar sbSmooth = v.findViewById(R.id.sbGyroSmoothing);
@@ -206,11 +208,12 @@ public class MotionControls implements SensorEventListener {
 
         Spinner spActivator = v.findViewById(R.id.spGyroTriggerButton);
 
-
         RadioGroup rgMode   = v.findViewById(R.id.rgGyroMode);
 
         // Load prefs
         boolean enabled = prefs.getBoolean("gyro_enabled", false);
+        boolean toLeft = prefs.getBoolean("gyro_to_left_stick", false);
+
         float xSens = prefs.getFloat("gyro_x_sensitivity", 1.0f);
         float ySens = prefs.getFloat("gyro_y_sensitivity", 1.0f);
         float smooth = prefs.getFloat("gyro_smoothing", 0.9f);
@@ -221,6 +224,7 @@ public class MotionControls implements SensorEventListener {
         int mode = prefs.getInt("gyro_mode", 0);
 
         cbEnabled.setChecked(enabled);
+        rgTarget.check(toLeft ? R.id.rbTargetLeft : R.id.rbTargetRight);
         sbXSens.setProgress(Math.round(xSens * 100f));
         sbYSens.setProgress(Math.round(ySens * 100f));
         sbSmooth.setProgress(Math.round(smooth * 100f));
@@ -251,6 +255,7 @@ public class MotionControls implements SensorEventListener {
         Runnable pushAll = () -> {
             if (winHandler == null) return;
             boolean en = cbEnabled.isChecked();
+            winHandler.setGyroToLeftStick(rgTarget.getCheckedRadioButtonId() == R.id.rbTargetLeft);
             winHandler.setGyroEnabled(en);
             winHandler.setGyroSensitivityX(sbXSens.getProgress() / 100f);
             winHandler.setGyroSensitivityY(sbYSens.getProgress() / 100f);
@@ -266,6 +271,7 @@ public class MotionControls implements SensorEventListener {
         };
 
         cbEnabled.setOnCheckedChangeListener((b, c) -> pushAll.run());
+        rgTarget.setOnCheckedChangeListener((g, id) -> pushAll.run());
         sbXSens.setOnSeekBarChangeListener(simple(p -> { tvXSens.setText(ctx.getString(R.string.percent_fmt, p)); pushAll.run(); }));
         sbYSens.setOnSeekBarChangeListener(simple(p -> { tvYSens.setText(ctx.getString(R.string.percent_fmt, p)); pushAll.run(); }));
         sbSmooth.setOnSeekBarChangeListener(simple(p -> { tvSmooth.setText(ctx.getString(R.string.percent_fmt, p)); pushAll.run(); }));
@@ -282,6 +288,7 @@ public class MotionControls implements SensorEventListener {
         cd.setOnConfirmCallback(() -> {
             SharedPreferences.Editor e = prefs.edit();
             e.putBoolean("gyro_enabled", cbEnabled.isChecked());
+            e.putBoolean("gyro_to_left_stick", rgTarget.getCheckedRadioButtonId() == R.id.rbTargetLeft);
             e.putFloat("gyro_x_sensitivity", sbXSens.getProgress() / 100f);
             e.putFloat("gyro_y_sensitivity", sbYSens.getProgress() / 100f);
             e.putFloat("gyro_smoothing", sbSmooth.getProgress() / 100f);

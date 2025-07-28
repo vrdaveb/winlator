@@ -1389,7 +1389,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 return true;
 
             case R.id.main_menu_controller_assignment:
-                ControllerAssignmentDialog.show(this);
+                ControllerAssignmentDialog.show(this, winHandler);
                 winHandler.clearIgnoredDevices();
                 drawerLayout.closeDrawers();
                 return true;

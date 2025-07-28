@@ -14,13 +14,65 @@
         android:paddingTop="12dp"
         android:paddingBottom="12dp" >
 
-        <!-- Enable -->
-        <CheckBox
-            android:id="@+id/cbGyroEnabled"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enable_right_stick_gyro"
-            android:layout_marginBottom="12dp" />
+            android:orientation="horizontal" >
+
+            <!-- Enable (Left-aligned) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical" >
+
+                <CheckBox
+                    android:id="@+id/cbGyroEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_stick_gyro"
+                    android:layout_marginBottom="0dp" />
+
+            </LinearLayout>
+
+            <!-- Gyro Target Stick (Right-aligned) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gyro_target_stick"
+                    android:textStyle="bold"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"/>
+
+                <RadioGroup
+                    android:id="@+id/rgGyroTarget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+            <RadioButton
+                android:id="@+id/rbTargetRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/right_stick"/>
+
+            <RadioButton
+                android:id="@+id/rbTargetLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/left_stick"/>
+                </RadioGroup>
+
+                </LinearLayout>
+            </LinearLayout>
+
 
         <!-- Two columns -->
         <LinearLayout
