@@ -86,7 +86,7 @@ public class SavesFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        FrameLayout frameLayout = (FrameLayout) inflater.inflate(R.layout.containers_fragment, container, false);
+        FrameLayout frameLayout = (FrameLayout) inflater.inflate(R.layout.saves_fragment, container, false);
         recyclerView = frameLayout.findViewById(R.id.RecyclerView);
         emptyTextView = frameLayout.findViewById(R.id.TVEmptyText);
         recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));

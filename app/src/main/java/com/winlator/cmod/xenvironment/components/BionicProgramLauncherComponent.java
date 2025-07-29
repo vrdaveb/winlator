@@ -211,36 +211,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         }
     }
 
-
-//    private String checkDependencies() {
-//        String curlPath = environment.getImageFs().getRootDir().getPath() + "/usr/lib/libXau.so";
-//        String lddCommand = "ldd " + curlPath;
-//
-//        StringBuilder output = new StringBuilder("Checking Curl dependencies...\n");
-//
-//        try {
-//            java.lang.Process process = Runtime.getRuntime().exec(lddCommand);
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-//
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                output.append(line).append("\n");
-//            }
-//            while ((line = errorReader.readLine()) != null) {
-//                output.append(line).append("\n");
-//            }
-//
-//            process.waitFor();
-//        } catch (Exception e) {
-//            output.append("Error running ldd: ").append(e.getMessage());
-//        }
-//
-//        Log.d("CurlDeps", output.toString()); // Log the full dependency output
-//        return output.toString();
-//    }
-
-
     @Override
     public void stop() {
         synchronized (lock) {
@@ -324,24 +294,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             }
         }
 
-        final String shmIdEnvValue;
-
-//        SysVSharedMemory shmMgr = SysVSharedMemory.getInstance();
-//
-//        if (shmMgr != null) {
-//            int padShmId = shmMgr.get(4096);
-//            if (padShmId != -1) {
-//                Log.i("EVSHIM_HOST", "Pre-created gamepad SHM segment with ID: " + padShmId);
-//                shmIdEnvValue = String.valueOf(padShmId);
-//            } else {
-//                Log.e("EVSHIM_HOST", "shmMgr.get() failed!");
-//                shmIdEnvValue = null;
-//            }
-//        } else {
-//            Log.e("EVSHIM_HOST", "SysVSharedMemory.getInstance() is null!");
-//            shmIdEnvValue = null;
-//        }
-
 
         Context context = environment.getContext();
         ImageFs imageFs = environment.getImageFs();
@@ -361,9 +313,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         EnvVars envVars = new EnvVars();
 
-        // --- Set the number of players for evshim ---
-        //envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(MAX_PLAYERS));
-
         // Use the ControllerManager's dynamic count for the environment variable
         envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(enabledPlayerCount));
 
@@ -373,6 +322,11 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             envVars.put("EVSHIM_SHM_ID", 1);
 
         }
+
+        // GStreamer media codec workaround
+        envVars.put("MEDIACONV_VIDEO_TRANSCODED_FILE", "/sdcard/transcoded.mkv");
+        envVars.put("MEDIACONV_BLANK_VIDEO_FILE", "/sdcard/blank.mkv");
+        envVars.put("MEDIACONV_AUDIO_DUMP_FILE", "/sdcard/audio.dump");
 
 
         addBox64EnvVars(envVars, enableBox86_64Logs);

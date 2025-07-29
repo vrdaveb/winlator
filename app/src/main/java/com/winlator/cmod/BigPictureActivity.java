@@ -180,7 +180,7 @@ public class BigPictureActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 // 1) Restore the previous SeekBar progress
-        int storedSeekBarProgress = prefs.getInt(SEEK_BAR_PROGRESS_KEY, 66); // default 66
+        int storedSeekBarProgress = prefs.getInt(SEEK_BAR_PROGRESS_KEY, 33); // default 33
 // 2) Set the SeekBar position
         frameSpeedSeekBar.setProgress(storedSeekBarProgress);
 

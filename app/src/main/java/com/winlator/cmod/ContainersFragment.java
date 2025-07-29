@@ -642,6 +642,7 @@ public class ContainersFragment extends Fragment {
             drawable.setTintList(null);
         } else {
             drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_star_border);
+            drawable.mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         }
 
         if (favoriteActionView != null) {

@@ -76,7 +76,7 @@ public class EnvVarsView extends FrameLayout {
         addView(container);
 
         emptyTextView = new TextView(context);
-        emptyTextView.setText(R.string.no_items_to_display);
+        emptyTextView.setText(R.string.no_items_to_display_envvars);
         emptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         emptyTextView.setGravity(Gravity.CENTER);
         int padding = (int) UnitUtils.dpToPx(16);

@@ -12,7 +12,16 @@
     <string name="shortcuts">Shortcuts</string>
     <string name="containers">Containers</string>
     <string name="input_controls">Input Controls</string>
-    <string name="no_items_to_display">Create an application shortcut from within a container to get started</string>
+    <string name="no_items_to_display">No items to display.</string>
+    <string name="no_items_to_display_envvars">No environmental variables activated.</string>
+    <string name="no_items_to_display_shortcuts">Create a container, right click an executable, create a shortcut!</string>
+    <string name="no_items_to_display_containers">Create a container to get started!</string>
+    <string name="no_items_to_display_saves">Register a save file directory from one of your containers to get started!</string>
+    <string name="no_items_to_display_input">No external controllers detected.</string>
+    <string name="no_items_to_display_taskmgr">No running processes detected!?</string>
+    <string name="no_items_to_display_drives">No drives assigned!</string>
+    <string name="no_items_to_display_contents">No installed contents to display!</string>
+    <string name="no_items_to_display_logs">No logs to display!</string>
     <string name="new_container">New Container</string>
     <string name="edit_container">Edit Container</string>
     <string name="creating_container">Creating Container…</string>
@@ -117,7 +126,7 @@
     <string name="exec_arguments">Exec Arguments</string>
     <string name="win_components">Win Components</string>
     <string name="drives">Drives</string>
-    <string name="force_fullscreen">Force Fullscreen</string>
+    <string name="force_fullscreen">Force Fullscreen for Windowed Apps</string>
     <string name="range">Range</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
@@ -452,7 +461,7 @@
     <string name="enable_touchscreen_haptics">Enable Touchscreen Haptic Feedback</string>
     <string name="help_steamgrid">SteamGrid API Key</string>
     <string name="disable_xinput_for_shortcut">Disable Xinput (For Exclusive M/KB Control)</string>
-    <string name="fullscreen_stretched">Enable Fullscreen (Stretched)</string>
+    <string name="fullscreen_stretched">Ignore Aspect Ratio (Fullscreen Stretched)</string>
     <string name="export_container">Export Container</string>
     <string name="exporting_container">Exporting Container...</string>
     <string name="importing_container">Importing Container...</string>
