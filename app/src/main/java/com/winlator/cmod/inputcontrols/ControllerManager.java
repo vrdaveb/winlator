@@ -76,18 +76,19 @@ public class ControllerManager {
      * Scans for all physically connected game controllers and updates the internal list.
      */
     public void scanForDevices() {
-        detectedDevices.clear();
-        if (inputManager == null) {
-            return;
-        }
-        int[] deviceIds = inputManager.getInputDeviceIds();
-        for (int deviceId : deviceIds) {
-            InputDevice device = inputManager.getInputDevice(deviceId);
-            if (device != null
-                    && !device.isVirtual()
-                    && isGameController(device)) {
-                detectedDevices.add(device);
+        try {
+            detectedDevices.clear();
+            int[] deviceIds = inputManager.getInputDeviceIds();
+            for (int deviceId : deviceIds) {
+                InputDevice device = inputManager.getInputDevice(deviceId);
+                if (device != null
+                        && !device.isVirtual()
+                        && isGameController(device)) {
+                    detectedDevices.add(device);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -304,17 +305,20 @@ public class ControllerManager {
      * @return The player slot index (0-3), or -1 if the device is not assigned.
      */
     public int getSlotForDevice(int deviceId) {
-        InputDevice device = inputManager.getInputDevice(deviceId);
-        String deviceIdentifier = getDeviceIdentifier(device);
-        if (deviceIdentifier == null) return -1;
+        try {
+            InputDevice device = inputManager.getInputDevice(deviceId);
+            String deviceIdentifier = getDeviceIdentifier(device);
+            if (deviceIdentifier == null) return -1;
 
-        // Correctly loop through the sparse array to find the key for our value.
-        for (int i = 0; i < slotAssignments.size(); i++) {
-            int key = slotAssignments.keyAt(i);
-            String value = slotAssignments.valueAt(i);
-            if (deviceIdentifier.equals(value)) {
-                return key; // Return the key (the slot index), not the internal index!
+            // Correctly loop through the sparse array to find the key for our value.
+            for (int i = 0; i < slotAssignments.size(); i++) {
+                int key = slotAssignments.keyAt(i);
+                String value = slotAssignments.valueAt(i);
+                if (deviceIdentifier.equals(value)) {
+                    return key; // Return the key (the slot index), not the internal index!
+                }
             }
+        } catch (Exception e) {
         }
 
         return -1; // Not found
@@ -373,22 +377,25 @@ public class ControllerManager {
     }
 
     public int getSlotForDeviceOrSibling(int deviceId) {
-        InputDevice d = inputManager.getInputDevice(deviceId);
-        if (d == null) return -1;
+        try {
+            InputDevice d = inputManager.getInputDevice(deviceId);
+            if (d == null) return -1;
 
-        // 1) Exact descriptor match first (current behavior)
-        int slot = getSlotForDevice(deviceId);
-        if (slot != -1) return slot;
+            // 1) Exact descriptor match first (current behavior)
+            int slot = getSlotForDevice(deviceId);
+            if (slot != -1) return slot;
 
-        // 2) Group match against already-assigned devices
-        String g = makePhysicalGroupKey(d);
-        for (int i = 0; i < 4; i++) {
-            InputDevice assigned = getAssignedDeviceForSlot(i);
-            if (assigned != null) {
-                if (g.equals(makePhysicalGroupKey(assigned))) {
-                    return i;
+            // 2) Group match against already-assigned devices
+            String g = makePhysicalGroupKey(d);
+            for (int i = 0; i < 4; i++) {
+                InputDevice assigned = getAssignedDeviceForSlot(i);
+                if (assigned != null) {
+                    if (g.equals(makePhysicalGroupKey(assigned))) {
+                        return i;
+                    }
                 }
             }
+        } catch (Exception e) {
         }
         return -1;
     }
