@@ -204,6 +204,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private MidiHandler midiHandler;
     private String midiSoundFont = "";
     private String lc_all = "";
+    private String vkbasaltConfig = "";
     PreloaderDialog preloaderDialog = null;
     private Runnable configChangedCallback = null;
     private boolean isPaused = false;
@@ -585,6 +586,12 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 xinputDisabledFromShortcut = parseBoolean(xinputDisabledString);
                 // Pass the value to WinHandler
                 winHandler.setXInputDisabled(xinputDisabledFromShortcut);
+                String sharpnessEffect = shortcut.getExtra("sharpnessEffect", "None");
+                if (!sharpnessEffect.equals("None")) {
+                    double sharpnessLevel = Double.parseDouble(shortcut.getExtra("sharpnessLevel", "100"));
+                    double sharpnessDenoise = Double.parseDouble(shortcut.getExtra("sharpnessDenoise", "100"));
+                    vkbasaltConfig = "effects=" + sharpnessEffect.toLowerCase() + ";" + "casSharpness=" + sharpnessLevel / 100 + ";" + "dlsSharpness=" + sharpnessLevel / 100  + ";" + "dlsDenoise=" + sharpnessDenoise / 100 + ";" + "enableOnLaunch=True";
+                }
                 Log.d("XServerDisplayActivity", "XInput Disabled from Shortcut: " + xinputDisabledFromShortcut);
             }
 
@@ -700,21 +707,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 //                    container.setGraphicsDriverVersion(originalContainerDriverVersion);
 //                    container.saveData();
                     changeWineAudioDriver();
-                    if (container != null) {
-                        if (!wineInfo.isArm64EC())
-                            envVars.put("HODLL", "wow64cpu.dll");
-                        else if (emulator.toLowerCase().equals("fexcore"))
-                            envVars.put("HODLL", "libwow64fex.dll");
-                        else
-                            envVars.put("HODLL", "wowbox64.dll");
-                        if (isOpenWithAndroidBrowser)
-                            envVars.put("WINE_OPEN_WITH_ANDROID_BROWSER", "1");
-                        if (isShareAndroidClipboard) {
-                            envVars.put("WINE_FROM_ANDROID_CLIPBOARD", "1");
-                            envVars.put("WINE_TO_ANDROID_CLIPBOARD", "1");
-                        }
-                    }
-
                 }
                 try {
                     setupXEnvironment();
@@ -826,7 +818,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 if (xServer.isRelativeMouseMovement())
                     xServer.getWinHandler().mouseEvent(MouseEventFlags.MOVE, (int)transformedPoint[0], (int)transformedPoint[1], 0);
                 else
-                    xServer.injectPointerMove((int)transformedPoint[0], (int)transformedPoint[1]);
+                    xServer.injectPointerMoveDelta((int)transformedPoint[0], (int)transformedPoint[1]);
                 handled = true;
                 break;
             case MotionEvent.ACTION_SCROLL:
@@ -2187,6 +2179,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         String selectedDriverVersion;
 
         String currentWrapperVersion = graphicsDriverConfig.get("version");
+        String isAdrenotoolsTurnip = graphicsDriverConfig.get("adrenotoolsTurnip");
+
         selectedDriverVersion = currentWrapperVersion;
 
         if (shortcut != null) {
@@ -2205,14 +2199,17 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             VKD3DConfigDialog.setEnvVars(this, dxwrapperConfig, envVars);
         }
 
-        if (!envVars.has("MESA_VK_WSI_PRESENT_MODE")) envVars.put("MESA_VK_WSI_PRESENT_MODE", "mailbox");
+
 
         boolean useDRI3 = preferences.getBoolean("use_dri3", true);
         if (!useDRI3) {
             envVars.put("MESA_VK_WSI_DEBUG", "sw");
         }
 
-        envVars.put("VK_ICD_FILENAMES", imageFs.getShareDir() + "/vulkan/icd.d/wrapper_icd.aarch64.json");
+        if (currentWrapperVersion.toLowerCase().contains("turnip") && isAdrenotoolsTurnip.equals("0"))
+            envVars.put("VK_ICD_FILENAMES", imageFs.getShareDir() + "/vulkan/icd.d/freedreno_icd.aarch64.json");
+        else
+            envVars.put("VK_ICD_FILENAMES", imageFs.getShareDir() + "/vulkan/icd.d/wrapper_icd.aarch64.json");
         envVars.put("GALLIUM_DRIVER", "zink");
         envVars.put("LIBGL_KOPPER_DISABLE", "true");
 
@@ -2232,6 +2229,19 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         String maxDeviceMemory = graphicsDriverConfig.get("maxDeviceMemory");
         if (maxDeviceMemory != null && Integer.parseInt(maxDeviceMemory) > 0)
             envVars.put("UTIL_LAYER_VMEM_MAX_SIZE", maxDeviceMemory);
+
+        String frameSync = graphicsDriverConfig.get("frameSync");
+        if (frameSync.equals("Always") && useDRI3) {
+            envVars.put("MESA_VK_WSI_DEBUG", "forcesync");
+        }
+        else if (frameSync.equals("Never")) {
+            envVars.put("WRAPPER_DISABLE_PRESENT_WAIT", "1");
+        }
+        envVars.put("MESA_VK_WSI_PRESENT_MODE", "mailbox");
+        if (!vkbasaltConfig.isEmpty()) {
+            envVars.put("ENABLE_VKBASALT", "1");
+            envVars.put("VKBASALT_CONFIG", vkbasaltConfig);
+        }
     }
 
     private void copyFile(File sourceFile, File destFile) throws IOException {

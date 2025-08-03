@@ -79,6 +79,11 @@
     <item>2048 MB</item>
     <item>4096 MB</item>
     </string-array>
+    <string-array name="frame_sync_entries">
+        <item>Never</item>
+        <item>Normal</item>
+        <item>Always</item>
+    </string-array>
     <string-array name="video_memory_size_entries">
         <item>32 MB</item>
         <item>64 MB</item>
@@ -318,5 +323,10 @@
     <string-array name="wine_entries">
         <item>proton-9.0-x86_64</item>
         <item>proton-9.0-arm64ec</item>
+    </string-array>
+    <string-array name="vkbasalt_sharpness_entries">
+        <item>None</item>
+        <item>CAS</item>
+        <item>DLS</item>
     </string-array>
 </resources>

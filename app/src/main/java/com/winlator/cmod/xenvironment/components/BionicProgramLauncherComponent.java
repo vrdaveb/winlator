@@ -323,12 +323,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         }
 
-        // GStreamer media codec workaround
-        envVars.put("MEDIACONV_VIDEO_TRANSCODED_FILE", "/sdcard/transcoded.mkv");
-        envVars.put("MEDIACONV_BLANK_VIDEO_FILE", "/sdcard/blank.mkv");
-        envVars.put("MEDIACONV_AUDIO_DUMP_FILE", "/sdcard/audio.dump");
-
-
         addBox64EnvVars(envVars, enableBox86_64Logs);
 
         if (envVars.get("BOX64_MMAP32").equals("1") && !wineInfo.isArm64EC())
