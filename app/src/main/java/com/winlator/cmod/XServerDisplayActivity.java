@@ -391,7 +391,20 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         Menu menu = navigationView.getMenu();
         menu.findItem(R.id.main_menu_logs).setVisible(enableLogs);
         menu.findItem(R.id.main_menu_logs).setEnabled(enableLogs);
-        allowMagnifier = !XrActivity.isEnabled(this);
+
+        if (XrActivity.isEnabled(this)) {
+            menu.findItem(R.id.main_menu_relative_mouse).setVisible(false);
+            menu.findItem(R.id.main_menu_controller_assignment).setVisible(false);
+            menu.findItem(R.id.main_menu_motion_controls).setVisible(false);
+            menu.findItem(R.id.main_menu_input_controls).setVisible(false);
+            menu.findItem(R.id.main_menu_toggle_fullscreen).setVisible(false);
+            menu.findItem(R.id.main_menu_magnifier).setVisible(false);
+            menu.findItem(R.id.main_menu_screen_effects).setVisible(false);
+            menu.findItem(R.id.main_menu_pip_mode).setVisible(false);
+            menu.findItem(R.id.main_menu_touchpad_help).setVisible(false);
+        } else {
+            menu.findItem(R.id.xr_passthrough).setVisible(false);
+        }
 
 
 
@@ -406,9 +419,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         expDisplay = preferences.getBoolean(PREF_EXP_DISPLAY, false);
         expSystem  = preferences.getBoolean(PREF_EXP_SYSTEM,  false);
 
-        applyGroup(menu, R.id.group_input,   R.id.header_input,   expInput);
-        applyGroup(menu, R.id.group_display, R.id.header_display, expDisplay);
-        applyGroup(menu, R.id.group_system,  R.id.header_system,  expSystem);
+        //applyGroup(menu, R.id.group_input,   R.id.header_input,   expInput);
+        //applyGroup(menu, R.id.group_display, R.id.header_display, expDisplay);
+        //applyGroup(menu, R.id.group_system,  R.id.header_system,  expSystem);
 
         // tune RV
         RecyclerView rv = navRecycler();
@@ -1318,7 +1331,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         switch (id) {
             // ---- Section headers (toggle, do NOT close drawer) ----
-            case R.id.header_input: {
+            /*case R.id.header_input: {
                 boolean wasExpanded = expInput;
                 expInput = !expInput;
                 persistSection(PREF_EXP_INPUT, expInput);
@@ -1352,7 +1365,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                     expandGroup(menu, R.id.group_system, R.id.header_system, SYSTEM_IDS);
                 }
                 return true;
-            }
+            }*/
 
 
             // ---- Top-level quick actions ----
@@ -1464,7 +1477,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
             // ---- SYSTEM group ----
             case R.id.main_menu_task_manager:
-                new TaskManagerDialog(this).show();
+                if (XrActivity.isEnabled(this)) {
+                    XrActivity.getInstance().getWinHandler().exec("taskmgr.exe");
+                } else {
+                    new TaskManagerDialog(this).show();
+                }
                 drawerLayout.closeDrawers();
                 return true;
 
@@ -1477,6 +1494,10 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             case R.id.main_menu_exit:
                 exitApp();
                 return true;
+            default:
+                if (XrActivity.isEnabled(this)) {
+                    XrActivity.getInstance().callMenuAction(item.getItemId());
+                }
         }
 
         return true;

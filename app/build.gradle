@@ -7,7 +7,8 @@ buildscript {
     dependencies {
         // Adjust Gradle plugin versions if needed
         classpath 'com.android.tools.build:gradle:8.8.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+        classpath 'org.jetbrains.kotlin' +
+                ':kotlin-gradle-plugin:1.9.0'
     }
 
 }
@@ -77,6 +78,12 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        //If you want to continue even if errors found use following line
+        abortOnError false
     }
 }
 

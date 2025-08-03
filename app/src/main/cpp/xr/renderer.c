@@ -5,6 +5,8 @@
 #include "engine.h"
 #include "math.h"
 #include "renderer.h"
+#include <jni.h>
+#include <stdbool.h>
 
 #define DECL_PFN(pfn) PFN_##pfn pfn = NULL
 #define INIT_PFN(pfn) OXR(xrGetInstanceProcAddr(engine->Instance, #pfn, (PFN_xrVoidFunction*)(&pfn)))
@@ -293,6 +295,16 @@ void XrRendererEndFrame(struct XrRenderer* renderer)
 
 void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 {
+    if (engine->PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] && renderer->ConfigInt[CONFIG_PASSTHROUGH]) {
+        if (renderer->PassthroughLayer != XR_NULL_HANDLE) {
+            XrCompositionLayerPassthroughFB passthrough_layer = {XR_TYPE_COMPOSITION_LAYER_PASSTHROUGH_FB};
+            passthrough_layer.layerHandle = renderer->PassthroughLayer;
+            passthrough_layer.flags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+            passthrough_layer.space = XR_NULL_HANDLE;
+            renderer->Layers[renderer->LayerCount++].passthrough = passthrough_layer;
+        }
+    }
+
     int x = 0;
     int y = 0;
     int w = renderer->Framebuffer[0].Width;
@@ -380,8 +392,8 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         quad_layer.subImage.imageArrayIndex = 0;
         quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
         quad_layer.pose.position = pos;
-        quad_layer.size.width = 4;
-        quad_layer.size.height = 4;
+        quad_layer.size.width = 6;
+        quad_layer.size.height = 6;
 
         // Build the cylinder layer
         if (renderer->ConfigInt[CONFIG_SBS])

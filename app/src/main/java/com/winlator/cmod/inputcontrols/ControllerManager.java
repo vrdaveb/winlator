@@ -77,6 +77,9 @@ public class ControllerManager {
      */
     public void scanForDevices() {
         detectedDevices.clear();
+        if (inputManager == null) {
+            return;
+        }
         int[] deviceIds = inputManager.getInputDeviceIds();
         for (int deviceId : deviceIds) {
             InputDevice device = inputManager.getInputDevice(deviceId);
