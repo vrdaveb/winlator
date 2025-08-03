@@ -1,3 +1,28 @@
+<img width="505" height="128" alt="logo" src="https://github.com/user-attachments/assets/272af339-23d9-4afc-abd8-2cb255665cf9" />
+
+WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses https://github.com/amwatson/2DVrHybrid to combine 2D Android UI APIs with XR integration.
+
+* Winlator is originally developed by brunodev85 but as he does not opensource the latest versions then I am forced to use an own fork for this project.
+* In 2024 WinlatorXR was based on GLIBC fork by longjunyu2 but as he stopped communicating, the project was inactive for a long time and later it stopped working.
+* In 2025 Pipetto-crypto ported Winlator to Bionic/Proton which is a massive boost for Meta Quest integration.
+* His integration was enhanced by coffincolors in Winlator CMOD fork which is now base for WinlatorXR.
+* Pico support and XR enhancement were brought by Tobbe85.
+
+### How to compile
+
+1.Clone repository with all submodules
+`git clone --recursive git@github.com:lvonasek/winlator.git`
+
+2.Donwload the latest APK from releases
+
+3.Unzip the APK and copy the content of assets into app/src/main/assets/ (except dexopt folder)
+
+4.Open the project in Android Studio and have fun :)
+
+---
+
+Original README:
+
 <p align="center">
 	<img src="logo.png" width="376" height="128" alt="Winlator Logo" />  
 </p>
@@ -40,4 +65,5 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 - CNC DDraw ([github.com/FunkyFr3sh/cnc-ddraw](https://github.com/FunkyFr3sh/cnc-ddraw))
 
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
+
 Thank you to all the people who believe in this project.
