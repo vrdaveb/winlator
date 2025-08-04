@@ -1477,15 +1477,20 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         String inputAsset = "arm64ec_input_dlls.tzst";
         String wineVersion = container.getWineVersion();
         Log.d("XServerDisplayActivity", "arm64ec Input DLL Extraction Verification: Container Wine version: " + wineVersion);
-        if ("proton-9.0-arm64ec".equals(wineVersion)) {
+
+        // Check if the wineVersion string is not null and contains "arm64ec"
+        if (wineVersion != null && wineVersion.contains("arm64ec")) {
             File wineFolder = new File(imageFs.getWinePath() + "/lib/wine/");
-            Log.d("XServerDisplayActivity", "Extracting input dlls to " + wineFolder.getPath());
+            Log.d("XServerDisplayActivity", "Wine version contains arm64ec. Extracting input dlls to " + wineFolder.getPath());
             boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, inputAsset, wineFolder);
-            if (!success)
+            if (!success) {
                 Log.d("XServerDisplayActivity", "Failed to extract input dlls");
+            }
         }
-        else
-            Log.d("XServerDisplayActivity", "Wine version is not proton-9.0-arm64ec, skipping input dlls extraction");
+        else {
+            // Updated log message for clarity
+            Log.d("XServerDisplayActivity", "Wine version is not arm64ec, skipping input dlls extraction.");
+        }
     }
 
     private void extractx86_64InputDlls() {

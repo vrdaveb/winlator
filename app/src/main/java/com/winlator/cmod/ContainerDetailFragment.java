@@ -119,7 +119,9 @@ public class ContainerDetailFragment extends Fragment {
         private static final String[] MEDIACONV_ENV_VARS = {
             "MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv",
             "MEDIACONV_BLANK_VIDEO_FILE=/sdcard/blank.mkv",
-            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump"
+            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump",
+            "WINE_NEW_MEDIASOURCE=0",
+            "WINE_DO_NOT_CREATE_DXGI_DEVICE_MANAGER=1"
     };
 
     @Override
@@ -1177,6 +1179,8 @@ public class ContainerDetailFragment extends Fragment {
         ArrayList<String> wineVersions = new ArrayList<>();
         wineVersions.addAll(Arrays.asList(versions));
         for (ContentProfile profile : contentsManager.getProfiles(ContentProfile.ContentType.CONTENT_TYPE_WINE))
+            wineVersions.add(ContentsManager.getEntryName(profile));
+        for (ContentProfile profile : contentsManager.getProfiles(ContentProfile.ContentType.CONTENT_TYPE_PROTON))
             wineVersions.add(ContentsManager.getEntryName(profile));
         sWineVersion.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, wineVersions));
         if (isEditMode()) AppUtils.setSpinnerSelectionFromValue(sWineVersion, container.getWineVersion());

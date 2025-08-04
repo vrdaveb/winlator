@@ -63,7 +63,9 @@ public class ShortcutSettingsDialog extends ContentDialog {
     private static final String[] MEDIACONV_ENV_VARS = {
             "MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv",
             "MEDIACONV_BLANK_VIDEO_FILE=/sdcard/blank.mkv",
-            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump"
+            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump",
+            "WINE_NEW_MEDIASOURCE=0",
+            "WINE_DO_NOT_CREATE_DXGI_DEVICE_MANAGER=1"
     };
 
 

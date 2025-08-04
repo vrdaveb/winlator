@@ -2,6 +2,8 @@ package com.winlator.cmod.xenvironment;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +12,8 @@ import com.winlator.cmod.R;
 import com.winlator.cmod.SettingsFragment;
 import com.winlator.cmod.container.Container;
 import com.winlator.cmod.container.ContainerManager;
+import com.winlator.cmod.contents.ContentProfile;
+import com.winlator.cmod.contents.ContentsManager;
 import com.winlator.cmod.core.AppUtils;
 import com.winlator.cmod.core.DownloadProgressDialog;
 import com.winlator.cmod.core.FileUtils;
@@ -31,7 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ImageFsInstaller {
-    public static final byte LATEST_VERSION = 23;
+    public static final byte LATEST_VERSION = 22;
 
     private static void resetContainerImgVersions(Context context) {
         ContainerManager manager = new ContainerManager(context);
@@ -104,7 +108,7 @@ public abstract class ImageFsInstaller {
         dialog.show(R.string.installing_system_files);
         Executors.newSingleThreadExecutor().execute(() -> {
             clearRootDir(rootDir);
-            final byte compressionRatio = 22;
+            final byte compressionRatio = 23;
             final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
             AtomicLong totalSizeRef = new AtomicLong();
 
@@ -116,6 +120,8 @@ public abstract class ImageFsInstaller {
                 }
                 return file;
             });
+
+
 
             if (success) {
                 installWineFromAssets(activity);
