@@ -3,15 +3,15 @@
 
     <!-- ===== Top-level quick actions ===== -->
     <item
+        android:id="@+id/main_menu_keyboard"
+        android:title="@string/keyboard"
+        android:icon="@drawable/icon_keyboard" />
+
+    <item
         android:id="@+id/main_menu_relative_mouse"
         android:title="@string/relative_mouse_movement"
         android:icon="@drawable/icon_mouse"
         android:checkable="true" />
-
-    <item
-        android:id="@+id/main_menu_keyboard"
-        android:title="@string/keyboard"
-        android:icon="@drawable/icon_keyboard" />
 
     <!-- ===== INPUT ===== -->
     <!--item

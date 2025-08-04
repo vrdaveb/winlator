@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 
 import androidx.preference.PreferenceManager;
 
+import com.winlator.cmod.XrActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +67,10 @@ public class ControllerManager {
         this.inputManager = (InputManager) this.context.getSystemService(Context.INPUT_SERVICE);
 
         // On startup, we load saved settings and scan for connected devices.
-        loadAssignments();
-        scanForDevices();
+        if (!XrActivity.isEnabled(context)) {
+            loadAssignments();
+            scanForDevices();
+        }
     }
 
 

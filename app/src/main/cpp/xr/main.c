@@ -108,13 +108,6 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         xr_module_renderer.ConfigInt[CONFIG_MODE] = mode;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
 
-        // Recenter if mode switched
-        static int last_immersive = -1;
-        if (last_immersive != immersive) {
-            XrRendererRecenter(&xr_module_engine, &xr_module_renderer);
-            last_immersive = immersive;
-        }
-
         // Update controllers state
         XrInputUpdate(&xr_module_engine, &xr_module_input);
 

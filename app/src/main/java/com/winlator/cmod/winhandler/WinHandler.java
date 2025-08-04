@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import androidx.preference.PreferenceManager;
 
 import com.winlator.cmod.XServerDisplayActivity;
+import com.winlator.cmod.XrActivity;
 import com.winlator.cmod.contentdialog.ContentDialog;
 import com.winlator.cmod.contentdialog.ControllerAssignmentDialog;
 import com.winlator.cmod.core.StringUtils;
@@ -365,7 +366,7 @@ public class WinHandler {
                 && !ignoredDeviceIds.contains(deviceId)
                 && !ignoredGroups.contains(groupKey)) {
 
-            if (!isShowingAssignDialog) {
+            if (!isShowingAssignDialog && !XrActivity.isEnabled(activity)) {
                 isShowingAssignDialog = true;
                 activity.runOnUiThread(() -> {
                     String checkboxMessage = "Don't prompt for this controller again.";
@@ -459,7 +460,7 @@ public class WinHandler {
                 && !ignoredGroups.contains(ControllerManager.makePhysicalGroupKey(device))
                 && !ignoredDeviceIds.contains(deviceId))) {
 
-            if (!isShowingAssignDialog) {
+            if (!isShowingAssignDialog && !XrActivity.isEnabled(activity)) {
                 isShowingAssignDialog = true;
                 activity.runOnUiThread(() -> {
                     String msg = "This controller is not active. Open assignment menu? (" + device.getName() + ")";

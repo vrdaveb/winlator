@@ -101,8 +101,8 @@ void XrRendererInit(struct XrEngine* engine, struct XrRenderer* renderer)
         }
 
         OXR(xrPassthroughStartFB(renderer->Passthrough));
-        OXR(xrPassthroughLayerResumeFB(renderer->PassthroughLayer));
     }
+    renderer->PassthroughRunning = false;
     renderer->Initialized = true;
 }
 

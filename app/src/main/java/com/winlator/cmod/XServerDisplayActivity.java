@@ -393,7 +393,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         menu.findItem(R.id.main_menu_logs).setEnabled(enableLogs);
 
         if (XrActivity.isEnabled(this)) {
-            menu.findItem(R.id.main_menu_relative_mouse).setVisible(false);
             menu.findItem(R.id.main_menu_controller_assignment).setVisible(false);
             menu.findItem(R.id.main_menu_motion_controls).setVisible(false);
             menu.findItem(R.id.main_menu_input_controls).setVisible(false);
@@ -1385,8 +1384,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 return true;
 
             case R.id.main_menu_keyboard:
-                AppUtils.showKeyboard(this);
-                drawerLayout.closeDrawers();
+                if (XrActivity.isEnabled(this)) {
+                    drawerLayout.closeDrawers();
+                    XrActivity.getInstance().callMenuAction(id);
+                } else {
+                    AppUtils.showKeyboard(this);
+                    drawerLayout.closeDrawers();
+                }
                 return true;
 
             case R.id.main_menu_pause:
