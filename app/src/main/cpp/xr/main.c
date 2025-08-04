@@ -109,6 +109,13 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         xr_module_renderer.ConfigInt[CONFIG_MODE] = mode;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
 
+        // Recenter on the first frame
+        static bool first_frame = true;
+        if (first_frame) {
+            XrRendererRecenter(&xr_module_engine, &xr_module_renderer);
+            first_frame = false;
+        }
+
         // Update controllers state
         XrInputUpdate(&xr_module_engine, &xr_module_input);
 
