@@ -305,11 +305,13 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             }
 
             // Set mouse status
-            mouse.setPosition((int) smoothedMouse[0], (int) smoothedMouse[1]);
-            mouse.setButton(Pointer.Button.BUTTON_LEFT, buttons[primaryTrigger.ordinal()]);
-            mouse.setButton(Pointer.Button.BUTTON_RIGHT, buttons[primaryGrip.ordinal()]);
-            mouse.setButton(Pointer.Button.BUTTON_SCROLL_UP, buttons[primaryUp.ordinal()]);
-            mouse.setButton(Pointer.Button.BUTTON_SCROLL_DOWN, buttons[primaryDown.ordinal()]);
+            if (!instance.getXServer().isRelativeMouseMovement()) {
+                mouse.setPosition((int) smoothedMouse[0], (int) smoothedMouse[1]);
+                mouse.setButton(Pointer.Button.BUTTON_LEFT, buttons[primaryTrigger.ordinal()]);
+                mouse.setButton(Pointer.Button.BUTTON_RIGHT, buttons[primaryGrip.ordinal()]);
+                mouse.setButton(Pointer.Button.BUTTON_SCROLL_UP, buttons[primaryUp.ordinal()]);
+                mouse.setButton(Pointer.Button.BUTTON_SCROLL_DOWN, buttons[primaryDown.ordinal()]);
+            }
 
             // Switch immersive/SBS mode
             if (getButtonClicked(buttons, secondaryPress)) {
