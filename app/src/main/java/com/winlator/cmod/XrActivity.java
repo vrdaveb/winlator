@@ -26,6 +26,8 @@ import com.winlator.cmod.xserver.XKeycode;
 import com.winlator.cmod.xserver.XLock;
 import com.winlator.cmod.xserver.XServer;
 
+import java.io.File;
+
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
  */
@@ -54,6 +56,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
+    private static File[] lastFiles = null;
     private static long lastDialogShown = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
@@ -340,6 +343,42 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             // Store the OpenXR data
             System.arraycopy(axes, 0, lastAxes, 0, axes.length);
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
+            try {
+                exposeData();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void exposeData() throws Exception {
+        //Ensure export directory exist
+        File dir = new File("/sdcard/Download/xrtemp");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+
+        //Ensure there is no previous data
+        if (lastFiles == null) {
+            for (File file : dir.listFiles()) {
+                if (!file.delete()) {
+                    throw new Exception("Filesystem issue");
+                }
+            }
+            lastFiles = new File[ControllerAxis.values().length];
+        }
+
+        //Extract the data into the filesystem
+        for (ControllerAxis axis : ControllerAxis.values()) {
+            File name = new File(dir, axis.name() + " " + lastAxes[axis.ordinal()]);
+            if (lastFiles[axis.ordinal()] == null) {
+                if (!name.createNewFile()) {
+                    throw new Exception("Filesystem issue");
+                }
+            } else if (!lastFiles[axis.ordinal()].renameTo(name)) {
+                    throw new Exception("Filesystem issue");
+            }
+            lastFiles[axis.ordinal()] = name;
         }
     }
 
