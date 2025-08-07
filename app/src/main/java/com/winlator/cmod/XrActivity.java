@@ -365,21 +365,26 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                     throw new Exception("Filesystem issue");
                 }
             }
-            lastFiles = new File[ControllerAxis.values().length];
+            lastFiles = new File[1];
+        }
+
+        //Combine the data
+        int clientIndex = 0;
+        StringBuilder data = new StringBuilder("client" + clientIndex);
+        for (ControllerAxis axis : ControllerAxis.values()) {
+            data.append(" ").append(lastAxes[axis.ordinal()]);
         }
 
         //Extract the data into the filesystem
-        for (ControllerAxis axis : ControllerAxis.values()) {
-            File name = new File(dir, axis.name() + " " + lastAxes[axis.ordinal()]);
-            if (lastFiles[axis.ordinal()] == null) {
-                if (!name.createNewFile()) {
-                    throw new Exception("Filesystem issue");
-                }
-            } else if (!lastFiles[axis.ordinal()].renameTo(name)) {
-                    throw new Exception("Filesystem issue");
+        File name = new File(dir, data.toString());
+        if (lastFiles[clientIndex] == null) {
+            if (!name.createNewFile()) {
+                throw new Exception("Filesystem issue");
             }
-            lastFiles[axis.ordinal()] = name;
+        } else if (!lastFiles[clientIndex].renameTo(name)) {
+            throw new Exception("Filesystem issue");
         }
+        lastFiles[clientIndex] = name;
     }
 
     private static float getAngleDiff(float oldAngle, float newAngle) {
