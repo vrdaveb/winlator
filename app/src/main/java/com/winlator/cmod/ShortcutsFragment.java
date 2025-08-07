@@ -362,14 +362,56 @@ public class ShortcutsFragment extends Fragment {
         fileObservers.clear();
     }
     public void loadShortcutsList() {
-        ArrayList<Shortcut> shortcuts = manager.loadShortcuts();
 
-        // Validate and remove corrupted shortcuts
-        shortcuts.removeIf(shortcut -> shortcut == null || shortcut.file == null || shortcut.file.getName().isEmpty());
+        ArrayList<Shortcut> shortcuts = new ArrayList<>();
+        ArrayList<File> quarantined   = new ArrayList<>();
 
+        // ContainerManager can still throw (e.g. I/O permission issues).
+        // Keep the whole call in one try/catch so the UI never dies.
+        try {
+            for (Container c : manager.getContainers()) {
+                for (File f : c.getDesktopDir().listFiles((dir, n) -> n.endsWith(".desktop"))) {
+                    try {
+                        Shortcut s = new Shortcut(c, f);   // may throw
+                        // very cheap logical sanity check
+                        if (s.name == null || s.name.trim().isEmpty()) {
+                            throw new IllegalStateException("empty name");
+                        }
+                        shortcuts.add(s);
+
+                    } catch (Throwable t) {               // <-- swallow & quarantine
+                        Log.e("ShortcutsFragment", "Bad shortcut: " + f.getAbsolutePath(), t);
+                        quarantined.add(f);
+                    }
+                }
+            }
+
+        } catch (Throwable fatal) {
+            Log.e("ShortcutsFragment", "Fatal error while scanning shortcuts!", fatal);
+            Toast.makeText(getContext(),
+                    "Couldn’t load shortcuts (see log).", Toast.LENGTH_LONG).show();
+        }
+
+        // ---- UI update ----
+//        Collections.sort(shortcuts);           // keep existing order logic
         recyclerView.setAdapter(new ShortcutsAdapter(shortcuts));
-        if (shortcuts.isEmpty()) emptyTextView.setVisibility(View.VISIBLE);
-        else emptyTextView.setVisibility(View.GONE); // Ensure the empty text view is hidden if there are shortcuts
+        emptyTextView.setVisibility(shortcuts.isEmpty() ? View.VISIBLE : View.GONE);
+
+        // ---- quarantine report ----
+        if (!quarantined.isEmpty()) {
+            Toast.makeText(getContext(),
+                    quarantined.size() + " shortcut(s) ignored (corrupted):",
+                    Toast.LENGTH_LONG).show();
+
+            // Move them out of the way so the crash never happens again.
+            for (File bad : quarantined) {
+                File dst = new File(bad.getParent(), bad.getName() + ".bad");
+                Toast.makeText(getContext(), bad.getName() + " renamed to " + dst.getName(), Toast.LENGTH_LONG).show();
+                // ignore return value – it’s a best-effort quarantine
+                //noinspection ResultOfMethodCallIgnored
+                bad.renameTo(dst);
+            }
+        }
     }
 
 
@@ -781,17 +823,31 @@ public class ShortcutsFragment extends Fragment {
         } catch (Exception e) {}
     }
 
-    public void updateShortcutOnScreen(String shortLabel, String longLabel, int containerId, String shortcutPath, Icon icon, String uuid) {
-        ShortcutManager shortcutManager = getSystemService(requireContext(), ShortcutManager.class);
-        try {
-            for (ShortcutInfo shortcutInfo : shortcutManager.getPinnedShortcuts()) {
-                if (shortcutInfo.getId().equals(uuid)) {
-                    shortcutManager.updateShortcuts(Collections.singletonList(
-                            buildScreenShortCut(shortLabel, longLabel, containerId, shortcutPath, icon, uuid)));
-                    break;
-                }
+    public void updateShortcutOnScreen(String shortLabel,
+                                       String longLabel,
+                                       int    containerId,
+                                       String shortcutPath,
+                                       Icon   icon,
+                                       String uuid) {
+
+        ShortcutManager sm =
+                androidx.core.content.ContextCompat.getSystemService(
+                        requireContext(), ShortcutManager.class);
+
+        if (sm == null) {                    // ⇦ grace-fully bail out on devices
+            Log.w("ShortcutsFragment",       //    that don’t expose ShortcutManager
+                    "ShortcutManager not available; cannot update pinned shortcut");
+            return;
+        }
+
+        for (ShortcutInfo info : sm.getPinnedShortcuts()) {
+            if (uuid.equals(info.getId())) {
+                sm.updateShortcuts(Collections.singletonList(
+                        buildScreenShortCut(shortLabel, longLabel,
+                                containerId, shortcutPath, icon, uuid)));
+                break;
             }
-        } catch (Exception e) {}
+        }
     }
 
     private static boolean safeDelete(@Nullable File f) {

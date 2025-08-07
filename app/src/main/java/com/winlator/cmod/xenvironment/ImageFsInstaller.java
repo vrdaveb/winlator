@@ -3,6 +3,8 @@ package com.winlator.cmod.xenvironment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.text.Html;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -148,12 +150,20 @@ public abstract class ImageFsInstaller {
 
         if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) {
             // A system files update is required, so show a warning dialog first.
+            String htmlMessageString = activity.getString(R.string.system_update_warning);
+            CharSequence formattedMessage;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                formattedMessage = Html.fromHtml(htmlMessageString, Html.FROM_HTML_MODE_LEGACY);
+            } else {
+                //noinspection deprecation
+                formattedMessage = Html.fromHtml(htmlMessageString);
+            }
             new AlertDialog.Builder(activity)
                     .setTitle("System Files Update Required")
-                    .setMessage(R.string.system_update_warning)
-                    .setCancelable(false) // Prevents the user from dismissing the dialog
+                    .setMessage(formattedMessage) // Set the Spanned CharSequence
+                    .setCancelable(false)
                     .setPositiveButton("Continue", (dialog, which) -> {
-                        installFromAssets(activity, onCompletion);
+                        // installFromAssets(activity, onCompletion);
                     })
                     .show();
         }

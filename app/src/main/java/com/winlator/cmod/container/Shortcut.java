@@ -33,72 +33,83 @@ import java.nio.file.Files;
         private static final String COVER_ART_DIR = "app_data/cover_arts/"; // Removed leading "/" to keep it relative
 
         public Shortcut(Container container, File file) {
+
             this.container = container;
-            this.file = file;
+            this.file      = file;
 
             String execArgs = "";
-            Bitmap icon = null;
-            File iconFile = null;
-            String wmClass = "";
+            Bitmap icon     = null;
+            File   iconFile = null;
+            String wmClass  = "";
 
-            File[] iconDirs = {container.getIconsDir(64), container.getIconsDir(48), container.getIconsDir(32), container.getIconsDir(16)};
+            File[] iconDirs = { container.getIconsDir(64),
+                    container.getIconsDir(48),
+                    container.getIconsDir(32),
+                    container.getIconsDir(16) };
+
+            /* --- NEW: flag so we know we actually parsed the header --- */
+            boolean seenDesktopEntry = false;
+
             String section = "";
-
             int index;
+
             for (String line : FileUtils.readLines(file)) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue; // Skip empty lines and comments
+                if (line.isEmpty() || line.startsWith("#")) continue;
+
                 if (line.startsWith("[")) {
-                    section = line.substring(1, line.indexOf("]"));
+                    section = line.substring(1, line.indexOf(']'));
+                    if ("Desktop Entry".equals(section)) seenDesktopEntry = true;   // <-- NEW
+                    continue;
                 }
-                else {
-                    index = line.indexOf("=");
-                    if (index == -1) continue;
-                    String key = line.substring(0, index);
-                    String value = line.substring(index+1);
 
-                    if (section.equals("Desktop Entry")) {
-                        if (key.equals("Exec")) execArgs = value;
-                        if (key.equals("Icon")) {
-                            for (File iconDir : iconDirs) {
-                                iconFile = new File(iconDir, value+".png");
-                                if (iconFile.isFile()){
-                                    icon = BitmapFactory.decodeFile(iconFile.getPath());
-                                    break;
-                                }
-                            }
+                index = line.indexOf('=');
+                if (index == -1) continue;
+                String key   = line.substring(0, index);
+                String value = line.substring(index + 1);
+
+                if ("Desktop Entry".equals(section)) {
+                    if (key.equals("Exec"))  execArgs = value;
+                    if (key.equals("Icon")) {
+                        for (File d : iconDirs) {
+                            iconFile = new File(d, value + ".png");
+                            if (iconFile.isFile()) { icon = BitmapFactory.decodeFile(iconFile.getPath()); break; }
                         }
-                        if (key.equals("StartupWMClass")) wmClass = value;
                     }
-                    else if (section.equals("Extra Data")) {
-                        try {
-                            extraData.put(key, value);
-                        }
-                        catch (JSONException e) {}
-                    }
+                    if (key.equals("StartupWMClass")) wmClass = value;
+                }
+                else if ("Extra Data".equals(section)) {
+                    try { extraData.put(key, value); } catch (JSONException ignored) {}
                 }
             }
 
-            // Check for custom icon path first
-            String customIconPath = getExtra("customIconPath");
-            if (!customIconPath.isEmpty()) {
-                iconFile = new File(customIconPath);
-                if (iconFile.isFile()) {
-                    icon = BitmapFactory.decodeFile(iconFile.getPath());
-                }
+            /* --- NEW: quick bail-out if header was missing or no meaningful data --- */
+            if (!seenDesktopEntry) {
+                Log.w("Shortcut", "Ignoring malformed shortcut (no [Desktop Entry]): "
+                        + file.getName());
+                throw new IllegalArgumentException("Malformed .desktop file");
             }
 
-            this.name = FileUtils.getBasename(file.getPath());
-            this.icon = icon;
+            /* ------------------------------------------------------------------ */
+            /*                 SAFE handling of Exec → path                       */
+            /* ------------------------------------------------------------------ */
+            int winePos = execArgs.lastIndexOf("wine ");
+            if (winePos != -1) {
+                // +5 because "wine " is five chars (w i n e ␠)
+                this.path = StringUtils.unescape(execArgs.substring(winePos + 5).trim());
+            } else {
+                Log.w("Shortcut", "Exec line missing or has no \"wine \" prefix: "
+                        + file.getName());
+                this.path = "";        // or leave null / handle however you prefer
+            }
+
+            /* --- everything else unchanged ------------------------------------ */
+            this.name     = FileUtils.getBasename(file.getPath());
+            this.icon     = icon;
             this.iconFile = iconFile;
-            this.path = StringUtils.unescape(execArgs.substring(execArgs.lastIndexOf("wine ") + 4));
-            this.wmClass = wmClass;
-
-
+            this.wmClass  = wmClass;
 
             this.customCoverArtPath = getExtra("customCoverArtPath");
-
-            // Load cover art if available
             loadCoverArt();
 
             Container.checkObsoleteOrMissingProperties(extraData);
