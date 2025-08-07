@@ -710,6 +710,10 @@ E.g. <b>META</b> for <i>META key</i>, \n
     &lt;b&gt;Migrating Shortcuts:&lt;/b&gt;&lt;br/&gt;
     While you can duplicate shortcuts via their pop-up menu, it is advised to recreate them manually from inside your new container to prevent issues with mismatched drive paths.
 </string>    <string name="installing_contents">Installing contents...</string>
+    <string name="renderer">Renderer</string>
+    <string name="gl">gl</string>
+    <string name="vulkan">vulkan</string>
+    <string name="gdi">gdi</string>
 
 
 </resources>

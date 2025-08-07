@@ -181,7 +181,11 @@ public class ContainerDetailFragment extends Fragment {
 
         Spinner sDesktopBackgroundType = view.findViewById(R.id.SDesktopBackgroundType);
         sDesktopBackgroundType.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
+
         // Registry Keys
+        Spinner sRenderer = view.findViewById(R.id.SRenderer);
+        sRenderer.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
+
         Spinner SCSMT = view.findViewById(R.id.SCSMT);
         SCSMT.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
 
@@ -706,6 +710,10 @@ public class ContainerDetailFragment extends Fragment {
     private void saveWineRegistryKeys(View view) {
         File userRegFile = new File(container.getRootDir(), ".wine/user.reg");
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(userRegFile)) {
+
+            Spinner sRenderer = view.findViewById(R.id.SRenderer);
+            registryEditor.setStringValue("Software\\Wine\\Direct3D", "renderer", sRenderer.getSelectedItem().toString());
+
             Spinner sCSMT = view.findViewById(R.id.SCSMT);
             registryEditor.setDwordValue("Software\\Wine\\Direct3D", "csmt", sCSMT.getSelectedItemPosition() != 0 ? 3 : 0);
 
@@ -770,6 +778,12 @@ public class ContainerDetailFragment extends Fragment {
         File userRegFile = new File(containerDir, ".wine/user.reg");
 
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(userRegFile)) {
+
+            List<String> rendererList = Arrays.asList(context.getString(R.string.gl), context.getString(R.string.vulkan), context.getString(R.string.gdi));
+            Spinner sRenderer = view.findViewById(R.id.SRenderer);
+            sRenderer.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, rendererList));
+            AppUtils.setSpinnerSelectionFromValue(sRenderer, registryEditor.getStringValue("Software\\Wine\\Direct3D", "renderer", "vulkan"));
+
             List<String> stateList = Arrays.asList(context.getString(R.string.disable), context.getString(R.string.enable));
             Spinner sCSMT = view.findViewById(R.id.SCSMT);
             sCSMT.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, stateList));
