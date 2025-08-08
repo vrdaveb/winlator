@@ -126,6 +126,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (XrActivity.isEnabled(null)) {
             xrImmersive = XrActivity.getImmersive();
             xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS());
+            fullscreen = XrActivity.getVR();
+        } else {
+            fullscreen = false;
         }
 
         // Update the viewport if necessary

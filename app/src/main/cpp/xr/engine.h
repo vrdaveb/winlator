@@ -40,7 +40,7 @@ void OXRCheckErrors(XrResult result, const char* file, int line);
 
 enum
 {
-  XrMaxLayerCount = 2
+  XrMaxLayerCount = 3
 };
 enum
 {
@@ -55,6 +55,7 @@ enum XrPlatformFlag
   PLATFORM_EXTENSION_PASSTHROUGH,
   PLATFORM_EXTENSION_PERFORMANCE,
   PLATFORM_TRACKING_FLOOR,
+  PLATFORM_VIEWPORT_UNCENTERED,
   PLATFORM_MAX
 };
 

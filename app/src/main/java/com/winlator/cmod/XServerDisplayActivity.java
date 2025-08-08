@@ -396,7 +396,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             menu.findItem(R.id.main_menu_controller_assignment).setVisible(false);
             menu.findItem(R.id.main_menu_motion_controls).setVisible(false);
             menu.findItem(R.id.main_menu_input_controls).setVisible(false);
-            menu.findItem(R.id.main_menu_toggle_fullscreen).setVisible(false);
             menu.findItem(R.id.main_menu_magnifier).setVisible(false);
             menu.findItem(R.id.main_menu_screen_effects).setVisible(false);
             menu.findItem(R.id.main_menu_pip_mode).setVisible(false);
@@ -404,6 +403,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         } else {
             menu.findItem(R.id.xr_passthrough).setVisible(false);
         }
+        menu.findItem(R.id.main_menu_toggle_fullscreen).setVisible(false);
 
 
 

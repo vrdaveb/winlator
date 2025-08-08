@@ -37,7 +37,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public enum ControllerAxis {
         L_PITCH, L_YAW, L_ROLL, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
         R_PITCH, R_YAW, R_ROLL, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z,
-        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_X, HMD_Y, HMD_Z, HMD_IPD
+        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_X, HMD_Y, HMD_Z, HMD_IPD, HMD_FOVX, HMD_FOVY
     }
 
     // Order of the enum has to be the as in xr/main.cpp
@@ -51,6 +51,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isEnabled = false;
     private static boolean isImmersive = false;
     private static boolean isSBS = false;
+    private static boolean isVR = false;
     private static boolean usePassthrough = false;
     private static boolean[] currentButtons = new boolean[ControllerButton.values().length];
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
@@ -64,6 +65,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static XrActivity instance;
 
     public native void nativeSetUsePT(boolean enabled);
+    public native void nativeSetUseVR(boolean enabled);
     public native void sendManufacturer(String manufacturer);
 
     @Override
@@ -158,6 +160,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         return isSBS && ContentDialog.getFrontInstance() == null;
     }
 
+    public static boolean getVR() {
+        return isVR && ContentDialog.getFrontInstance() == null;
+    }
+
     public static boolean isEnabled(Context context) {
         if (context != null) {
             isEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("use_xr", true);
@@ -184,6 +190,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public void callMenuAction(int item) {
         switch (item) {
             case R.id.main_menu_keyboard:
+                isVR = false;
                 isSBS = false;
                 isImmersive = false;
                 instance.resetText();
@@ -366,6 +373,13 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 }
             }
             lastFiles = new File[1];
+        }
+
+        //Expose data only if VR mode is requested
+        isVR = new File(dir, "vr").exists();
+        getInstance().nativeSetUseVR(isVR);
+        if (!isVR) {
+            return;
         }
 
         //Combine the data

@@ -10,6 +10,8 @@ enum XrConfigFloat
     CONFIG_MENU_PITCH,
     CONFIG_MENU_YAW,
     CONFIG_RECENTER_YAW,
+    CONFIG_VIEWPORT_FOVX,
+    CONFIG_VIEWPORT_FOVY,
 
     CONFIG_FLOAT_MAX
 };
@@ -19,6 +21,7 @@ enum XrConfigInt
     // switching between modes
     CONFIG_MODE,
     CONFIG_PASSTHROUGH,
+    CONFIG_IMMERSIVE,
     CONFIG_SBS,
     // viewport setup
     CONFIG_VIEWPORT_WIDTH,

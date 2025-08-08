@@ -275,6 +275,22 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         renderer->InvertedViewPose[eye] = renderer->Projections[eye].pose;
     }
 
+    float fovx = 0;
+    float fovy = 0;
+    for (int eye = 0; eye < XrMaxNumEyes; eye++) {
+        fovx += fabs(renderer->Projections[eye].fov.angleDown - renderer->Projections[eye].fov.angleUp) / 2.0f;
+        fovy += fabs(renderer->Projections[eye].fov.angleRight - renderer->Projections[eye].fov.angleLeft) / 2.0f;
+    }
+    if (engine->PlatformFlag[PLATFORM_VIEWPORT_UNCENTERED]) {
+        fovy *= 1.1f;
+    }
+    renderer->ConfigFloat[CONFIG_VIEWPORT_FOVX] = ToDegrees(fovx);
+    renderer->ConfigFloat[CONFIG_VIEWPORT_FOVY] = ToDegrees(fovy);
+    renderer->Fov.angleLeft = -fovx / 2.0f;
+    renderer->Fov.angleRight = fovx / 2.0f;
+    renderer->Fov.angleDown = -fovy / 2.0f;
+    renderer->Fov.angleUp = fovy / 2.0f;
+
     renderer->HmdOrientation = XrQuaternionfEulerAngles(renderer->InvertedViewPose[0].orientation);
     renderer->LayerCount = 0;
     memset(renderer->Layers, 0, sizeof(XrCompositorLayer) * XrMaxLayerCount);
@@ -307,8 +323,8 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
     int x = 0;
     int y = 0;
-    int w = renderer->Framebuffer[0].Width;
-    int h = renderer->Framebuffer[0].Height;
+    int w = renderer->ConfigInt[CONFIG_VIEWPORT_WIDTH];
+    int h = renderer->ConfigInt[CONFIG_VIEWPORT_HEIGHT];
     if (renderer->ConfigInt[CONFIG_SBS])
     {
         w /= 2;
@@ -334,10 +350,12 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                 pose = renderer->InvertedViewPose[eye];
             }
 ;
-            XrVector3f roll_axis = {0, 0, 1};
-            XrVector3f rotation = XrQuaternionfEulerAngles(pose.orientation);
-            XrQuaternionf invRoll = XrQuaternionfCreateFromVectorAngle(roll_axis, ToRadians(rotation.z));
-            pose.orientation = XrQuaternionfMultiply(pose.orientation, invRoll);
+            if (renderer->ConfigInt[CONFIG_IMMERSIVE]) {
+                XrVector3f roll_axis = {0, 0, 1};
+                XrVector3f rotation = XrQuaternionfEulerAngles(pose.orientation);
+                XrQuaternionf invRoll = XrQuaternionfCreateFromVectorAngle(roll_axis, ToRadians(rotation.z));
+                pose.orientation = XrQuaternionfMultiply(pose.orientation, invRoll);
+            }
 
             memset(&projection_layer_elements[eye], 0, sizeof(XrCompositionLayerProjectionView));
             projection_layer_elements[eye].type = XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;

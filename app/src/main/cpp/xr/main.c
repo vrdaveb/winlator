@@ -11,7 +11,9 @@ struct XrEngine xr_module_engine;
 struct XrInput xr_module_input;
 struct XrRenderer xr_module_renderer;
 bool xr_initialized = false;
+bool xr_hasFrame = false;
 bool xr_usePassthrough = false;
+bool xr_vr = false;
 
 #if defined(_DEBUG)
 #include <GLES2/gl2.h>
@@ -61,6 +63,7 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_CONTROLLER_QUEST] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_VIEWPORT_UNCENTERED] = true;
     }
 
     // Get Java VM
@@ -99,12 +102,18 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
 }
 
 JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs) {
-    if (XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
+    if (xr_hasFrame || XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
+        // Update controllers state only when necessary
+        if (!xr_hasFrame) {
+            XrInputUpdate(&xr_module_engine, &xr_module_input);
+        }
+        xr_hasFrame = false;
 
         // Set render canvas
-        int mode = immersive ? RENDER_MODE_MONO_6DOF : RENDER_MODE_MONO_SCREEN;
+        int mode = immersive || xr_vr ? RENDER_MODE_MONO_6DOF : RENDER_MODE_MONO_SCREEN;
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
-        xr_module_renderer.ConfigInt[CONFIG_PASSTHROUGH] = !immersive && xr_usePassthrough;
+        xr_module_renderer.ConfigInt[CONFIG_PASSTHROUGH] = !immersive && !xr_vr && xr_usePassthrough;
+        xr_module_renderer.ConfigInt[CONFIG_IMMERSIVE] = immersive && !xr_vr;
         xr_module_renderer.ConfigInt[CONFIG_MODE] = mode;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
 
@@ -114,9 +123,6 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
             XrRendererRecenter(&xr_module_engine, &xr_module_renderer);
             first_frame = false;
         }
-
-        // Update controllers state
-        XrInputUpdate(&xr_module_engine, &xr_module_input);
 
         // Lock framebuffer
         XrRendererBeginFrame(&xr_module_renderer, 0);
@@ -129,6 +135,12 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
 JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_endFrame(JNIEnv *env, jobject obj) {
     XrRendererEndFrame(&xr_module_renderer);
     XrRendererFinishFrame(&xr_module_engine, &xr_module_renderer);
+
+    // Prepare next frame to have input status ready earlier
+    if (!xr_hasFrame && XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
+        XrInputUpdate(&xr_module_engine, &xr_module_input);
+        xr_hasFrame = true;
+    }
 }
 
 JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *env, jobject obj) {
@@ -165,7 +177,8 @@ JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *
     data[count++] = (lPosition.y + rPosition.y) * 0.5f; //HMD_Y
     data[count++] = (lPosition.z + rPosition.z) * 0.5f; //HMD_Z
     data[count++] = XrVector3fDistance(lPosition, rPosition); //HMD_IPD
-
+    data[count++] = xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVX]; //HMD_FOVX
+    data[count++] = xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVY]; //HMD_FOVY
 
     jfloat values[count];
     memcpy(values, data, count * sizeof(float));
@@ -210,4 +223,9 @@ JNIEXPORT jbooleanArray JNICALL Java_com_winlator_cmod_XrActivity_getButtons(JNI
 JNIEXPORT void JNICALL
 Java_com_winlator_cmod_XrActivity_nativeSetUsePT(JNIEnv *env, jobject obj, jboolean enabled) {
     xr_usePassthrough = enabled;
+}
+
+JNIEXPORT void JNICALL
+Java_com_winlator_cmod_XrActivity_nativeSetUseVR(JNIEnv *env, jobject obj, jboolean enabled) {
+    xr_vr = enabled;
 }
