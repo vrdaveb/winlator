@@ -148,15 +148,20 @@ JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *
     XrPosef rPose = XrInputGetPose(&xr_module_input, 1);
     XrVector2f lThumbstick = XrInputGetJoystickState(&xr_module_input, 0);
     XrVector2f rThumbstick = XrInputGetJoystickState(&xr_module_input, 1);
+    XrQuaternionf quat = xr_module_renderer.Projections[0].pose.orientation;
     XrVector3f lPosition = xr_module_renderer.Projections[0].pose.position;
     XrVector3f rPosition = xr_module_renderer.Projections[1].pose.position;
     XrVector3f angles = xr_module_renderer.HmdOrientation;
 
     int count = 0;
-    float data[32];
+    float data[48];
     data[count++] = XrQuaternionfEulerAngles(lPose.orientation).x; //L_PITCH
     data[count++] = XrQuaternionfEulerAngles(lPose.orientation).y; //L_YAW
     data[count++] = XrQuaternionfEulerAngles(lPose.orientation).z; //L_ROLL
+    data[count++] = lPose.orientation.x; //L_QX
+    data[count++] = lPose.orientation.y; //L_QY
+    data[count++] = lPose.orientation.z; //L_QZ
+    data[count++] = lPose.orientation.w; //L_QW
     data[count++] = lThumbstick.x; //L_THUMBSTICK_X
     data[count++] = lThumbstick.y; //L_THUMBSTICK_Y
     data[count++] = lPose.position.x; //L_X
@@ -165,6 +170,10 @@ JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *
     data[count++] = XrQuaternionfEulerAngles(rPose.orientation).x; //R_PITCH
     data[count++] = XrQuaternionfEulerAngles(rPose.orientation).y; //R_YAW
     data[count++] = XrQuaternionfEulerAngles(rPose.orientation).z; //R_ROLL
+    data[count++] = rPose.orientation.x; //R_QX
+    data[count++] = rPose.orientation.y; //R_QY
+    data[count++] = rPose.orientation.z; //R_QZ
+    data[count++] = rPose.orientation.w; //R_QW
     data[count++] = rThumbstick.x; //R_THUMBSTICK_X
     data[count++] = rThumbstick.y; //R_THUMBSTICK_Y
     data[count++] = rPose.position.x; //R_X
@@ -173,6 +182,10 @@ JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *
     data[count++] = angles.x; //HMD_PITCH
     data[count++] = angles.y; //HMD_YAW
     data[count++] = angles.z; //HMD_ROLL
+    data[count++] = quat.x; //HMD_QX
+    data[count++] = quat.y; //HMD_QY
+    data[count++] = quat.z; //HMD_QZ
+    data[count++] = quat.w; //HMD_QW
     data[count++] = (lPosition.x + rPosition.x) * 0.5f; //HMD_X
     data[count++] = (lPosition.y + rPosition.y) * 0.5f; //HMD_Y
     data[count++] = (lPosition.z + rPosition.z) * 0.5f; //HMD_Z

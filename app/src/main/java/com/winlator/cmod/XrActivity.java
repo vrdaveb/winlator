@@ -1,5 +1,6 @@
 package com.winlator.cmod;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -35,9 +36,9 @@ import java.io.File;
 public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     // Order of the enum has to be the as in xr/main.cpp
     public enum ControllerAxis {
-        L_PITCH, L_YAW, L_ROLL, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
-        R_PITCH, R_YAW, R_ROLL, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z,
-        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_X, HMD_Y, HMD_Z, HMD_IPD, HMD_FOVX, HMD_FOVY
+        L_PITCH, L_YAW, L_ROLL, L_QX, L_QY, L_QZ, L_QW, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
+        R_PITCH, R_YAW, R_ROLL, R_QX, R_QY, R_QZ, R_QW, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z,
+        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_QX, HMD_QY, HMD_QZ, HMD_QW, HMD_X, HMD_Y, HMD_Z, HMD_IPD, HMD_FOVX, HMD_FOVY
     }
 
     // Order of the enum has to be the as in xr/main.cpp
@@ -358,6 +359,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private static void exposeData() throws Exception {
         //Ensure export directory exist
         File dir = new File("/sdcard/Download/xrtemp");
@@ -381,16 +383,42 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         if (!isVR) {
             return;
         }
+        isSBS = new File(dir, "sbs").exists();
 
         //Combine the data
         int clientIndex = 0;
-        StringBuilder data = new StringBuilder("client" + clientIndex);
-        for (ControllerAxis axis : ControllerAxis.values()) {
-            data.append(" ").append(lastAxes[axis.ordinal()]);
-        }
+        String data = "client" + clientIndex +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QX.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QY.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QZ.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QW.ordinal()]) +
+                " " + String.format("%.1f", lastAxes[ControllerAxis.L_THUMBSTICK_X.ordinal()]) +
+                " " + String.format("%.1f", lastAxes[ControllerAxis.L_THUMBSTICK_Y.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_X.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_Y.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.L_Z.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QX.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QY.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QZ.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QW.ordinal()]) +
+                " " + String.format("%.1f", lastAxes[ControllerAxis.R_THUMBSTICK_X.ordinal()]) +
+                " " + String.format("%.1f", lastAxes[ControllerAxis.R_THUMBSTICK_Y.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_X.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_Y.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.R_Z.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QX.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QY.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QZ.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QW.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_X.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_Y.ordinal()]) +
+                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_Z.ordinal()]) +
+                " " + String.format("%.4f", lastAxes[ControllerAxis.HMD_IPD.ordinal()]) +
+                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVX.ordinal()]) +
+                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVY.ordinal()]);
 
         //Extract the data into the filesystem
-        File name = new File(dir, data.toString());
+        File name = new File(dir, data);
         if (lastFiles[clientIndex] == null) {
             if (!name.createNewFile()) {
                 throw new Exception("Filesystem issue");
