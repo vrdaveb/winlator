@@ -40,6 +40,10 @@ void OXRCheckErrors(XrResult result, const char* file, int line);
 
 enum
 {
+    XrMaxFrameSync = 256
+};
+enum
+{
   XrMaxLayerCount = 3
 };
 enum

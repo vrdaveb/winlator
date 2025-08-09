@@ -20,6 +20,7 @@ enum XrConfigInt
 {
     // switching between modes
     CONFIG_MODE,
+    CONFIG_FRAMESYNC,
     CONFIG_PASSTHROUGH,
     CONFIG_IMMERSIVE,
     CONFIG_SBS,
@@ -51,6 +52,7 @@ struct XrRenderer {
 
     struct XrFramebuffer Framebuffer[XrMaxNumEyes];
 
+    int FrameSync;
     int LayerCount;
     XrCompositorLayer Layers[XrMaxLayerCount];
     XrPassthroughFB Passthrough;
@@ -61,7 +63,7 @@ struct XrRenderer {
 
     XrFovf Fov;
     XrView* Projections;
-    XrPosef InvertedViewPose[2];
+    XrPosef InvertedViewPose[2][XrMaxFrameSync + 1];
     XrVector3f HmdOrientation;
 };
 

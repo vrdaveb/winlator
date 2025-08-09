@@ -114,6 +114,7 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
         xr_module_renderer.ConfigInt[CONFIG_PASSTHROUGH] = !immersive && !xr_vr && xr_usePassthrough;
         xr_module_renderer.ConfigInt[CONFIG_IMMERSIVE] = immersive && !xr_vr;
+        xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC] = xr_vr;
         xr_module_renderer.ConfigInt[CONFIG_MODE] = mode;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
 
@@ -192,6 +193,7 @@ JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *
     data[count++] = XrVector3fDistance(lPosition, rPosition); //HMD_IPD
     data[count++] = xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVX]; //HMD_FOVX
     data[count++] = xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVY]; //HMD_FOVY
+    data[count++] = xr_module_renderer.FrameSync; //HMD_SYNC
 
     jfloat values[count];
     memcpy(values, data, count * sizeof(float));

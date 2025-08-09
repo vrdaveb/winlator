@@ -38,7 +38,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public enum ControllerAxis {
         L_PITCH, L_YAW, L_ROLL, L_QX, L_QY, L_QZ, L_QW, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
         R_PITCH, R_YAW, R_ROLL, R_QX, R_QY, R_QZ, R_QW, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z,
-        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_QX, HMD_QY, HMD_QZ, HMD_QW, HMD_X, HMD_Y, HMD_Z, HMD_IPD, HMD_FOVX, HMD_FOVY
+        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_QX, HMD_QY, HMD_QZ, HMD_QW, HMD_X, HMD_Y, HMD_Z,
+        HMD_IPD, HMD_FOVX, HMD_FOVY, HMD_SYNC
     }
 
     // Order of the enum has to be the as in xr/main.cpp
@@ -415,7 +416,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_Z.ordinal()]) +
                 " " + String.format("%.4f", lastAxes[ControllerAxis.HMD_IPD.ordinal()]) +
                 " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVX.ordinal()]) +
-                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVY.ordinal()]);
+                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVY.ordinal()]) +
+                " " + String.format("%d", (int)lastAxes[ControllerAxis.HMD_SYNC.ordinal()]);
 
         //Extract the data into the filesystem
         File name = new File(dir, data);
