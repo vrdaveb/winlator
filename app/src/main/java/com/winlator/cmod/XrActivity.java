@@ -28,6 +28,9 @@ import com.winlator.cmod.xserver.XLock;
 import com.winlator.cmod.xserver.XServer;
 
 import java.io.File;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
@@ -64,6 +67,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
+    private static InetAddress address = null;
+    private static DatagramSocket socket = null;
     private static XrActivity instance;
 
     public native void nativeSetUsePT(boolean enabled);
@@ -419,16 +424,27 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVY.ordinal()]) +
                 " " + String.format("%d", (int)lastAxes[ControllerAxis.HMD_SYNC.ordinal()]);
 
-        //Extract the data into the filesystem
-        File name = new File(dir, data);
-        if (lastFiles[clientIndex] == null) {
-            if (!name.createNewFile()) {
+        //Send data
+        boolean useUDP = true;
+        if (useUDP) {
+            int port = 7872;
+            if ((socket == null) || (address == null)) {
+                socket = new DatagramSocket(port);
+                address = InetAddress.getLocalHost();
+            }
+            byte[] buffer = data.getBytes();
+            socket.send(new DatagramPacket(buffer, buffer.length, address, port));
+        } else {
+            File name = new File(dir, data);
+            if (lastFiles[clientIndex] == null) {
+                if (!name.createNewFile()) {
+                    throw new Exception("Filesystem issue");
+                }
+            } else if (!lastFiles[clientIndex].renameTo(name)) {
                 throw new Exception("Filesystem issue");
             }
-        } else if (!lastFiles[clientIndex].renameTo(name)) {
-            throw new Exception("Filesystem issue");
+            lastFiles[clientIndex] = name;
         }
-        lastFiles[clientIndex] = name;
     }
 
     private static float getAngleDiff(float oldAngle, float newAngle) {
