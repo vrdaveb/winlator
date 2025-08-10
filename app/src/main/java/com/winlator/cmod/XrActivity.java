@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,6 +31,9 @@ import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 /*
@@ -71,6 +73,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final float[] smoothedMouse = new float[2];
     private static InetAddress address = null;
     private static DatagramSocket socket = null;
+    private static ByteBuffer senddata = ByteBuffer.allocate(8192).order(ByteOrder.LITTLE_ENDIAN);
+    private static DatagramPacket sendpacket = new DatagramPacket(senddata.array(), 8192);
     private static XrActivity instance;
 
     public native void nativeSetUsePT(boolean enabled);
@@ -431,15 +435,17 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         if (useUDP) {
             int port = 7872;
             if ((socket == null) || (address == null)) {
-                WifiManager wifi = (WifiManager) instance.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                int ip = wifi.getConnectionInfo().getIpAddress();
-                byte[] addr = {(byte) (ip & 0xff), (byte) (ip >> 8 & 0xff), (byte) (ip >> 16 & 0xff), (byte) (ip >> 24 & 0xff)};
-                address = InetAddress.getByAddress(addr);
-                socket = new DatagramSocket(port, address);
-                socket.setBroadcast(true);
+                address = InetAddress.getLocalHost();
+                socket = new DatagramSocket(null);
+                socket.bind(new InetSocketAddress((InetAddress) null, port));
+                socket.setReuseAddress(true);
             }
-            byte[] buffer = data.getBytes(StandardCharsets.UTF_8);
-            socket.send(new DatagramPacket(buffer, buffer.length));
+            senddata.rewind();
+            senddata.putInt(data.length());
+            senddata.put(data.getBytes(StandardCharsets.US_ASCII));
+            sendpacket.setAddress(address);
+            sendpacket.setPort(port);
+            socket.send(sendpacket);
         } else {
             File name = new File(dir, data);
             if (lastFiles[clientIndex] == null) {
