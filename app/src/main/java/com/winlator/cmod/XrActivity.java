@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +32,7 @@ import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
@@ -429,11 +431,15 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         if (useUDP) {
             int port = 7872;
             if ((socket == null) || (address == null)) {
-                socket = new DatagramSocket(port);
-                address = InetAddress.getLocalHost();
+                WifiManager wifi = (WifiManager) instance.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                int ip = wifi.getConnectionInfo().getIpAddress();
+                byte[] addr = {(byte) (ip & 0xff), (byte) (ip >> 8 & 0xff), (byte) (ip >> 16 & 0xff), (byte) (ip >> 24 & 0xff)};
+                address = InetAddress.getByAddress(addr);
+                socket = new DatagramSocket(port, address);
+                socket.setBroadcast(true);
             }
-            byte[] buffer = data.getBytes();
-            socket.send(new DatagramPacket(buffer, buffer.length, address, port));
+            byte[] buffer = data.getBytes(StandardCharsets.UTF_8);
+            socket.send(new DatagramPacket(buffer, buffer.length));
         } else {
             File name = new File(dir, data);
             if (lastFiles[clientIndex] == null) {
