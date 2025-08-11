@@ -1,6 +1,5 @@
 package com.winlator.cmod;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -26,15 +25,6 @@ import com.winlator.cmod.xserver.Pointer;
 import com.winlator.cmod.xserver.XKeycode;
 import com.winlator.cmod.xserver.XLock;
 import com.winlator.cmod.xserver.XServer;
-
-import java.io.File;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
@@ -66,16 +56,12 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
-    private static File[] lastFiles = null;
     private static long lastDialogShown = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
-    private static InetAddress address = null;
-    private static DatagramSocket socket = null;
-    private static ByteBuffer senddata = ByteBuffer.allocate(8192).order(ByteOrder.LITTLE_ENDIAN);
-    private static DatagramPacket sendpacket = new DatagramPacket(senddata.array(), 8192);
     private static XrActivity instance;
+    private static XrAPI xrAPI = null;
 
     public native void nativeSetUsePT(boolean enabled);
     public native void nativeSetUseVR(boolean enabled);
@@ -363,99 +349,24 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             // Store the OpenXR data
             System.arraycopy(axes, 0, lastAxes, 0, axes.length);
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
+
+            // Communication between XR and Win32 apps
             try {
-                exposeData();
+                if (xrAPI == null) {
+                    //xrAPI = new XrAPI("/sdcard/Download/xrtemp");
+                    xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
+                    xrAPI.writeFile(XrAPI.FLAG_VERSION, XrAPI.CURRENT_VERSION);
+                }
+                isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
+                getInstance().nativeSetUseVR(isVR);
+                if (isVR) {
+                    isSBS = xrAPI.hasFlag(XrAPI.FLAG_SBS);
+                    xrAPI.sendUDP(xrAPI.encodeAxes(lastAxes, 0), XrAPI.DEFAULT_PORT);
+                    //xrAPI.sendFile(xrAPI.encodeAxes(lastAxes, 0), 0);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @SuppressLint("DefaultLocale")
-    private static void exposeData() throws Exception {
-        //Ensure export directory exist
-        File dir = new File("/sdcard/Download/xrtemp");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-
-        //Ensure there is no previous data
-        if (lastFiles == null) {
-            for (File file : dir.listFiles()) {
-                if (!file.delete()) {
-                    throw new Exception("Filesystem issue");
-                }
-            }
-            lastFiles = new File[1];
-        }
-
-        //Expose data only if VR mode is requested
-        isVR = new File(dir, "vr").exists();
-        getInstance().nativeSetUseVR(isVR);
-        if (!isVR) {
-            return;
-        }
-        isSBS = new File(dir, "sbs").exists();
-
-        //Combine the data
-        int clientIndex = 0;
-        String data = "client" + clientIndex +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QX.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QY.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QZ.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_QW.ordinal()]) +
-                " " + String.format("%.1f", lastAxes[ControllerAxis.L_THUMBSTICK_X.ordinal()]) +
-                " " + String.format("%.1f", lastAxes[ControllerAxis.L_THUMBSTICK_Y.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_X.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_Y.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.L_Z.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QX.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QY.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QZ.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_QW.ordinal()]) +
-                " " + String.format("%.1f", lastAxes[ControllerAxis.R_THUMBSTICK_X.ordinal()]) +
-                " " + String.format("%.1f", lastAxes[ControllerAxis.R_THUMBSTICK_Y.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_X.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_Y.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.R_Z.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QX.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QY.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QZ.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_QW.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_X.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_Y.ordinal()]) +
-                " " + String.format("%.3f", lastAxes[ControllerAxis.HMD_Z.ordinal()]) +
-                " " + String.format("%.4f", lastAxes[ControllerAxis.HMD_IPD.ordinal()]) +
-                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVX.ordinal()]) +
-                " " + String.format("%.2f", lastAxes[ControllerAxis.HMD_FOVY.ordinal()]) +
-                " " + String.format("%d", (int)lastAxes[ControllerAxis.HMD_SYNC.ordinal()]);
-
-        //Send data
-        boolean useUDP = true;
-        if (useUDP) {
-            int port = 7872;
-            if ((socket == null) || (address == null)) {
-                address = InetAddress.getLocalHost();
-                socket = new DatagramSocket(null);
-                socket.bind(new InetSocketAddress((InetAddress) null, port));
-                socket.setReuseAddress(true);
-            }
-            senddata.rewind();
-            senddata.putInt(data.length());
-            senddata.put(data.getBytes(StandardCharsets.US_ASCII));
-            sendpacket.setAddress(address);
-            sendpacket.setPort(port);
-            socket.send(sendpacket);
-        } else {
-            File name = new File(dir, data);
-            if (lastFiles[clientIndex] == null) {
-                if (!name.createNewFile()) {
-                    throw new Exception("Filesystem issue");
-                }
-            } else if (!lastFiles[clientIndex].renameTo(name)) {
-                throw new Exception("Filesystem issue");
-            }
-            lastFiles[clientIndex] = name;
         }
     }
 
