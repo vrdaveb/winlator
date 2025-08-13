@@ -81,7 +81,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         mouseSpeed = PreferenceManager.getDefaultSharedPreferences(this).getFloat("cursor_speed", 1.0f);
 
         EditText text = findViewById(R.id.XRTextInput);
-        text.setVisibility(View.VISIBLE);
         text.getEditableText().clear();
         text.addTextChangedListener(this);
 
@@ -186,15 +185,28 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         return isDeviceSupported;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        instance.findViewById(R.id.XRTextInput).setVisibility(View.GONE);
+    }
+
     public void callMenuAction(int item) {
         switch (item) {
             case R.id.main_menu_keyboard:
-                isVR = false;
-                isSBS = false;
-                isImmersive = false;
-                instance.resetText();
-                AppUtils.showKeyboard(instance);
-                instance.findViewById(R.id.XRTextInput).requestFocus();
+                new Thread(() -> {
+                    sleep(250); //ensure onWindowFocusChanged was called
+                    runOnUiThread(() -> {
+                        View input = instance.findViewById(R.id.XRTextInput);
+                        input.setVisibility(View.VISIBLE);
+                        isVR = false;
+                        isSBS = false;
+                        isImmersive = false;
+                        instance.resetText();
+                        AppUtils.showKeyboard(instance);
+                        input.requestFocus();
+                    });
+                }).start();
                 break;
             case R.id.xr_passthrough:
                 usePassthrough = !usePassthrough;
