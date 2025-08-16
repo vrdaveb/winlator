@@ -1,6 +1,7 @@
 package com.winlator.cmod;
 
 import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 
 import java.io.File;
@@ -16,6 +17,10 @@ public class XrAPI {
     public static final String CURRENT_VERSION = "0.1.0";
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_PATH = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
+
+    public boolean ENABLE_UDP_DEBUG = false;
+    public static final String DEFAULT_DEBUG_PATH = "/sdcard/Download/udp_debug";
+
     public static final int DEFAULT_PORT = 7872;
     public static final String FLAG_SBS = "sbs";
     public static final String FLAG_VERSION = "version";
@@ -26,6 +31,8 @@ public class XrAPI {
     private final File dir;
     private final File[] lastFiles = new File[SLOTS_LIMIT];
     private final DatagramSocket socket = new DatagramSocket();
+
+    private String debugIp = "";
 
     public XrAPI(String path) throws Exception {
         //Ensure directory exists
@@ -98,6 +105,51 @@ public class XrAPI {
         InetAddress address = InetAddress.getLocalHost();
         byte[] bytes = data.getBytes(StandardCharsets.US_ASCII);
         socket.send(new DatagramPacket(bytes, bytes.length, address, port));
+
+        if (ENABLE_UDP_DEBUG) {
+            if (Objects.equals(debugIp, "")) {
+                setupDebugModeIP();
+            }
+
+            if (validDebugIP()) {
+                sendDebugUDP(data, port);
+            }
+        }
+    }
+
+    private void setupDebugModeIP() {
+        //Set Debug directory
+        File debugDir = new File(DEFAULT_DEBUG_PATH);
+        String dbgIPTmp = "";
+
+        if (debugDir.exists()) {
+            boolean foundIp = false;
+
+            for (File file : debugDir.listFiles()) {
+                foundIp = true;
+                dbgIPTmp = file.getName();
+                break;
+            }
+
+            if (!foundIp) dbgIPTmp = "0.0.0.0";
+        }
+        else {
+            dbgIPTmp = "0.0.0.0";
+        }
+
+        debugIp = dbgIPTmp;
+    }
+
+    private boolean validDebugIP() {
+        return !Objects.equals(debugIp, "0.0.0.0");
+    }
+
+    private void sendDebugUDP(@NonNull String data, int port) throws Exception {
+        if (!Objects.equals(debugIp, "0.0.0.0")) {
+            InetAddress debugIPAdd = InetAddress.getByName(debugIp);
+            byte[] bytes = data.getBytes(StandardCharsets.US_ASCII);
+            socket.send(new DatagramPacket(bytes, bytes.length, debugIPAdd, port));
+        }
     }
 
     public void writeFile(String flag, @NonNull String data) throws Exception {
