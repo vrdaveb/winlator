@@ -14,13 +14,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class XrAPI {
-    public static final String CURRENT_VERSION = "0.1.0";
+    public static final String CURRENT_VERSION = "0.1.1";
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_PATH = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
-
-    public boolean ENABLE_UDP_DEBUG = false;
+    @SuppressLint("SdCardPath")
     public static final String DEFAULT_DEBUG_PATH = "/sdcard/Download/udp_debug";
-
     public static final int DEFAULT_PORT = 7872;
     public static final String FLAG_SBS = "sbs";
     public static final String FLAG_VERSION = "version";
@@ -32,7 +30,8 @@ public class XrAPI {
     private final File[] lastFiles = new File[SLOTS_LIMIT];
     private final DatagramSocket socket = new DatagramSocket();
 
-    private String debugIp = "";
+    private String debugIp = null;
+    private boolean debugMode = false;
 
     public XrAPI(String path) throws Exception {
         //Ensure directory exists
@@ -51,7 +50,11 @@ public class XrAPI {
         }
     }
 
-    public String encodeAxes(@NonNull float[] axes, int clientIndex) {
+    public String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
+        StringBuilder binary = new StringBuilder();
+        for (boolean button : buttons) {
+            binary.append(button ? "T" : "F");
+        }
         return MSG_CLIENT + clientIndex +
                 " " + String.format(Locale.US, "%.3f", axes[XrActivity.ControllerAxis.L_QX.ordinal()]) +
                 " " + String.format(Locale.US, "%.3f", axes[XrActivity.ControllerAxis.L_QY.ordinal()]) +
@@ -81,11 +84,16 @@ public class XrAPI {
                 " " + String.format(Locale.US, "%.4f", axes[XrActivity.ControllerAxis.HMD_IPD.ordinal()]) +
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVX.ordinal()]) +
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVY.ordinal()]) +
-                " " + String.format(Locale.US, "%d", (int)axes[XrActivity.ControllerAxis.HMD_SYNC.ordinal()]);
+                " " + String.format(Locale.US, "%d", (int)axes[XrActivity.ControllerAxis.HMD_SYNC.ordinal()]) +
+                " " + binary;
     }
 
     public boolean hasFlag(String flag) {
         return new File(dir, flag).exists();
+    }
+
+    public void setDebugMode(boolean enabled) {
+        debugMode = enabled;
     }
 
     @Deprecated
@@ -106,50 +114,26 @@ public class XrAPI {
         byte[] bytes = data.getBytes(StandardCharsets.US_ASCII);
         socket.send(new DatagramPacket(bytes, bytes.length, address, port));
 
-        if (ENABLE_UDP_DEBUG) {
-            if (Objects.equals(debugIp, "")) {
-                setupDebugModeIP();
+        if (debugMode) {
+            if (debugIp == null) {
+                debugIp = getDebugModeIP();
             }
-
-            if (validDebugIP()) {
-                sendDebugUDP(data, port);
+            if (!Objects.equals(debugIp, "0.0.0.0")) {
+                InetAddress debugIPAdd = InetAddress.getByName(debugIp);
+                socket.send(new DatagramPacket(bytes, bytes.length, debugIPAdd, port));
             }
         }
     }
 
-    private void setupDebugModeIP() {
-        //Set Debug directory
+    @NonNull
+    private String getDebugModeIP() {
         File debugDir = new File(DEFAULT_DEBUG_PATH);
-        String dbgIPTmp = "";
-
         if (debugDir.exists()) {
-            boolean foundIp = false;
-
-            for (File file : debugDir.listFiles()) {
-                foundIp = true;
-                dbgIPTmp = file.getName();
-                break;
+            for (File file : Objects.requireNonNull(debugDir.listFiles())) {
+                return file.getName();
             }
-
-            if (!foundIp) dbgIPTmp = "0.0.0.0";
         }
-        else {
-            dbgIPTmp = "0.0.0.0";
-        }
-
-        debugIp = dbgIPTmp;
-    }
-
-    private boolean validDebugIP() {
-        return !Objects.equals(debugIp, "0.0.0.0");
-    }
-
-    private void sendDebugUDP(@NonNull String data, int port) throws Exception {
-        if (!Objects.equals(debugIp, "0.0.0.0")) {
-            InetAddress debugIPAdd = InetAddress.getByName(debugIp);
-            byte[] bytes = data.getBytes(StandardCharsets.US_ASCII);
-            socket.send(new DatagramPacket(bytes, bytes.length, debugIPAdd, port));
-        }
+        return "0.0.0.0";
     }
 
     public void writeFile(String flag, @NonNull String data) throws Exception {
