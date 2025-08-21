@@ -77,7 +77,7 @@ public class ContentsFragment extends Fragment {
         super.onResume();
 
         new Thread(() -> {
-            String json = FileUtils.readString(getActivity(), ContentsManager.REMOTE_PROFILES);
+            String json = Downloader.downloadString(ContentsManager.REMOTE_PROFILES);
             if (json == null)
                 return;
             getActivity().runOnUiThread(() -> {
