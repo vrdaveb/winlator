@@ -36,6 +36,8 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="org.khronos.openxr.permission.OPENXR"/>
+    <uses-permission android:name="org.khronos.openxr.permission.OPENXR_SYSTEM"/>
 
     <application
         android:label="@string/app_name"
@@ -49,7 +51,6 @@
         android:hardwareAccelerated="true"
         android:supportsRtl="true"
         tools:ignore="DataExtractionRules,GoogleAppIndexingWarning">
-
         <!-- Main activity -->
         <activity
             android:name="com.winlator.cmod.MainActivity"
@@ -116,6 +117,21 @@
         </activity>
 
         <activity
+            android:name=".XrActivityPFD"
+            android:configChanges="density|orientation|screenSize|keyboard|keyboardHidden|uiMode"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:resizeableActivity="false"
+            android:screenOrientation="landscape"
+            android:process=":vr_process"
+            android:theme="@style/AppThemeFullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="com.yvr.intent.category.VR" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name="com.winlator.cmod.ControlsEditorActivity"
             android:theme="@style/AppThemeFullscreen"
             android:screenOrientation="sensorLandscape"
@@ -169,6 +185,9 @@
             android:name="android.allow_multiple_resumed_activities"
             android:value="true" />
 
+        <meta-data
+            android:name="com.yvr.intent.category.VR"
+            android:value="vr_only" />
 
     </application>
 </manifest>

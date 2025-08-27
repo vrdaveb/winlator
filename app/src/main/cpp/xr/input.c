@@ -34,7 +34,7 @@ void XrInputInit(struct XrEngine* engine, struct XrInput* input)
     input->HandPoseRight = XrInputCreateAction(input->ActionSet, XR_ACTION_TYPE_POSE_INPUT, "hand_pose_right", NULL,1, &input->RightHandPath);
 
     XrPath interactionProfilePath = XR_NULL_PATH;
-    if (engine->PlatformFlag[PLATFORM_CONTROLLER_QUEST])
+    if (engine->PlatformFlag[PLATFORM_CONTROLLER_QUEST] || engine->PlatformFlag[PLATFORM_CONTROLLER_PFD])
     {
         OXR(xrStringToPath(engine->Instance, "/interaction_profiles/oculus/touch_controller",&interactionProfilePath));
     }
@@ -48,7 +48,7 @@ void XrInputInit(struct XrEngine* engine, struct XrInput* input)
     XrActionSuggestedBinding bindings[32];  // large enough for all profiles
     int curr = 0;
 
-    if (engine->PlatformFlag[PLATFORM_CONTROLLER_QUEST])
+    if (engine->PlatformFlag[PLATFORM_CONTROLLER_QUEST] || engine->PlatformFlag[PLATFORM_CONTROLLER_PFD])
     {
         bindings[curr++] = XrInputGetBinding(instance, input->IndexLeft, "/user/hand/left/input/trigger");
         bindings[curr++] = XrInputGetBinding(instance, input->IndexRight, "/user/hand/right/input/trigger");
@@ -67,6 +67,7 @@ void XrInputInit(struct XrEngine* engine, struct XrInput* input)
     bindings[curr++] = XrInputGetBinding(instance, input->ButtonB, "/user/hand/right/input/b/click");
     bindings[curr++] = XrInputGetBinding(instance, input->GripLeft, "/user/hand/left/input/squeeze/value");
     bindings[curr++] = XrInputGetBinding(instance, input->GripRight, "/user/hand/right/input/squeeze/value");
+
     bindings[curr++] = XrInputGetBinding(instance, input->JoystickLeft, "/user/hand/left/input/thumbstick");
     bindings[curr++] = XrInputGetBinding(instance, input->JoystickRight, "/user/hand/right/input/thumbstick");
     bindings[curr++] = XrInputGetBinding(instance, input->ThumbLeft, "/user/hand/left/input/thumbstick/click");
