@@ -2,17 +2,19 @@
 
 WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses 2D/VR hybrid app flow documented by [amwatson](https://github.com/amwatson/2DVrHybrid).
 
+# History of the project
+
 * Winlator is originally developed by [brunodev85](https://github.com/brunodev85/winlator) but as he does not opensource the latest versions then I am forced to use a custom fork for this project.
 * In 2024 WinlatorXR was based on Glibc fork by [longjunyu2](https://github.com/longjunyu2/winlator) but as he stopped communicating, the project was inactive for a long time and later it stopped working.
 * In 2025 [Pipetto-crypto](https://github.com/Pipetto-crypto/winlator) ported Winlator to Bionic/Proton which is a massive boost for Meta Quest integration.
 * His integration was enhanced by [coffincolors](https://github.com/coffincolors/winlator) in Winlator CMOD fork which is now base for WinlatorXR.
 * Pico support and XR enhancement were brought by [Tobbe85](https://github.com/tobbe85/winlator).
-* Play for Dream support were brought by [EasonZxp](https://github.com/EasonZxp/WinlatorXR).
+* Play for Dream support was brought by [EasonZxp](https://github.com/EasonZxp/WinlatorXR).
 
 ![WinlatorXR history](https://github.com/user-attachments/assets/947c4be7-fe9e-435e-92c9-9ca1d55bef79)
 
 
-### How to compile
+# How to compile
 
 1.Clone repository with all submodules
 `git clone --recursive git@github.com:lvonasek/winlator.git`
@@ -22,6 +24,17 @@ WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses 2D/VR
 3.Unzip the APK and copy the content of assets into app/src/main/assets/ (except dexopt folder)
 
 4.Open the project in Android Studio and have fun :)
+
+# WinlatorXR API
+![API flow diagram](https://github.com/user-attachments/assets/4e511519-6987-40d8-a360-f93b92867566)
+
+Our XrAPI provides developers with a way to replace OpenVR or OpenXR in their applications, enabling PCVR content to run natively within WinlatorXR on standalone VR headsets. The XrAPI is still very experimental and may change over time.
+
+* [XrAPI 0.1.0](https://github.com/lvonasek/WinlatorXR/releases/tag/winlatorxr_cmod_v13_11) - the first version providing 6DoF tracking in text format over UDP localhost
+* [XrAPI 0.1.1](https://github.com/lvonasek/WinlatorXR/releases/tag/winlatorxr_cmod_v13_13) - added direct controller access
+
+* [SixDOFinator_MinimalProject](https://github.com/bigelod/SixDOFinator_MinimalProject) - Unity sample implementation (minimal project)
+* [SixDOFinator_SampleProject](https://github.com/bigelod/SixDOFinator_SampleProject) - Unity sample implementation (full project)
 
 ---
 
@@ -71,5 +84,6 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
