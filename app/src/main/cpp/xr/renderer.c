@@ -476,6 +476,10 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     end_frame_info.layerCount = renderer->LayerCount;
     end_frame_info.layers = layers;
     OXR(xrEndFrame(engine->Session, &end_frame_info));
+
+    struct XrFramebuffer* frameBuffer = &renderer->Framebuffer[0];
+    frameBuffer->SwapchainIndex++;
+    frameBuffer->SwapchainIndex %= frameBuffer->SwapchainLength;
 }
 
 void XrRendererBindFramebuffer(struct XrRenderer* renderer)
