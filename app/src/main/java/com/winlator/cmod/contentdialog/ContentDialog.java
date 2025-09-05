@@ -300,6 +300,16 @@ public class ContentDialog extends Dialog {
         return drawable;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        //workaround for buggy Meta Quest OS
+        if (!hasFocus) {
+            dismiss();
+        } else {
+            super.onWindowFocusChanged(hasFocus);
+        }
+    }
+
     public void onKeyAction(int keyCode) {
         BaseInputConnection input = new BaseInputConnection(contentView, true);
         input.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
