@@ -1,6 +1,7 @@
 package com.winlator.cmod;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +15,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class XrAPI {
-    public static final String CURRENT_VERSION = "0.1.1";
+    public static final String CURRENT_VERSION = "0.1.2";
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_PATH = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
     @SuppressLint("SdCardPath")
@@ -85,7 +86,7 @@ public class XrAPI {
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVX.ordinal()]) +
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVY.ordinal()]) +
                 " " + String.format(Locale.US, "%d", (int)axes[XrActivity.ControllerAxis.HMD_SYNC.ordinal()]) +
-                " " + binary;
+                " " + binary + " " + Build.MANUFACTURER.toUpperCase().replaceAll("\\s+", "");
     }
 
     public boolean hasFlag(String flag) {
