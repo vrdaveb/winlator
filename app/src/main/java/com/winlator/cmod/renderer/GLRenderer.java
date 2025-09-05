@@ -334,11 +334,17 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
         try (XLock lock = xServer.lock(XServer.Lockable.DRAWABLE_MANAGER)) {
             ContentDialog dialog = ContentDialog.getFrontInstance();
+            int viewport = 1;
+            //workaround to prevent freezing, render a dialog on low FPS
+            if ((dialog == null) && (XrActivity.getInstance().getLastFPS() < 5)) {
+                dialog = XrActivity.getDialog();
+                viewport = 5; //far away to not see it
+            }
             if (dialog != null) {
                 Drawable drawable = dialog.getDrawable();
                 if (drawable != null) {
                     float scale = Build.MANUFACTURER.toUpperCase().compareTo("PICO") == 0 ? 0.3f : 0.4f;
-                    int offsetX = (int) ((xServer.screenInfo.width - drawable.width * scale) / 2);
+                    int offsetX = (int) ((viewport * xServer.screenInfo.width - drawable.width * scale) / 2);
                     int offsetY = (int) ((xServer.screenInfo.height - drawable.height * scale) / 2);
                     renderDrawable(drawable, offsetX, offsetY, bgrMaterial, false, scale);
                 }

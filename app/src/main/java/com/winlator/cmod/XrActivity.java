@@ -61,6 +61,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
     private static XrActivity instance;
+    private static NavigationDialog navigationDialog;
     private static XrAPI xrAPI = null;
 
     public native void nativeSetUsePT(boolean enabled);
@@ -78,6 +79,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public synchronized void onResume() {
         super.onResume();
         instance = this;
+        navigationDialog = new NavigationDialog(instance);
         mouseSpeed = PreferenceManager.getDefaultSharedPreferences(this).getFloat("cursor_speed", 1.0f);
 
         EditText text = findViewById(R.id.XRTextInput);
@@ -148,6 +150,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
 
     public static XrActivity getInstance() {
         return instance;
+    }
+
+    public static ContentDialog getDialog() {
+        return navigationDialog;
     }
 
     public static boolean getImmersive() {
@@ -302,7 +308,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             lastDialogShown = System.currentTimeMillis();
             return;
         } else if (getButtonClicked(buttons, primaryPress)) {
-            instance.runOnUiThread(() -> new NavigationDialog(instance).show());
+            instance.runOnUiThread(() -> navigationDialog.show());
         }
 
         // Block input shortly after dialog closed
