@@ -248,9 +248,30 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         // Get OpenXR data
         float[] axes = instance.getAxes();
         boolean[] buttons = instance.getButtons();
-        int primaryController = instance.container.getPrimaryController();
+
+        // Communication between XR and Win32 apps
+        try {
+            if (xrAPI == null) {
+                //xrAPI = new XrAPI("/sdcard/Download/xrtemp");
+                xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
+                xrAPI.writeFile(XrAPI.FLAG_VERSION, XrAPI.CURRENT_VERSION);
+            }
+            isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
+            getInstance().nativeSetUseVR(isVR);
+            if (isVR) {
+                //Uncomment the line below and put a udp_debug folder in your Winlator D:/ drive
+                //with a file named the IP on LAN to send XR data via UDP traffic to that IP.
+                //xrAPI.setDebugMode(true);
+                isSBS = xrAPI.hasFlag(XrAPI.FLAG_SBS);
+                xrAPI.sendUDP(xrAPI.encode(axes, buttons, 0), XrAPI.DEFAULT_PORT);
+                //xrAPI.sendFile(xrAPI.encode(axes, buttons, 0), 0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Primary controller mapping
+        int primaryController = instance.container.getPrimaryController();
         ControllerAxis mouseAxisX = primaryController == 0 ? ControllerAxis.L_X : ControllerAxis.R_X;
         ControllerAxis mouseAxisY = primaryController == 0 ? ControllerAxis.L_Y : ControllerAxis.R_Y;
         ControllerButton primaryGrip = primaryController == 0 ? ControllerButton.L_GRIP : ControllerButton.R_GRIP;
@@ -365,27 +386,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             // Store the OpenXR data
             System.arraycopy(axes, 0, lastAxes, 0, axes.length);
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
-
-            // Communication between XR and Win32 apps
-            try {
-                if (xrAPI == null) {
-                    //xrAPI = new XrAPI("/sdcard/Download/xrtemp");
-                    xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
-                    xrAPI.writeFile(XrAPI.FLAG_VERSION, XrAPI.CURRENT_VERSION);
-                }
-                isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
-                getInstance().nativeSetUseVR(isVR);
-                if (isVR) {
-                    //Uncomment the line below and put a udp_debug folder in your Winlator D:/ drive
-                    //with a file named the IP on LAN to send XR data via UDP traffic to that IP.
-                    //xrAPI.setDebugMode(true);
-                    isSBS = xrAPI.hasFlag(XrAPI.FLAG_SBS);
-                    xrAPI.sendUDP(xrAPI.encode(lastAxes, lastButtons, 0), XrAPI.DEFAULT_PORT);
-                    //xrAPI.sendFile(xrAPI.encode(lastAxes, lastButtons, 0), 0);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
