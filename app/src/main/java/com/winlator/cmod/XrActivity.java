@@ -56,6 +56,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
+    private static long lastActive = 0;
     private static long lastDialogShown = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
@@ -166,6 +167,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
 
     public static boolean getVR() {
         return isVR && ContentDialog.getFrontInstance() == null;
+    }
+
+    public static boolean isActive() {
+        return Math.abs(System.currentTimeMillis() - lastActive) < 5000;
     }
 
     public static boolean isEnabled(Context context) {
@@ -390,6 +395,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             mapKey(secondaryRight, instance.container.getControllerMapping(Container.XrControllerMapping.THUMBSTICK_RIGHT));
 
             // Store the OpenXR data
+            lastActive = System.currentTimeMillis();
             System.arraycopy(axes, 0, lastAxes, 0, axes.length);
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
         }

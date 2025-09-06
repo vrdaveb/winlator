@@ -303,7 +303,7 @@ public class ContentDialog extends Dialog {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         //workaround for buggy Meta Quest OS
-        if (!hasFocus) {
+        if (!hasFocus && XrActivity.isActive()) {
             dismiss();
         } else {
             super.onWindowFocusChanged(hasFocus);
