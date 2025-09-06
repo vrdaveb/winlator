@@ -32,6 +32,7 @@ Our XrAPI provides developers with a way to replace OpenVR or OpenXR in their ap
 
 * [XrAPI 0.1.0](https://github.com/lvonasek/WinlatorXR/releases/tag/winlatorxr_cmod_v13_11) - the first version providing 6DoF tracking in text format over UDP localhost
 * [XrAPI 0.1.1](https://github.com/lvonasek/WinlatorXR/releases/tag/winlatorxr_cmod_v13_13) - added direct controller access
+* [XrAPI 0.1.2](https://github.com/lvonasek/WinlatorXR/releases/tag/winlatorxr_cmod_v13_15) - added headset vendor name
 
 * [SixDOFinator_MinimalProject](https://github.com/bigelod/SixDOFinator_MinimalProject) - Unity sample implementation (minimal project)
 * [SixDOFinator_SampleProject](https://github.com/bigelod/SixDOFinator_SampleProject) - Unity sample implementation (full project)
@@ -84,6 +85,7 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
 
