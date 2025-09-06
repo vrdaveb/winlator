@@ -350,17 +350,11 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
         struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
         if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
-            static bool srgb = false;
-            XrColor3f color = XrFramebufferGetPixel(framebuffer, 0, h - 1, srgb);
-            if (color.g > 0.5f) {
+            XrColor3f color = XrFramebufferGetPixelSweep(framebuffer);
+            if ((color.g > 0.5f) || (color.b > 0.5f)) {
                 frame = XrMaxFrameSync;
             } else {
-                if (color.r > 0.1) {
-                    srgb = false;
-                } else if (color.b > 0.1) {
-                    srgb = true;
-                }
-                frame = (int)((srgb ? color.b : color.r) + 0.5);
+                frame = (int)(color.r + 0.5);
             }
         }
 
@@ -424,6 +418,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
         // Setup quad layer
         struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
+        XrFramebufferResetSweepPixel(framebuffer);
         XrCompositionLayerQuad quad_layer = {};
         quad_layer.type = XR_TYPE_COMPOSITION_LAYER_QUAD;
         quad_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;

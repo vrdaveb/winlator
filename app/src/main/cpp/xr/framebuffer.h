@@ -13,6 +13,10 @@ struct XrFramebuffer {
     void* SwapchainImage;
 
     unsigned int* GLFrameBuffers;
+
+    bool SweepPixelFound;
+    int SweepXPos;
+    int SweepYPos;
 };
 
 bool XrFramebufferCreate(struct XrFramebuffer *framebuffer, XrSession session, int width, int height);
@@ -21,7 +25,9 @@ void XrFramebufferDestroy(struct XrFramebuffer *framebuffer);
 void XrFramebufferAcquire(struct XrFramebuffer *framebuffer);
 void XrFramebufferRelease(struct XrFramebuffer *framebuffer);
 void XrFramebufferSetCurrent(struct XrFramebuffer *framebuffer);
-XrColor3f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y, bool srgb);
+XrColor3f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y);
+XrColor3f XrFramebufferGetPixelSweep(struct XrFramebuffer *framebuffer);
+void XrFramebufferResetSweepPixel(struct XrFramebuffer *framebuffer);
 
 #if XR_USE_GRAPHICS_API_OPENGL_ES
 bool XrFramebufferCreateGL(struct XrFramebuffer *framebuffer, XrSession session, int width, int height);
