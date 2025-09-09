@@ -11,7 +11,6 @@
 bool XrFramebufferCreate(struct XrFramebuffer *framebuffer, XrSession session, int width, int height)
 {
     memset(framebuffer, 0, sizeof(framebuffer));
-    XrFramebufferResetSweepPixel(framebuffer);
 
 #if XR_USE_GRAPHICS_API_OPENGL_ES
     return XrFramebufferCreateGL(framebuffer, session, width, height);
@@ -94,63 +93,6 @@ XrColor3f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y)
     output.b = pixel[2];
 #endif
     return output;
-}
-
-XrColor3f XrFramebufferGetPixelSweep(struct XrFramebuffer *framebuffer)
-{
-    if (framebuffer->SweepPixelFound)
-    {
-        return XrFramebufferGetPixel(framebuffer, framebuffer->SweepXPos, framebuffer->SweepYPos);
-    }
-    else
-    {
-        //Read the data from framebuffer
-        int h = 150;
-        int w = 150;
-        XrColor3f output = {};
-        GLubyte pixels[4 * h * w];
-        int pos = framebuffer->Height - h - 1;
-        GL(glReadPixels(0, pos, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
-
-        //Check pixels in the left top corner starting from top
-        for (int y = h - 1; y >= 0; y--)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                int index = (y * w + x) * 4;
-                float r = pixels[index];
-                float g = pixels[index + 1];
-                float b = pixels[index + 2];
-
-                //Process only shades of red
-                if (r > 0 && g < 1 && b < 1)
-                {
-                    output.r = r;
-                    output.g = g;
-                    output.b = b;
-
-                    //TODO:use more generally safe color
-                    if (r > 220 && r < 225)
-                    {
-                        framebuffer->SweepPixelFound = true;
-                        framebuffer->SweepXPos = x;
-                        framebuffer->SweepYPos = y + pos;
-                        ALOGV("Selecting sweep pixel at %d %d", x, y + pos);
-                        return output;
-                    }
-                    break;
-                }
-            }
-        }
-        return output;
-    }
-}
-
-void XrFramebufferResetSweepPixel(struct XrFramebuffer *framebuffer)
-{
-    framebuffer->SweepPixelFound = false;
-    framebuffer->SweepXPos = 0;
-    framebuffer->SweepYPos = 0;
 }
 
 #if XR_USE_GRAPHICS_API_OPENGL_ES
