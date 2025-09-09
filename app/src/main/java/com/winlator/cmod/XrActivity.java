@@ -263,9 +263,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         // Communication between XR and Win32 apps
         try {
             if (xrAPI == null) {
-                //xrAPI = new XrAPI("/sdcard/Download/xrtemp");
                 xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
-                xrAPI.writeFile(XrAPI.FLAG_VERSION, XrAPI.CURRENT_VERSION);
             }
             isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
             getInstance().nativeSetUseVR(isVR);
@@ -274,8 +272,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 //with a file named the IP on LAN to send XR data via UDP traffic to that IP.
                 //xrAPI.setDebugMode(true);
                 isSBS = xrAPI.hasFlag(XrAPI.FLAG_SBS);
-                xrAPI.sendUDP(xrAPI.encode(axes, buttons, 0), XrAPI.DEFAULT_PORT);
-                //xrAPI.sendFile(xrAPI.encode(axes, buttons, 0), 0);
+                xrAPI.send(xrAPI.encode(axes, buttons, 0), XrAPI.DEFAULT_PORT);
             }
         } catch (Exception e) {
             e.printStackTrace();

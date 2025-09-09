@@ -15,20 +15,18 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class XrAPI {
-    public static final String CURRENT_VERSION = "0.1.2";
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_PATH = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_DEBUG_PATH = "/sdcard/Download/udp_debug";
     public static final int DEFAULT_PORT = 7872;
     public static final String FLAG_SBS = "sbs";
-    public static final String FLAG_VERSION = "version";
     public static final String FLAG_VR = "vr";
-    public static final String MSG_CLIENT = "client";
-    public static final int SLOTS_LIMIT = 4096;
+    private static final String MSG_CLIENT = "client";
+    private static final String VERSION_FILE = "version";
+    private static final String VERSION_VALUE = "0.1.3";
 
     private final File dir;
-    private final File[] lastFiles = new File[SLOTS_LIMIT];
     private final DatagramSocket socket = new DatagramSocket();
 
     private String debugIp = null;
@@ -38,7 +36,7 @@ public class XrAPI {
         //Ensure directory exists
         dir = new File(path);
         if (!dir.exists()) {
-            if (!dir.mkdir()) {
+            if (!dir.mkdirs()) {
                 throw new Exception("Filesystem issue");
             }
         }
@@ -49,6 +47,11 @@ public class XrAPI {
                 throw new Exception("Filesystem issue");
             }
         }
+
+        //Write version number
+        FileOutputStream fos = new FileOutputStream(new File(dir, VERSION_FILE));
+        fos.write(VERSION_VALUE.getBytes(StandardCharsets.US_ASCII));
+        fos.close();
     }
 
     public String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
@@ -97,49 +100,30 @@ public class XrAPI {
         debugMode = enabled;
     }
 
-    @Deprecated
-    public void sendFile(String data, int slot) throws Exception {
-        File name = new File(dir, data);
-        if (lastFiles[slot] == null) {
-            if (!name.createNewFile()) {
-                throw new Exception("Filesystem issue");
-            }
-        } else if (!lastFiles[slot].renameTo(name)) {
-            throw new Exception("Filesystem issue");
-        }
-        lastFiles[slot] = name;
-    }
-
-    public void sendUDP(@NonNull String data, int port) throws Exception {
+    public void send(@NonNull String data, int port) throws Exception {
+        //Send data to localhost
         InetAddress address = InetAddress.getLocalHost();
         byte[] bytes = data.getBytes(StandardCharsets.US_ASCII);
         socket.send(new DatagramPacket(bytes, bytes.length, address, port));
 
         if (debugMode) {
+            //Get requested IP from the filesystem
             if (debugIp == null) {
-                debugIp = getDebugModeIP();
+                debugIp = "";
+                File debugDir = new File(DEFAULT_DEBUG_PATH);
+                if (debugDir.exists()) {
+                    for (File file : Objects.requireNonNull(debugDir.listFiles())) {
+                        debugIp = file.getName();
+                        break;
+                    }
+                }
             }
-            if (!Objects.equals(debugIp, "0.0.0.0")) {
+
+            //Send the data over the network
+            if (!debugIp.isEmpty()) {
                 InetAddress debugIPAdd = InetAddress.getByName(debugIp);
                 socket.send(new DatagramPacket(bytes, bytes.length, debugIPAdd, port));
             }
         }
-    }
-
-    @NonNull
-    private String getDebugModeIP() {
-        File debugDir = new File(DEFAULT_DEBUG_PATH);
-        if (debugDir.exists()) {
-            for (File file : Objects.requireNonNull(debugDir.listFiles())) {
-                return file.getName();
-            }
-        }
-        return "0.0.0.0";
-    }
-
-    public void writeFile(String flag, @NonNull String data) throws Exception {
-        FileOutputStream fos = new FileOutputStream(new File(dir, flag));
-        fos.write(data.getBytes(StandardCharsets.US_ASCII));
-        fos.close();
     }
 }
