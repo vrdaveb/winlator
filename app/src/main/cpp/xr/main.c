@@ -251,3 +251,7 @@ JNIEXPORT void JNICALL
 Java_com_winlator_cmod_XrActivity_nativeSetUseVR(JNIEnv *env, jobject obj, jboolean enabled) {
     xr_vr = enabled;
 }
+
+JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_vibrateController(JNIEnv *env, jobject obj, int duration, int chan, float intensity) {
+    XrInputVibrate(&xr_module_input, duration, chan, intensity);
+}

@@ -398,6 +398,23 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             System.arraycopy(axes, 0, lastAxes, 0, axes.length);
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
         }
+
+        //Update haptics
+        if (lControllerVibration > 0.0f) {
+            instance.vibrateController(1, 0, lControllerVibration);
+            lControllerVibration -= 0.1f;
+        }
+        else {
+            lControllerVibration = 0.0f;
+        }
+
+        if (rControllerVibration > 0.0f) {
+            instance.vibrateController(1, 1, rControllerVibration);
+            rControllerVibration -= 0.1f;
+        }
+        else {
+            rControllerVibration = 0.0f;
+        }
     }
 
     private static float getAngleDiff(float oldAngle, float newAngle) {
@@ -445,4 +462,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     // Input
     public native float[] getAxes();
     public native boolean[] getButtons();
+
+    public native void vibrateController(int duration, int chan, float intensity);
+
+    public static float lControllerVibration = 0.0f;
+    public static float rControllerVibration = 0.0f;
 }
