@@ -413,7 +413,7 @@ void XrInputProcessHaptics(struct XrInput* input, XrSession session)
             vibration.next = NULL;
             vibration.amplitude = input->VibrationChannelIntensity[i];
             vibration.duration = ToXrTime(input->VibrationChannelDuration[i]);
-            vibration.frequency = 3000;
+            vibration.frequency = 150;
             XrHapticActionInfo haptic_info = {};
             haptic_info.type = XR_TYPE_HAPTIC_ACTION_INFO;
             haptic_info.next = NULL;
