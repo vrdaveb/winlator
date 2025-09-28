@@ -57,14 +57,13 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
-    private static float[] lastControllerVibration = new float[2];
+    private static final float[] lastControllerVibration = new float[2];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
     private static XrActivity instance;
-    private static NavigationDialog navigationDialog;
     private static XrAPI xrAPI = null;
 
     public native void nativeSetUsePT(boolean enabled);
@@ -90,7 +89,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     public synchronized void onResume() {
         super.onResume();
         instance = this;
-        navigationDialog = new NavigationDialog(instance);
         mouseSpeed = PreferenceManager.getDefaultSharedPreferences(this).getFloat("cursor_speed", 1.0f);
 
         EditText text = findViewById(R.id.XRTextInput);
@@ -157,10 +155,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
 
     public static XrActivity getInstance() {
         return instance;
-    }
-
-    public static ContentDialog getDialog() {
-        return navigationDialog;
     }
 
     public static boolean getImmersive() {
@@ -342,7 +336,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
             getInstance().nativeSetUseVR(isVR);
             return;
         } else if (getButtonClicked(buttons, primaryPress)) {
-            instance.runOnUiThread(() -> navigationDialog.show());
+            instance.runOnUiThread(() -> new NavigationDialog(instance).show());
         }
 
         // Block input shortly after dialog closed
