@@ -95,9 +95,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         if (XrActivity.isEnabled(null)) {
             XrActivity activity = XrActivity.getInstance();
-            activity.init();
-            width = activity.getWidth();
-            height = activity.getHeight();
+            String res = activity.getContainer().getScreenSize();
+            String[] parts = res.split("x");
+            width = Short.parseShort(parts[0]);
+            height = Short.parseShort(parts[0]); //use square resolution
+            activity.init(width, height);
             GLES20.glViewport(0, 0, width, height);
             magnifierEnabled = false;
         }

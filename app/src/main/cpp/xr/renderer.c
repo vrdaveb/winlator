@@ -40,17 +40,6 @@ void XrRendererInit(struct XrEngine* engine, struct XrRenderer* renderer)
         INIT_PFN(xrPassthroughLayerResumeFB);
     }
 
-    int eyeW, eyeH;
-    XrRendererGetResolution(engine, renderer, &eyeW, &eyeH);
-    renderer->ConfigInt[CONFIG_VIEWPORT_WIDTH] = eyeW;
-    renderer->ConfigInt[CONFIG_VIEWPORT_HEIGHT] = eyeH;
-
-    // Get the viewport configuration info for the chosen viewport configuration type.
-    renderer->ViewportConfig.type = XR_TYPE_VIEW_CONFIGURATION_PROPERTIES;
-    OXR(xrGetViewConfigurationProperties(engine->Instance, engine->SystemId,
-                                         XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
-                                         &renderer->ViewportConfig));
-
     uint32_t num_spaces = 0;
     OXR(xrEnumerateReferenceSpaces(engine->Session, 0, &num_spaces, NULL));
     XrReferenceSpaceType* spaces = (XrReferenceSpaceType*)malloc(num_spaces * sizeof(XrReferenceSpaceType));
@@ -79,8 +68,8 @@ void XrRendererInit(struct XrEngine* engine, struct XrRenderer* renderer)
     }
 
     // Create framebuffers.
-    int width = renderer->ViewConfig[0].recommendedImageRectWidth;
-    int height = renderer->ViewConfig[0].recommendedImageRectHeight;
+    int width = renderer->ConfigInt[CONFIG_VIEWPORT_WIDTH];
+    int height = renderer->ConfigInt[CONFIG_VIEWPORT_HEIGHT];
     for (int i = 0; i < XrMaxNumEyes; i++)
     {
         XrFramebufferCreate(&renderer->Framebuffer[i], engine->Session, width, height);
@@ -137,87 +126,6 @@ void XrRendererDestroy(struct XrEngine* engine, struct XrRenderer* renderer)
     renderer->Initialized = false;
 }
 
-
-void XrRendererGetResolution(struct XrEngine* engine, struct XrRenderer* renderer, int* pWidth, int* pHeight)
-{
-    static int width = 0;
-    static int height = 0;
-
-    if (engine)
-    {
-        // Enumerate the viewport configurations.
-        uint32_t viewport_config_count = 0;
-        OXR(xrEnumerateViewConfigurations(engine->Instance, engine->SystemId, 0,
-                                          &viewport_config_count, NULL));
-
-        XrViewConfigurationType* viewport_configs =
-                (XrViewConfigurationType*)malloc(viewport_config_count * sizeof(XrViewConfigurationType));
-
-        OXR(xrEnumerateViewConfigurations(engine->Instance, engine->SystemId,
-                                          viewport_config_count, &viewport_config_count,
-                                          viewport_configs));
-
-        for (uint32_t i = 0; i < viewport_config_count; i++)
-        {
-            const XrViewConfigurationType viewport_config_type = viewport_configs[i];
-
-            ALOGV("Viewport configuration type %d", (int)viewport_config_type);
-
-            XrViewConfigurationProperties viewport_config;
-            viewport_config.type = XR_TYPE_VIEW_CONFIGURATION_PROPERTIES;
-            OXR(xrGetViewConfigurationProperties(engine->Instance, engine->SystemId,
-                                                 viewport_config_type, &viewport_config));
-
-            uint32_t view_count;
-            OXR(xrEnumerateViewConfigurationViews(engine->Instance, engine->SystemId,
-                                                  viewport_config_type, 0, &view_count, NULL));
-
-            if (view_count > 0)
-            {
-                XrViewConfigurationView* elements =
-                        (XrViewConfigurationView*)malloc(view_count * sizeof(XrViewConfigurationView));
-
-                for (uint32_t e = 0; e < view_count; e++)
-                {
-                    elements[e].type = XR_TYPE_VIEW_CONFIGURATION_VIEW;
-                    elements[e].next = NULL;
-                }
-
-                OXR(xrEnumerateViewConfigurationViews(engine->Instance, engine->SystemId,
-                                                      viewport_config_type, view_count, &view_count,
-                                                      elements));
-
-                // Cache the view config properties for the selected config type.
-                if (viewport_config_type == XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO)
-                {
-                    assert(view_count == XrMaxNumEyes);
-                    for (uint32_t e = 0; e < view_count; e++)
-                    {
-                        renderer->ViewConfig[e] = elements[e];
-                    }
-                }
-
-                free(elements);
-            }
-            else
-            {
-                ALOGE("Empty viewport configuration");
-            }
-        }
-
-        free(viewport_configs);
-
-        *pWidth = width = renderer->ViewConfig[0].recommendedImageRectWidth;
-        *pHeight = height = renderer->ViewConfig[0].recommendedImageRectHeight;
-    }
-    else
-    {
-        // use cached values
-        *pWidth = width;
-        *pHeight = height;
-    }
-}
-
 bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 {
     if (!renderer->Initialized)
@@ -229,8 +137,6 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     {
         return false;
     }
-
-    XrRendererUpdateStageBounds(engine);
 
     // Update passthrough
     if (renderer->PassthroughRunning != renderer->ConfigInt[CONFIG_PASSTHROUGH])
@@ -251,7 +157,7 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     XrViewLocateInfo projection_info = {};
     projection_info.type = XR_TYPE_VIEW_LOCATE_INFO;
     projection_info.next = NULL;
-    projection_info.viewConfigurationType = renderer->ViewportConfig.viewConfigurationType;
+    projection_info.viewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
     projection_info.displayTime = engine->PredictedDisplayTime;
     projection_info.space = engine->CurrentSpace;
 
@@ -564,7 +470,7 @@ void XrRendererHandleSessionStateChanges(struct XrEngine* engine, struct XrRende
         memset(&session_begin_info, 0, sizeof(session_begin_info));
         session_begin_info.type = XR_TYPE_SESSION_BEGIN_INFO;
         session_begin_info.next = NULL;
-        session_begin_info.primaryViewConfigurationType = renderer->ViewportConfig.viewConfigurationType;
+        session_begin_info.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
 
         XrResult result;
         OXR(result = xrBeginSession(engine->Session, &session_begin_info));
@@ -668,21 +574,5 @@ void XrRendererHandleXrEvents(struct XrEngine* engine, struct XrRenderer* render
                 ALOGV("xrPollEvent: Unknown event");
                 break;
         }
-    }
-}
-
-void XrRendererUpdateStageBounds(struct XrEngine* engine)
-{
-    XrExtent2Df stage_bounds = {};
-
-    XrResult result;
-    OXR(result = xrGetReferenceSpaceBoundsRect(engine->Session, XR_REFERENCE_SPACE_TYPE_STAGE,
-                                               &stage_bounds));
-    if (result != XR_SUCCESS)
-    {
-        stage_bounds.width = 1.0f;
-        stage_bounds.height = 1.0f;
-
-        engine->CurrentSpace = engine->FakeSpace;
     }
 }

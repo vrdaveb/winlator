@@ -471,7 +471,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     }
 
     // Rendering
-    public native void init();
+    public native void init(int width, int height);
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();

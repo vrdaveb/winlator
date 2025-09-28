@@ -58,8 +58,6 @@ struct XrRenderer {
     XrPassthroughFB Passthrough;
     XrPassthroughLayerFB PassthroughLayer;
     bool PassthroughRunning;
-    XrViewConfigurationProperties ViewportConfig;
-    XrViewConfigurationView ViewConfig[XrMaxNumEyes];
 
     XrFovf Fov;
     XrView* Projections;
@@ -69,7 +67,6 @@ struct XrRenderer {
 
 void XrRendererInit(struct XrEngine* engine, struct XrRenderer* renderer);
 void XrRendererDestroy(struct XrEngine* engine, struct XrRenderer* renderer);
-void XrRendererGetResolution(struct XrEngine* engine, struct XrRenderer* renderer, int* pWidth, int* pHeight);
 
 bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer);
 void XrRendererBeginFrame(struct XrRenderer* renderer, int fbo_index);
@@ -81,4 +78,3 @@ void XrRendererRecenter(struct XrEngine* engine, struct XrRenderer* renderer);
 
 void XrRendererHandleSessionStateChanges(struct XrEngine* engine, struct XrRenderer* renderer, XrSessionState state);
 void XrRendererHandleXrEvents(struct XrEngine* engine, struct XrRenderer* renderer);
-void XrRendererUpdateStageBounds(struct XrEngine* engine);

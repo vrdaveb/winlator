@@ -45,7 +45,7 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_sendManufacturer(JNIEnv
     (*env)->ReleaseStringUTFChars(env, manufacturer, nativeStr);
 }
 
-JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobject obj, jint width, jint height) {
 
     // Do not allow second initialization
     if (xr_initialized) {
@@ -72,6 +72,8 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
     }
+    xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_WIDTH] = width;
+    xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT] = height;
 
     // Get Java VM
     JavaVM* vm;
@@ -98,14 +100,10 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_bindFramebuffer(JNIEnv 
 }
 
 JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getWidth(JNIEnv *env, jobject obj) {
-    int w, h;
-    XrRendererGetResolution(&xr_module_engine, &xr_module_renderer, &w, &h);
-    return w;
+    return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_WIDTH];
 }
 JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, jobject obj) {
-    int w, h;
-    XrRendererGetResolution(&xr_module_engine, &xr_module_renderer, &w, &h);
-    return h;
+    return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT];
 }
 
 JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs) {
