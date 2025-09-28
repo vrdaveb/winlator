@@ -20,6 +20,9 @@ DECL_PFN(xrDestroyPassthroughLayerFB);
 DECL_PFN(xrPassthroughLayerPauseFB);
 DECL_PFN(xrPassthroughLayerResumeFB);
 
+PFN_xrGetDisplayRefreshRateFB pfnGetDisplayRefreshRate = NULL;
+PFN_xrRequestDisplayRefreshRateFB pfnRequestDisplayRefreshRate = NULL;
+
 void XrRendererInit(struct XrEngine* engine, struct XrRenderer* renderer)
 {
     if (renderer->Initialized)
@@ -572,5 +575,40 @@ void XrRendererHandleXrEvents(struct XrEngine* engine, struct XrRenderer* render
                 ALOGV("xrPollEvent: Unknown event");
                 break;
         }
+    }
+}
+
+int XrRendererGetRefreshRate(struct XrEngine* engine)
+{
+    if (engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE])
+    {
+        if (!pfnGetDisplayRefreshRate)
+        {
+            OXR(xrGetInstanceProcAddr(
+                    engine->Instance,
+                    "xrGetDisplayRefreshRateFB",
+                    (PFN_xrVoidFunction*)(&pfnGetDisplayRefreshRate)));
+        }
+
+        float currentDisplayRefreshRate = 0.0f;
+        OXR(pfnGetDisplayRefreshRate(engine->Session, &currentDisplayRefreshRate));
+        return (int)currentDisplayRefreshRate;
+    }
+    return 72;
+}
+
+void XrRendererSetRefreshRate(struct XrEngine* engine, int refresh)
+{
+    if (engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE])
+    {
+        if (!pfnRequestDisplayRefreshRate)
+        {
+            OXR(xrGetInstanceProcAddr(
+                    engine->Instance,
+                    "xrRequestDisplayRefreshRateFB",
+                    (PFN_xrVoidFunction*)(&pfnRequestDisplayRefreshRate)));
+        }
+        OXR(pfnRequestDisplayRefreshRate(engine->Session, 72.0f));
+        OXR(pfnRequestDisplayRefreshRate(engine->Session, (float)refresh));
     }
 }

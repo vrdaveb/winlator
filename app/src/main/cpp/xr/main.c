@@ -57,12 +57,14 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_INSTANCE] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
     }
     if (strcmp(gManufacturer, "META") == 0 || strcmp(gManufacturer, "OCULUS") == 0) {
         memset(&xr_module_engine, 0, sizeof(xr_module_engine));
         xr_module_engine.PlatformFlag[PLATFORM_CONTROLLER_QUEST] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
         xr_module_engine.PlatformFlag[PLATFORM_VIEWPORT_UNCENTERED] = true;
     }
     if (strcmp(gManufacturer, "PLAY FOR DREAM") == 0) {
@@ -107,6 +109,14 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
 }
 
 JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs) {
+    // Ensure we are using correct refresh rate
+    int refreshRate = 72;
+    static int lastRefresh = 0;
+    if (lastRefresh != refreshRate) {
+        lastRefresh = refreshRate;
+        XrRendererSetRefreshRate(&xr_module_engine, refreshRate);
+    }
+
     if (xr_hasFrame || XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
         // Update controllers state only when necessary
         if (!xr_hasFrame) {

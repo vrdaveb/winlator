@@ -78,3 +78,5 @@ void XrRendererRecenter(struct XrEngine* engine, struct XrRenderer* renderer);
 
 void XrRendererHandleSessionStateChanges(struct XrEngine* engine, struct XrRenderer* renderer, XrSessionState state);
 void XrRendererHandleXrEvents(struct XrEngine* engine, struct XrRenderer* renderer);
+int XrRendererGetRefreshRate(struct XrEngine* engine);
+void XrRendererSetRefreshRate(struct XrEngine* engine, int refresh);

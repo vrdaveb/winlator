@@ -41,6 +41,9 @@ void XrEngineInit(struct XrEngine* engine, void* system, const char* name, int v
         extensions[count++] = XR_EXT_PERFORMANCE_SETTINGS_EXTENSION_NAME;
         extensions[count++] = XR_KHR_ANDROID_THREAD_SETTINGS_EXTENSION_NAME;
     }
+    if (engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE]) {
+        extensions[count++] = XR_FB_DISPLAY_REFRESH_RATE_EXTENSION_NAME;
+    }
     if (engine->PlatformFlag[PLATFORM_CONTROLLER_PICO]) {
         extensions[count++] = XR_BD_CONTROLLER_INTERACTION_EXTENSION_NAME;
     }
