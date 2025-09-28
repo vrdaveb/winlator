@@ -5,6 +5,7 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Display;
@@ -71,6 +72,14 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     public native void sendManufacturer(String manufacturer);
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        usePassthrough = prefs.getBoolean("use_pt", true);
+        nativeSetUsePT(usePassthrough);
+    }
+
+    @Override
     public synchronized void onPause() {
         EditText text = findViewById(R.id.XRTextInput);
         text.removeTextChangedListener(this);
@@ -87,10 +96,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
         EditText text = findViewById(R.id.XRTextInput);
         text.getEditableText().clear();
         text.addTextChangedListener(this);
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        usePassthrough = prefs.getBoolean("use_pt", true);
-        nativeSetUsePT(usePassthrough);
 
         String manufacturer = Build.MANUFACTURER.toUpperCase();
         sendManufacturer(manufacturer);
