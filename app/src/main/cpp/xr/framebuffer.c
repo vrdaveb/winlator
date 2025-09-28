@@ -81,9 +81,9 @@ void XrFramebufferSetCurrent(struct XrFramebuffer *framebuffer)
 #endif
 }
 
-XrColor3f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y)
+XrColor4f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y)
 {
-    XrColor3f output = {};
+    XrColor4f output = {};
 #if XR_USE_GRAPHICS_API_OPENGL_ES
     GL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GLFrameBuffers[framebuffer->SwapchainIndex]));
     GLubyte pixel[4];
@@ -91,6 +91,7 @@ XrColor3f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y)
     output.r = pixel[0];
     output.g = pixel[1];
     output.b = pixel[2];
+    output.a = pixel[3];
 #endif
     return output;
 }

@@ -256,10 +256,8 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
         struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
         if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
-            XrColor3f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
-            if ((color.g > 0.5f) || (color.b > 0.5f)) {
-                frame = XrMaxFrameSync;
-            } else {
+            XrColor4f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
+            if ((color.g < 1) && (color.b < 1) && (color.a > 200)) {
                 frame = (int)(color.r + 0.5);
             }
         }
