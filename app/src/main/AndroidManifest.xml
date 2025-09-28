@@ -184,7 +184,12 @@
         <meta-data
             android:name="android.allow_multiple_resumed_activities"
             android:value="true" />
-
+        <meta-data
+            android:name="com.oculus.dualcorecpuset"
+            android:value="true" />
+        <meta-data
+            android:name="com.oculus.trade_cpu_for_gpu_amount"
+            android:value="-1" />
         <meta-data
             android:name="com.yvr.intent.category.VR"
             android:value="vr_only" />
