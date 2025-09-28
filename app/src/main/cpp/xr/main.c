@@ -11,7 +11,6 @@ struct XrEngine xr_module_engine;
 struct XrInput xr_module_input;
 struct XrRenderer xr_module_renderer;
 bool xr_initialized = false;
-bool xr_hasFrame = false;
 bool xr_usePassthrough = false;
 bool xr_vr = false;
 
@@ -117,12 +116,9 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         XrRendererSetRefreshRate(&xr_module_engine, refreshRate);
     }
 
-    if (xr_hasFrame || XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
-        // Update controllers state only when necessary
-        if (!xr_hasFrame) {
-            XrInputUpdate(&xr_module_engine, &xr_module_input);
-        }
-        xr_hasFrame = false;
+    if (XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
+        // Update controllers state
+        XrInputUpdate(&xr_module_engine, &xr_module_input);
 
         // Set render canvas
         int mode = immersive || xr_vr ? RENDER_MODE_MONO_6DOF : RENDER_MODE_MONO_SCREEN;
@@ -151,12 +147,6 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
 JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_endFrame(JNIEnv *env, jobject obj) {
     XrRendererEndFrame(&xr_module_renderer);
     XrRendererFinishFrame(&xr_module_engine, &xr_module_renderer);
-
-    // Prepare next frame to have input status ready earlier
-    if (!xr_hasFrame && XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
-        XrInputUpdate(&xr_module_engine, &xr_module_input);
-        xr_hasFrame = true;
-    }
 }
 
 JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *env, jobject obj) {
