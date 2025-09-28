@@ -192,7 +192,7 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         renderer->Fov.angleRight += renderer->Projections[eye].fov.angleRight / 2.0f;
         renderer->Fov.angleUp += renderer->Projections[eye].fov.angleUp / 2.0f;
         renderer->Fov.angleDown += renderer->Projections[eye].fov.angleDown / 2.0f;
-        renderer->InvertedViewPose[eye][renderer->FrameSync] = renderer->Projections[eye].pose;
+        memcpy(&renderer->InvertedViewPose[eye][renderer->FrameSync], &renderer->Projections[eye].pose, sizeof(XrPosef));
     }
 
     float fovx = 0;
