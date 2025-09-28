@@ -124,9 +124,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         boolean xrFrame = false;
         boolean xrImmersive = false;
         if (XrActivity.isEnabled(null)) {
-            xrImmersive = XrActivity.getImmersive();
-            xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS());
+            XrActivity.updateControllers();
             fullscreen = XrActivity.getVR();
+            xrImmersive = XrActivity.getImmersive() || fullscreen;
+            xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS());
         } else {
             fullscreen = false;
         }
@@ -200,7 +201,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (xrFrame) {
             renderDialog();
             XrActivity.getInstance().endFrame();
-            XrActivity.updateControllers();
             xServerView.requestRender();
         }
     }
