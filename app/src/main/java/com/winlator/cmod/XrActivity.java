@@ -308,6 +308,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             if (getButtonClicked(buttons, primaryRight)) instance.runOnUiThread(() -> dialog.onKeyAction(KeyEvent.KEYCODE_DPAD_RIGHT));
             System.arraycopy(buttons, 0, lastButtons, 0, buttons.length);
             lastDialogShown = System.currentTimeMillis();
+            isVR = false;
+            getInstance().nativeSetUseVR(isVR);
             return;
         } else if (getButtonClicked(buttons, primaryPress)) {
             instance.runOnUiThread(() -> navigationDialog.show());
