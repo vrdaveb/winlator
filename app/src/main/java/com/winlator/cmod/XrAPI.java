@@ -14,11 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Objects;
 
-interface UdpDataListener {
-    void onDataReceived(String message);
-}
+public class XrAPI {
+    public interface UdpDataListener {
+        void onDataReceived(String message);
+    }
 
-public class XrAPI implements UdpDataListener {
     @SuppressLint("SdCardPath")
     public static final String DEFAULT_PATH = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
     @SuppressLint("SdCardPath")
@@ -28,7 +28,7 @@ public class XrAPI implements UdpDataListener {
     public static final String FLAG_VR = "vr";
     private static final String MSG_CLIENT = "client";
     private static final String VERSION_FILE = "version";
-    private static final String VERSION_VALUE = "0.1.3";
+    private static final String VERSION_VALUE = "0.1.4";
 
     private final File dir;
     private final DatagramSocket socket = new DatagramSocket();
@@ -56,11 +56,6 @@ public class XrAPI implements UdpDataListener {
         FileOutputStream fos = new FileOutputStream(new File(dir, VERSION_FILE));
         fos.write(VERSION_VALUE.getBytes(StandardCharsets.US_ASCII));
         fos.close();
-
-        //Create our haptic UDP listener background thread
-        Thread udpRecThread = new Thread(new UdpThread(this));
-        udpRecThread.setDaemon(true); // Run as daemon thread
-        udpRecThread.start();
     }
 
     public String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
@@ -136,52 +131,38 @@ public class XrAPI implements UdpDataListener {
         }
     }
 
-    @Override
-    public void onDataReceived(String message) {
-        //System.out.println("Received: " + message);
+    public static class UdpThread implements Runnable {
+        private static final int PORT = 7278;
+        private static final int BUFFER_SIZE = 1024;
 
-        try {
-            String[] parts = message.split("\\s+");
-            float[] values = new float[parts.length];
+        private final UdpDataListener listener;
+        private boolean running = false;
 
-            for (int i = 0; i < parts.length; i++) {
-                values[i] = Float.parseFloat(parts[i]);
-            }
-
-            if (values.length >= 2) {
-                if (values[0] > 0) XrActivity.lControllerVibration = values[0];
-                if (values[1] > 0) XrActivity.rControllerVibration = values[1];
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing float values: " + e.getMessage());
+        public UdpThread(UdpDataListener listener) {
+            this.listener = listener;
         }
-    }
-}
 
-class UdpThread implements Runnable {
-    private static final int PORT = 7278;
-    private static final int BUFFER_SIZE = 1024;
-
-    private final UdpDataListener listener;
-
-    public UdpThread(UdpDataListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public void run() {
-        try (DatagramSocket socket = new DatagramSocket(PORT)) {
+        @Override
+        public void run() {
             byte[] buffer = new byte[BUFFER_SIZE];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            try (DatagramSocket socket = new DatagramSocket(PORT)) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                running = true;
 
-            while (true) {
-                socket.receive(packet);
-                String message = new String(buffer, 0, packet.getLength());
+                while (running) {
+                    socket.receive(packet);
+                    String message = new String(buffer, 0, packet.getLength());
 
-                listener.onDataReceived(message);
+                    listener.onDataReceived(message);
+                    Thread.sleep(10);
+                }
+            } catch (Exception e) {
+                System.err.println("Error listening for UDP packets: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error listening for UDP packets: " + e.getMessage());
+        }
+
+        public void stop() {
+            running = false;
         }
     }
 }

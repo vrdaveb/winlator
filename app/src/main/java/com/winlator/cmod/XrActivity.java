@@ -30,7 +30,7 @@ import com.winlator.cmod.xserver.XServer;
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
  */
 
-public class XrActivity extends XServerDisplayActivity implements TextWatcher {
+public class XrActivity extends XServerDisplayActivity implements TextWatcher, XrAPI.UdpDataListener {
     // Order of the enum has to be the as in xr/main.cpp
     public enum ControllerAxis {
         L_PITCH, L_YAW, L_ROLL, L_QX, L_QY, L_QZ, L_QW, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
@@ -56,6 +56,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
+    private static float[] lastControllerVibration = new float[2];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
     private static String lastText = "";
@@ -205,6 +206,25 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         instance.findViewById(R.id.XRTextInput).setVisibility(View.GONE);
     }
 
+    @Override
+    public void onDataReceived(String message) {
+        try {
+            String[] parts = message.split("\\s+");
+            float[] values = new float[parts.length];
+
+            for (int i = 0; i < parts.length; i++) {
+                values[i] = Float.parseFloat(parts[i]);
+            }
+
+            if (values.length >= 2) {
+                if (values[0] > 0) lastControllerVibration[0] = values[0];
+                if (values[1] > 0) lastControllerVibration[1] = values[1];
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing float values: " + e.getMessage());
+        }
+    }
+
     public void callMenuAction(int item) {
         switch (item) {
             case R.id.main_menu_keyboard:
@@ -264,6 +284,11 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         try {
             if (xrAPI == null) {
                 xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
+
+                //Create UDP listener background thread
+                Thread udpThread = new Thread(new XrAPI.UdpThread(instance));
+                udpThread.setDaemon(true); // Run as daemon thread
+                udpThread.start();
             }
             isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
             getInstance().nativeSetUseVR(isVR);
@@ -400,20 +425,14 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         }
 
         //Update haptics
-        if (lControllerVibration > 0.0f) {
-            instance.vibrateController(1, 0, lControllerVibration);
-            lControllerVibration -= 0.1f;
-        }
-        else {
-            lControllerVibration = 0.0f;
-        }
-
-        if (rControllerVibration > 0.0f) {
-            instance.vibrateController(1, 1, rControllerVibration);
-            rControllerVibration -= 0.1f;
-        }
-        else {
-            rControllerVibration = 0.0f;
+        for (int i = 0; i < lastControllerVibration.length; i++) {
+            if (lastControllerVibration[i] > 0.0f) {
+                instance.vibrateController(1, i, lastControllerVibration[i]);
+                lastControllerVibration[i] -= 0.1f;
+            }
+            else {
+                lastControllerVibration[i] = 0.0f;
+            }
         }
     }
 
@@ -464,7 +483,4 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native boolean[] getButtons();
 
     public native void vibrateController(int duration, int chan, float intensity);
-
-    public static float lControllerVibration = 0.0f;
-    public static float rControllerVibration = 0.0f;
 }
