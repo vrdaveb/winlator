@@ -583,7 +583,7 @@ public class SettingsFragment extends Fragment {
         final Context context = getContext();
 
         Callback<String> updateSpinner = (prefix) -> {
-            Box86_64PresetManager.loadSpinner(prefix, spinners.get(prefix), preferences.getString(prefix+"_preset", Box86_64Preset.COMPATIBILITY));
+            Box86_64PresetManager.loadSpinner(prefix, spinners.get(prefix), preferences.getString(prefix+"_preset", Box86_64Preset.DEFAULT));
         };
 
         Callback<String> onAddPreset = (prefix) -> {

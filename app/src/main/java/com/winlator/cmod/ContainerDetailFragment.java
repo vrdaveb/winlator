@@ -496,7 +496,7 @@ public class ContainerDetailFragment extends Fragment {
         sStartupSelection.setSelection(previousStartupSelection != -1 ? previousStartupSelection : Container.STARTUP_SELECTION_ESSENTIAL);
 
         final Spinner sBox64Preset = view.findViewById(R.id.SBox64Preset);
-        Box86_64PresetManager.loadSpinner("box64", sBox64Preset, isEditMode() ? container.getBox64Preset() : preferences.getString("box64_preset", Box86_64Preset.COMPATIBILITY));
+        Box86_64PresetManager.loadSpinner("box64", sBox64Preset, isEditMode() ? container.getBox64Preset() : preferences.getString("box64_preset", Box86_64Preset.DEFAULT));
 
         final Spinner sFEXCoreVersion = view.findViewById(R.id.SFEXCoreVersion);
         FEXCoreManager.loadFEXCoreVersion(context, contentsManager, sFEXCoreVersion, container);

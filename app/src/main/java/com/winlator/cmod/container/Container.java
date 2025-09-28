@@ -70,7 +70,7 @@ public class Container {
     private String cpuList;
     private String cpuListWoW64;
     private String desktopTheme = WineThemeManager.DEFAULT_DESKTOP_THEME;
-    private String box64Preset = Box86_64Preset.COMPATIBILITY;
+    private String box64Preset = Box86_64Preset.DEFAULT;
     private File rootDir;
     private JSONObject extraData;
     private int rcfileId = 0;

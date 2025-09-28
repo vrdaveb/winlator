@@ -30,8 +30,8 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
     private static int pid = -1;
     private String[] bindingPaths;
     private EnvVars envVars;
-    private String box86Preset = Box86_64Preset.COMPATIBILITY;
-    private String box64Preset = Box86_64Preset.COMPATIBILITY;
+    private String box86Preset = Box86_64Preset.DEFAULT;
+    private String box64Preset = Box86_64Preset.DEFAULT;
     private Callback<Integer> terminationCallback;
     private static final Object lock = new Object();
     private boolean wow64Mode = true;
