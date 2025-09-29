@@ -60,6 +60,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     private static final float[] lastControllerVibration = new float[2];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
+    private static long lastMouseUpdate = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
@@ -386,11 +387,19 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
 
             // Set mouse status
             if (!instance.getXServer().isRelativeMouseMovement()) {
-                mouse.setPosition((int) smoothedMouse[0], (int) smoothedMouse[1]);
+                mouse.setX((int) smoothedMouse[0]);
+                mouse.setY((int) smoothedMouse[1]);
                 mouse.setButton(Pointer.Button.BUTTON_LEFT, buttons[primaryTrigger.ordinal()]);
                 mouse.setButton(Pointer.Button.BUTTON_RIGHT, buttons[primaryGrip.ordinal()]);
                 mouse.setButton(Pointer.Button.BUTTON_SCROLL_UP, buttons[primaryUp.ordinal()]);
                 mouse.setButton(Pointer.Button.BUTTON_SCROLL_DOWN, buttons[primaryDown.ordinal()]);
+
+                // Limit cursor updates to the FPS (this prevents freezing)
+                long timestamp = System.currentTimeMillis();
+                if (timestamp - lastMouseUpdate > 1000 / Math.max(instance.getLastFPS(), 1)) {
+                    mouse.triggerOnPointerMove(mouse.getX(), mouse.getY());
+                    lastMouseUpdate = timestamp;
+                }
             }
 
             // Switch immersive/SBS mode

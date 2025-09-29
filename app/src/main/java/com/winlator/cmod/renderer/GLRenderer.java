@@ -336,10 +336,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
         try (XLock lock = xServer.lock(XServer.Lockable.DRAWABLE_MANAGER)) {
             ContentDialog dialog = ContentDialog.getFrontInstance();
-            //workaround to prevent freezing
-            if (dialog == null) {
-                System.gc();
-            }
             if (dialog != null) {
                 Drawable drawable = dialog.getDrawable();
                 if (drawable != null) {
