@@ -58,9 +58,12 @@ L_GRIP, L_MENU, L_THUMBSTICK_PRESS, L_THUMBSTICK_LEFT, L_THUMBSTICK_RIGHT, L_THU
 R_A, R_B, R_GRIP, R_THUMBSTICK_PRESS, R_THUMBSTICK_LEFT, R_THUMBSTICK_RIGHT, R_THUMBSTICK_UP, R_THUMBSTICK_DOWN, R_TRIGGER
 ```
 
-* XrAPI 0.1.2 - added headset vendor name (single string without spaces)
+* XrAPI 0.1.2 - ~~added headset manufacturer name (single string without spaces)~~
 * XrAPI 0.1.3 - no new features, improved performance and bug fixes
 * XrAPI 0.1.4 - receiving UDP data from app on localhost:7278, containing two floats as ASCII string. The values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
+* XrAPI 0.1.5 - information about headset is written into Z:\tmp\xr\system (manufacturer, model, Android version, security patch version)
+
+Note that headset manufacturer added in XrAPI 0.1.2 will be removed in XrAPI 0.2.x, use Z:\tmp\xr\system instead.
 
 ### Code examples
 
@@ -115,6 +118,7 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
 
