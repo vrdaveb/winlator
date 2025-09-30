@@ -28,7 +28,7 @@ public class XrAPI {
     public static final String FLAG_VR = "vr";
     private static final String MSG_CLIENT = "client";
     private static final String VERSION_FILE = "version";
-    private static final String VERSION_VALUE = "0.1.4";
+    private static final String VERSION_VALUE = "0.1.5";
 
     private final File dir;
     private final DatagramSocket socket = new DatagramSocket();
@@ -93,7 +93,8 @@ public class XrAPI {
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVX.ordinal()]) +
                 " " + String.format(Locale.US, "%.2f", axes[XrActivity.ControllerAxis.HMD_FOVY.ordinal()]) +
                 " " + String.format(Locale.US, "%d", (int)axes[XrActivity.ControllerAxis.HMD_SYNC.ordinal()]) +
-                " " + binary + " " + Build.MANUFACTURER.toUpperCase().replaceAll("\\s+", "");
+                " " + binary + " " + Build.MANUFACTURER.toUpperCase().replaceAll("\\s+", "") +
+                " " + binary + " " + Build.MODEL.toUpperCase().replaceAll("\\s+", "");
     }
 
     public boolean hasFlag(String flag) {
