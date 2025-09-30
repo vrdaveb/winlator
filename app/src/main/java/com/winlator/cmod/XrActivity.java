@@ -61,6 +61,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
     private static long lastMouseUpdate = 0;
+    private static short lastMouseX = 0;
+    private static short lastMouseY = 0;
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
@@ -397,8 +399,12 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
                 // Limit cursor updates to the FPS (this prevents freezing)
                 long timestamp = System.currentTimeMillis();
                 if (timestamp - lastMouseUpdate > 1000 / Math.max(instance.getLastFPS(), 1)) {
-                    mouse.triggerOnPointerMove(mouse.getX(), mouse.getY());
-                    lastMouseUpdate = timestamp;
+                    if ((lastMouseX != mouse.getX()) || (lastMouseY != mouse.getY())) {
+                        lastMouseUpdate = timestamp;
+                        lastMouseX = mouse.getX();
+                        lastMouseY = mouse.getY();
+                        mouse.triggerOnPointerMove(lastMouseX, lastMouseY);
+                    }
                 }
             }
 

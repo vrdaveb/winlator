@@ -229,6 +229,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
     private boolean isDarkMode;
     private float lastFPS = 0;
+    private long lastTime = 0;
+    private int frameCount = 0;
 
     private String screenEffectProfile;
 
@@ -613,8 +615,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // Add the OnWindowModificationListener for dynamic workarounds
         xServer.windowManager.addOnWindowModificationListener(new WindowManager.OnWindowModificationListener() {
-            private long lastTime = 0;
-            private int frameCount = 0;
             @Override
             public void onUpdateWindowContent(Window window) {
                 if (!winStarted[0] && window.isApplicationWindow()) {
@@ -624,15 +624,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 }
 
                 if (frameRatingWindowId == window.id) frameRating.update();
-
-                //measure framerate
-                if (lastTime == 0) lastTime = SystemClock.elapsedRealtime();
-                long time = SystemClock.elapsedRealtime();
-                if (time >= lastTime + 500) {
-                    lastFPS = ((float)(frameCount * 1000) / (time - lastTime));
-                    lastTime = time;
-                    frameCount = 0;
-                }
                 frameCount++;
             }
 
@@ -767,6 +758,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
 
     public float getLastFPS() {
+        if (lastTime == 0) lastTime = SystemClock.elapsedRealtime();
+        long time = SystemClock.elapsedRealtime();
+        if (time >= lastTime + 500) {
+            lastFPS = ((float)(frameCount * 1000) / (time - lastTime));
+            lastTime = time;
+            frameCount = 0;
+        }
         return lastFPS;
     }
 
