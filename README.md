@@ -61,7 +61,7 @@ R_A, R_B, R_GRIP, R_THUMBSTICK_PRESS, R_THUMBSTICK_LEFT, R_THUMBSTICK_RIGHT, R_T
 * XrAPI 0.1.2 - ~~added headset manufacturer name (single string without spaces)~~
 * XrAPI 0.1.3 - no new features, improved performance and bug fixes
 * XrAPI 0.1.4 - receiving UDP data from app on localhost:7278, containing two floats as ASCII string. The values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
-* XrAPI 0.1.5 - information about headset is written into Z:\tmp\xr\system (manufacturer, model, Android version, security patch version)
+* XrAPI 0.1.5 - information about headset is written into Z:\tmp\xr\system (manufacturer, product, Android version, security patch version)
 
 Note that headset manufacturer added in XrAPI 0.1.2 will be removed in XrAPI 0.2.x, use Z:\tmp\xr\system instead.
 

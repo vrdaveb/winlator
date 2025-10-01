@@ -61,7 +61,7 @@ public class XrAPI {
         //Write system info
         String info = "";
         info += Build.MANUFACTURER.toUpperCase() + "\n";
-        info += Build.MODEL.toUpperCase() + "\n";
+        info += Build.PRODUCT.toUpperCase() + "\n";
         info += Build.VERSION.RELEASE.toUpperCase() + "\n";
         info += Build.VERSION.SECURITY_PATCH.toUpperCase() + "\n";
         fos = new FileOutputStream(new File(dir, SYSTEM_FILE));
