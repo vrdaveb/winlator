@@ -201,9 +201,10 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         fovx += fabs(renderer->Projections[eye].fov.angleDown - renderer->Projections[eye].fov.angleUp) / 2.0f;
         fovy += fabs(renderer->Projections[eye].fov.angleRight - renderer->Projections[eye].fov.angleLeft) / 2.0f;
     }
-    if (engine->PlatformFlag[PLATFORM_VIEWPORT_UNCENTERED]) {
-        fovy *= 1.1f;
-    }
+    // Ensure there is enough overlap for late reprojection
+    fovx *= 1.1f;
+    fovy *= 1.1f;
+
     renderer->ConfigFloat[CONFIG_VIEWPORT_FOVX] = ToDegrees(fovx);
     renderer->ConfigFloat[CONFIG_VIEWPORT_FOVY] = ToDegrees(fovy);
     renderer->Fov.angleLeft = -fovx / 2.0f;
