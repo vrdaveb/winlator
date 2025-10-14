@@ -32,39 +32,36 @@ WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses 2D/VR
 Our XrAPI provides developers with a way to replace OpenVR or OpenXR in their applications, enabling PCVR content to run natively within WinlatorXR on standalone VR headsets. The XrAPI is still very experimental and may change over time.
 
 ### Required changes for the Windows app
-1) WinlatorXR checks for Z:\tmp\xr\vr file. If this file exists, it enters VR mode and start sending data.
+1) WinlatorXR checks for Z:\tmp\xr\version file and read the API version which should be used
 2) The data are sent using UDP protocol on localhost:7872 as AsCII string in order which can be found below.
 3) It is important to keep the Windows app as much in sync as possible, ideally holding renderer until HMD_SYNC changes.
 4) Windows app have to render value of HMD_SYNC as shade of red (in sRGB colorspace) into top-left corner.
+5) Information about used headset is written into Z:\tmp\xr\system (manufacturer, product, Android version, security patch version).
 
-### Optional stereo 3D rendering:
-1) To enable 3D rendering create file Z:\tmp\xr\sbs
-2) Windows app have to render frame for the left eye into left half of the screen and for the right eye into right half of the screen
+### XrAPI 0.1 specification
+1) WinlatorXR checks for Z:\tmp\xr\vr file. If this file exists, it enters VR mode and start sending data.
+2) To enable 3D rendering create file Z:\tmp\xr\sbs
+3) Windows app have to render frame for the left eye into left half of the screen and for the right eye into right half of the screen
 
-### Future compatibility:
-1) The XrAPI is still very experimental and may change over time
-2) To ensure compatbility content of Z:\tmp\xr\version file
-3) If the version is starting with 0.1 then it is compatible
-4) New features (backward compatible) are added in versions 0.1.1, 0.1.2, etc.
-5) Major API changes (not backward compatible) will be versioned as 0.2, 0.3, etc.
+The data transfered over UDP starts with an array of float numbers separated by space, the values are:
+```
+L_QX, L_QY, L_QZ, L_QW, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z, 
+R_QX, R_QY, R_QZ, R_QW, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z, 
+HMD_QX, HMD_QY, HMD_QZ, HMD_QW, HMD_X, HMD_Y, HMD_Z, HMD_IPD, HMD_FOVX, HMD_FOVY, HMD_SYNC
+```
 
-### XrAPI data specification
-* XrAPI 0.1.0 - the first version providing 6DoF tracking in text format over UDP localhost. Provides data in order which is defined [here](https://github.com/lvonasek/WinlatorXR/blob/28b40afaf08bf06b752a7947cc2c13a8b5cb4ae9/app/src/main/java/com/winlator/cmod/XrAPI.java#L48)
-
-* XrAPI 0.1.1 - added direct controller access, on the end of the received UDP packet is a new string containing characters T (for TRUE) and F (for FALSE).
-
-This string represents the controller buttons in order:
+next is a string containing characters T (for TRUE) and F (for FALSE). This string represents the controller buttons in order:
 ```
 L_GRIP, L_MENU, L_THUMBSTICK_PRESS, L_THUMBSTICK_LEFT, L_THUMBSTICK_RIGHT, L_THUMBSTICK_UP, L_THUMBSTICK_DOWN, L_TRIGGER, L_X, L_Y,
 R_A, R_B, R_GRIP, R_THUMBSTICK_PRESS, R_THUMBSTICK_LEFT, R_THUMBSTICK_RIGHT, R_THUMBSTICK_UP, R_THUMBSTICK_DOWN, R_TRIGGER
 ```
 
-* XrAPI 0.1.2 - ~~added headset manufacturer name (single string without spaces)~~
-* XrAPI 0.1.3 - no new features, improved performance and bug fixes
-* XrAPI 0.1.4 - receiving UDP data from app on localhost:7278, containing two floats as ASCII string. The values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
-* XrAPI 0.1.5 - information about headset is written into Z:\tmp\xr\system (manufacturer, product, Android version, security patch version)
+Data sent on localhost:7278 could require additional functionality by sending flot numbers separated by space:
+```
+L_HAPTICS, R_HAPTICS
+```
 
-Note that headset manufacturer added in XrAPI 0.1.2 will be removed in XrAPI 0.2.x, use Z:\tmp\xr\system instead.
+The haptic values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
 
 ### Code examples
 
@@ -119,6 +116,7 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
 
