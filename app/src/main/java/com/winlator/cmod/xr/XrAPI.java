@@ -93,7 +93,7 @@ public class XrAPI implements XrInterface, Runnable {
             while (running) {
                 socket.receive(packet);
                 dataReceived(new String(buffer, 0, packet.getLength()));
-                wait(10);
+                Thread.sleep(10);
             }
         } catch (Exception e) {
             System.err.println("Error listening for UDP packets: " + e.getMessage());
