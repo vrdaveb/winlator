@@ -85,7 +85,7 @@
 
 
         <activity
-            android:name=".XrActivityMeta"
+            android:name=".xr.RuntimeMeta"
             android:configChanges="density|orientation|screenSize|keyboard|keyboardHidden|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
@@ -101,7 +101,7 @@
         </activity>
 
         <activity
-            android:name=".XrActivityPico"
+            android:name=".xr.RuntimePico"
             android:configChanges="density|orientation|screenSize|keyboard|keyboardHidden|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
@@ -117,7 +117,7 @@
         </activity>
 
         <activity
-            android:name=".XrActivityPFD"
+            android:name=".xr.RuntimePFD"
             android:configChanges="density|orientation|screenSize|keyboard|keyboardHidden|uiMode"
             android:exported="true"
             android:launchMode="singleTask"

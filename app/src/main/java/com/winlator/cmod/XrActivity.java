@@ -21,31 +21,25 @@ import com.winlator.cmod.container.Container;
 import com.winlator.cmod.contentdialog.ContentDialog;
 import com.winlator.cmod.contentdialog.NavigationDialog;
 import com.winlator.cmod.core.AppUtils;
+import com.winlator.cmod.xr.XrAPI;
+import com.winlator.cmod.xr.RuntimeMeta;
+import com.winlator.cmod.xr.RuntimePFD;
+import com.winlator.cmod.xr.RuntimePico;
 import com.winlator.cmod.xserver.Keyboard;
 import com.winlator.cmod.xserver.Pointer;
 import com.winlator.cmod.xserver.XKeycode;
 import com.winlator.cmod.xserver.XLock;
 import com.winlator.cmod.xserver.XServer;
 
+import static com.winlator.cmod.xr.XrInterface.AppInput;
+import static com.winlator.cmod.xr.XrInterface.ControllerAxis;
+import static com.winlator.cmod.xr.XrInterface.ControllerButton;
+
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
  */
 
-public class XrActivity extends XServerDisplayActivity implements TextWatcher, XrAPI.UdpDataListener {
-    // Order of the enum has to be the as in xr/main.cpp
-    public enum ControllerAxis {
-        L_PITCH, L_YAW, L_ROLL, L_QX, L_QY, L_QZ, L_QW, L_THUMBSTICK_X, L_THUMBSTICK_Y, L_X, L_Y, L_Z,
-        R_PITCH, R_YAW, R_ROLL, R_QX, R_QY, R_QZ, R_QW, R_THUMBSTICK_X, R_THUMBSTICK_Y, R_X, R_Y, R_Z,
-        HMD_PITCH, HMD_YAW, HMD_ROLL, HMD_QX, HMD_QY, HMD_QZ, HMD_QW, HMD_X, HMD_Y, HMD_Z,
-        HMD_IPD, HMD_FOVX, HMD_FOVY, HMD_SYNC
-    }
-
-    // Order of the enum has to be the as in xr/main.cpp
-    public enum ControllerButton {
-        L_GRIP,  L_MENU, L_THUMBSTICK_PRESS, L_THUMBSTICK_LEFT, L_THUMBSTICK_RIGHT, L_THUMBSTICK_UP, L_THUMBSTICK_DOWN, L_TRIGGER, L_X, L_Y,
-        R_A, R_B, R_GRIP, R_THUMBSTICK_PRESS, R_THUMBSTICK_LEFT, R_THUMBSTICK_RIGHT, R_THUMBSTICK_UP, R_THUMBSTICK_DOWN, R_TRIGGER,
-    }
-
+public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isDeviceDetectionFinished = false;
     private static boolean isDeviceSupported = false;
     private static boolean isEnabled = false;
@@ -57,7 +51,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
     private static final float[] lastAxes = new float[ControllerAxis.values().length];
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
-    private static final float[] lastControllerVibration = new float[2];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
     private static long lastMouseUpdate = 0;
@@ -208,25 +201,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
         instance.findViewById(R.id.XRTextInput).setVisibility(View.GONE);
     }
 
-    @Override
-    public void onDataReceived(String message) {
-        try {
-            String[] parts = message.split("\\s+");
-            float[] values = new float[parts.length];
-
-            for (int i = 0; i < parts.length; i++) {
-                values[i] = Float.parseFloat(parts[i]);
-            }
-
-            if (values.length >= 2) {
-                if (values[0] > 0) lastControllerVibration[0] = values[0];
-                if (values[1] > 0) lastControllerVibration[1] = values[1];
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing float values: " + e.getMessage());
-        }
-    }
-
     public void callMenuAction(int item) {
         switch (item) {
             case R.id.main_menu_keyboard:
@@ -255,7 +229,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
         // 0. Create the launch intent
         boolean isPico = Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0;
         boolean isPfd = Build.MANUFACTURER.compareToIgnoreCase("PLAY FOR DREAM") == 0;
-        Intent intent = new Intent(context, isPico ? XrActivityPico.class : isPfd ? XrActivityPFD.class : XrActivityMeta.class);
+        Intent intent = new Intent(context, isPico ? RuntimePico.class : isPfd ? RuntimePFD.class : RuntimeMeta.class);
         intent.putExtra("container_id", containerId);
         if (path != null) {
             intent.putExtra("shortcut_path", path);
@@ -285,21 +259,22 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
         // Communication between XR and Win32 apps
         try {
             if (xrAPI == null) {
-                xrAPI = new XrAPI(XrAPI.DEFAULT_PATH);
+                //Set the param to true and put a udp_debug folder in your Winlator D:\ drive
+                //with a file named the IP on LAN to send XR data via UDP traffic to that IP.
+                xrAPI = new XrAPI(false);
 
                 //Create UDP listener background thread
-                Thread udpThread = new Thread(new XrAPI.UdpThread(instance));
-                udpThread.setDaemon(true); // Run as daemon thread
+                Thread udpThread = new Thread(xrAPI);
+                udpThread.setDaemon(true);
                 udpThread.start();
             }
-            isVR = xrAPI.hasFlag(XrAPI.FLAG_VR);
+            isVR = xrAPI.getValue(AppInput.MODE_VR) > 0.5f;
             getInstance().nativeSetUseVR(isVR);
             if (isVR) {
-                //Uncomment the line below and put a udp_debug folder in your Winlator D:/ drive
-                //with a file named the IP on LAN to send XR data via UDP traffic to that IP.
-                //xrAPI.setDebugMode(true);
-                isSBS = xrAPI.hasFlag(XrAPI.FLAG_SBS);
-                xrAPI.send(xrAPI.encode(axes, buttons, 0), XrAPI.DEFAULT_PORT);
+                isSBS = xrAPI.getValue(AppInput.MODE_SBS) > 0.5f;
+                xrAPI.send(xrAPI.encode(axes, buttons, 0));
+            } else {
+                xrAPI.updateImplementation();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -439,13 +414,15 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher, X
         }
 
         //Update haptics
-        for (int i = 0; i < lastControllerVibration.length; i++) {
-            if (lastControllerVibration[i] > 0.0f) {
-                instance.vibrateController(1, i, lastControllerVibration[i]);
-                lastControllerVibration[i] -= 0.1f;
-            }
-            else {
-                lastControllerVibration[i] = 0.0f;
+        AppInput[] haptics = {AppInput.L_HAPTICS, AppInput.R_HAPTICS};
+        for (int i = 0; i < haptics.length; i++) {
+            AppInput haptic = haptics[i];
+            float value = xrAPI.getValue(haptic);
+            if (value > 0.0f) {
+                instance.vibrateController(1, i, value);
+                xrAPI.setValue(haptic, value - 0.1f);
+            } else {
+                xrAPI.setValue(haptic, 0.0f);
             }
         }
     }

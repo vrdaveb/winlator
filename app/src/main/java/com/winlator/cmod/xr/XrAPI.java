@@ -1,0 +1,156 @@
+package com.winlator.cmod.xr;
+
+import androidx.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.os.Build;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Scanner;
+
+public class XrAPI implements XrInterface, Runnable {
+
+    private static final int BUFFER_SIZE = 1024;
+    @SuppressLint("SdCardPath")
+    private static final String PATH_API = "/data/data/com.winlator.cmod/files/imagefs/tmp/xr";
+    @SuppressLint("SdCardPath")
+    private static final String PATH_DEBUG = "/sdcard/Download/udp_debug";
+    private static final int PORT_IN = 7278;
+    private static final int PORT_OUT = 7872;
+    private static final String SYSTEM_FILE = "system";
+    private static final String VERSION_FILE = "version";
+
+    private XrInterface impl = null;
+    private boolean running = false;
+    private final DatagramSocket socket = new DatagramSocket();
+
+    private String debugIp = null;
+    private final boolean debugMode;
+
+    public XrAPI(boolean debugMode) throws Exception {
+        //Ensure directory exists
+        File dir = new File(PATH_API);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new Exception("Filesystem issue");
+            }
+        }
+
+        //Ensure there are no previous data
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (!file.delete()) {
+                throw new Exception("Filesystem issue");
+            }
+        }
+
+        //Write system info
+        String info = "";
+        info += Build.MANUFACTURER.toUpperCase() + "\n";
+        info += Build.PRODUCT.toUpperCase() + "\n";
+        info += Build.VERSION.RELEASE.toUpperCase() + "\n";
+        info += Build.VERSION.SECURITY_PATCH.toUpperCase() + "\n";
+        FileOutputStream fos = new FileOutputStream(new File(dir, SYSTEM_FILE));
+        fos.write(info.getBytes(StandardCharsets.US_ASCII));
+        fos.close();
+
+        //Set debug mode
+        this.debugMode = debugMode;
+    }
+
+    public void dataReceived(@NonNull String message) {
+        if (impl != null) {
+            impl.dataReceived(message);
+        }
+    }
+
+    public byte[] encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
+        return impl != null ? impl.encode(axes, buttons, clientIndex) : new byte[0];
+    }
+
+    public float getValue(@NonNull AppInput index) {
+        return impl != null ? impl.getValue(index) : 0.0f;
+    }
+
+    public void setValue(@NonNull AppInput index, float value) {
+        if (impl != null) {
+            impl.setValue(index, value);
+        }
+    }
+
+    @Override
+    public void run() {
+        byte[] buffer = new byte[BUFFER_SIZE];
+        try (DatagramSocket socket = new DatagramSocket(PORT_IN)) {
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            running = true;
+
+            while (running) {
+                socket.receive(packet);
+                dataReceived(new String(buffer, 0, packet.getLength()));
+                wait(10);
+            }
+        } catch (Exception e) {
+            System.err.println("Error listening for UDP packets: " + e.getMessage());
+        }
+    }
+
+    public void send(@NonNull byte[] bytes) throws Exception {
+        //Send data to localhost
+        InetAddress address = InetAddress.getLocalHost();
+        socket.send(new DatagramPacket(bytes, bytes.length, address, PORT_OUT));
+
+        if (debugMode) {
+            //Get requested IP from the filesystem
+            if (debugIp == null) {
+                debugIp = "";
+                File debugDir = new File(PATH_DEBUG);
+                if (debugDir.exists()) {
+                    for (File file : Objects.requireNonNull(debugDir.listFiles())) {
+                        debugIp = file.getName();
+                        break;
+                    }
+                }
+            }
+
+            //Send the data over the network
+            if (!debugIp.isEmpty()) {
+                InetAddress debugIPAdd = InetAddress.getByName(debugIp);
+                socket.send(new DatagramPacket(bytes, bytes.length, debugIPAdd, PORT_OUT));
+            }
+        }
+    }
+
+    public void stop() {
+        running = false;
+    }
+
+    public void updateImplementation() {
+        if (impl != null) {
+            return;
+        }
+
+        //Check if the host requested XrAPI
+        File file = new File(PATH_API, VERSION_FILE);
+        if (file.exists()) {
+            try {
+                //Get requested API version
+                FileInputStream fis = new FileInputStream(file);
+                Scanner sc = new Scanner(fis);
+                String version = sc.nextLine();
+                sc.close();
+                fis.close();
+
+                //Decide which implementation to use
+                if (version.startsWith("0.1")) impl = new XrVersion01(new File(PATH_API));
+            } catch (Exception e) {
+                System.err.println("Error reading version file: " + e.getMessage());
+            }
+        }
+    }
+}
