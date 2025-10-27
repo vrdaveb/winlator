@@ -62,6 +62,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static XrActivity instance;
     private static XrAPI xrAPI = null;
 
+    public native void nativeSetFoV(float x, float y);
     public native void nativeSetUsePT(boolean enabled);
     public native void nativeSetUseVR(boolean enabled);
     public native void sendManufacturer(String manufacturer);
@@ -271,6 +272,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
             isVR = xrAPI.getValue(AppInput.MODE_VR) > 0.5f;
             getInstance().nativeSetUseVR(isVR);
             if (isVR) {
+                float fovx = xrAPI.getValue(AppInput.HMD_FOVX);
+                float fovy = xrAPI.getValue(AppInput.HMD_FOVY);
+                getInstance().nativeSetFoV(fovx, fovy);
                 isSBS = xrAPI.getValue(AppInput.MODE_SBS) > 0.5f;
                 xrAPI.send(xrAPI.encode(axes, buttons, 0));
             } else {

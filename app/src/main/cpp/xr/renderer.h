@@ -12,6 +12,7 @@ enum XrConfigFloat
     CONFIG_RECENTER_YAW,
     CONFIG_VIEWPORT_FOVX,
     CONFIG_VIEWPORT_FOVY,
+    CONFIG_VIEWPORT_FOV_SCALE,
 
     CONFIG_FLOAT_MAX
 };
@@ -52,6 +53,7 @@ struct XrRenderer {
 
     struct XrFramebuffer Framebuffer[XrMaxNumEyes];
 
+    float FovScale;
     int FrameSync;
     int LayerCount;
     XrCompositorLayer Layers[XrMaxLayerCount];
@@ -59,7 +61,6 @@ struct XrRenderer {
     XrPassthroughLayerFB PassthroughLayer;
     bool PassthroughRunning;
 
-    XrFovf Fov;
     XrView* Projections;
     XrPosef InvertedViewPose[2][XrMaxFrameSync + 1];
     XrVector3f HmdOrientation;

@@ -13,7 +13,7 @@ public class XrVersion01 implements XrInterface {
     private static final String MSG_CLIENT = "client";
 
     private final File dir;
-    private final float[] input = new float[XrAPI.AppInput.values().length];
+    protected final float[] input = new float[XrAPI.AppInput.values().length];
 
     public XrVersion01(File dir) {
         this.dir = dir;

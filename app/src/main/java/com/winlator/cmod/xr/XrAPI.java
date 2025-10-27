@@ -148,6 +148,7 @@ public class XrAPI implements XrInterface, Runnable {
 
                 //Decide which implementation to use
                 if (version.startsWith("0.1")) impl = new XrVersion01(new File(PATH_API));
+                if (version.startsWith("0.2")) impl = new XrVersion02();
             } catch (Exception e) {
                 System.err.println("Error reading version file: " + e.getMessage());
             }

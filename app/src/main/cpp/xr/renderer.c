@@ -181,37 +181,23 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     begin_frame_info.next = NULL;
     OXR(xrBeginFrame(engine->Session, &begin_frame_info));
 
-    renderer->Fov.angleLeft = 0;
-    renderer->Fov.angleRight = 0;
-    renderer->Fov.angleUp = 0;
-    renderer->Fov.angleDown = 0;
-    renderer->FrameSync = (renderer->FrameSync + 1) % XrMaxFrameSync;
-    for (int eye = 0; eye < XrMaxNumEyes; eye++)
-    {
-        renderer->Fov.angleLeft += renderer->Projections[eye].fov.angleLeft / 2.0f;
-        renderer->Fov.angleRight += renderer->Projections[eye].fov.angleRight / 2.0f;
-        renderer->Fov.angleUp += renderer->Projections[eye].fov.angleUp / 2.0f;
-        renderer->Fov.angleDown += renderer->Projections[eye].fov.angleDown / 2.0f;
-        memcpy(&renderer->InvertedViewPose[eye][renderer->FrameSync], &renderer->Projections[eye].pose, sizeof(XrPosef));
-    }
-
     float fovx = 0;
     float fovy = 0;
+    renderer->FrameSync = (renderer->FrameSync + 1) % XrMaxFrameSync;
     for (int eye = 0; eye < XrMaxNumEyes; eye++) {
         fovx += fabs(renderer->Projections[eye].fov.angleDown - renderer->Projections[eye].fov.angleUp) / 2.0f;
         fovy += fabs(renderer->Projections[eye].fov.angleRight - renderer->Projections[eye].fov.angleLeft) / 2.0f;
+        memcpy(&renderer->InvertedViewPose[eye][renderer->FrameSync], &renderer->Projections[eye].pose, sizeof(XrPosef));
     }
     // Ensure there is enough overlap for late reprojection
-    fovx *= 1.1f;
-    fovy *= 1.1f;
+    renderer->FovScale = renderer->ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE];
+    if (renderer->FovScale > 0.1f) {
+        fovx *= renderer->FovScale;
+        fovy *= renderer->FovScale;
+    }
 
     renderer->ConfigFloat[CONFIG_VIEWPORT_FOVX] = ToDegrees(fovx);
     renderer->ConfigFloat[CONFIG_VIEWPORT_FOVY] = ToDegrees(fovy);
-    renderer->Fov.angleLeft = -fovx / 2.0f;
-    renderer->Fov.angleRight = fovx / 2.0f;
-    renderer->Fov.angleDown = -fovy / 2.0f;
-    renderer->Fov.angleUp = fovy / 2.0f;
-
     renderer->HmdOrientation = XrQuaternionfEulerAngles(renderer->InvertedViewPose[0][renderer->FrameSync].orientation);
     renderer->LayerCount = 0;
     memset(renderer->Layers, 0, sizeof(XrCompositorLayer) * XrMaxLayerCount);
@@ -240,6 +226,23 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             passthrough_layer.space = XR_NULL_HANDLE;
             renderer->Layers[renderer->LayerCount++].passthrough = passthrough_layer;
         }
+    }
+
+    XrFovf fov;
+    float fovx = ToRadians(renderer->ConfigFloat[CONFIG_VIEWPORT_FOVX]);
+    float fovy = ToRadians(renderer->ConfigFloat[CONFIG_VIEWPORT_FOVY]);
+    fov.angleLeft = -fovx / 2.0f;
+    fov.angleRight = fovx / 2.0f;
+    fov.angleDown = -fovy / 2.0f;
+    fov.angleUp = fovy / 2.0f;
+
+    // Log the fov change
+    static float lastFovX = 0;
+    static float lastFovY = 0;
+    if ((fabs(lastFovX - fovx) > 0.001f) || (fabs(lastFovY - fovy) > 0.001f)) {
+        ALOGE("FoV changed! It is now %.2fx%.2f (scaled by %.1f)", ToDegrees(fovx), ToDegrees(fovy), renderer->FovScale);
+        lastFovX = fovx;
+        lastFovY = fovy;
     }
 
     int x = 0;
@@ -289,7 +292,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             memset(&projection_layer_elements[eye], 0, sizeof(XrCompositionLayerProjectionView));
             projection_layer_elements[eye].type = XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;
             projection_layer_elements[eye].pose = pose;
-            projection_layer_elements[eye].fov = renderer->Fov;
+            projection_layer_elements[eye].fov = fov;
 
             memset(&projection_layer_elements[eye].subImage, 0, sizeof(XrSwapchainSubImage));
             projection_layer_elements[eye].subImage.swapchain = framebuffer->Handle;
