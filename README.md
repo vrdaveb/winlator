@@ -1,5 +1,3 @@
-<img width="505" height="128" alt="logo" src="https://github.com/user-attachments/assets/272af339-23d9-4afc-abd8-2cb255665cf9" />
-
 WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses 2D/VR hybrid app flow documented by [amwatson](https://github.com/amwatson/2DVrHybrid).
 
 # History of the project
@@ -18,7 +16,7 @@ WinlatorXR is a port of Winlator for Meta Quest and Pico headsets. It uses 2D/VR
 # How to compile
 
 1.Clone repository with all submodules
-`git clone --recursive git@github.com:lvonasek/winlator.git`
+`git clone --recursive git@github.com:Team-Beef-Studios/WinlatorXR.git`
 
 2.Donwload the latest APK from releases
 
