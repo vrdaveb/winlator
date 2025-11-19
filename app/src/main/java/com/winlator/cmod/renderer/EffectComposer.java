@@ -3,6 +3,7 @@ package com.winlator.cmod.renderer;
 import android.opengl.GLES20;
 import android.util.Log;
 
+import com.winlator.cmod.XrActivity;
 import com.winlator.cmod.renderer.effects.Effect;
 import com.winlator.cmod.renderer.effects.ToonEffect;
 import com.winlator.cmod.renderer.material.ShaderMaterial;
@@ -78,6 +79,10 @@ public class EffectComposer {
         return hasEffects;
     }
 
+    public synchronized void removeAll() {
+        effects.clear();
+    }
+
     // Removes a specific effect from the composer
     public synchronized void removeEffect(Effect effect) {
         if (effects.remove(effect)) {
@@ -121,7 +126,11 @@ public class EffectComposer {
             int targetFramebuffer = renderToScreen ? 0 : writeBuffer.getFramebuffer();
 
             // Bind appropriate framebuffer
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, targetFramebuffer);
+            if (renderToScreen && XrActivity.isEnabled(null)) {
+                XrActivity.getInstance().bindFramebuffer();
+            } else {
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, targetFramebuffer);
+            }
 //            Log.d(TAG, "Binding to " + (renderToScreen ? "screen" : "writeBuffer") + " framebuffer: " + targetFramebuffer);
 
             GLES20.glViewport(0, 0, renderer.surfaceWidth, renderer.surfaceHeight);

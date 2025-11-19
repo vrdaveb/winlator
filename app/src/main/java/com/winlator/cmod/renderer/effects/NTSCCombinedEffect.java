@@ -78,10 +78,10 @@ public class NTSCCombinedEffect extends Effect {
                     "}",
 
                     // Function to apply scanlines using resolution uniform
-                    "vec3 applyScanlines(vec2 uv) {",
-                    "   vec3 col = texture2D(screenTexture, uv).rgb;",
+                    "vec4 applyScanlines(vec2 uv) {",
+                    "   vec4 col = texture2D(screenTexture, uv);",
                     "   float scanline = abs(sin(uv.y * resolution.y * 2.0)) * SCANLINE_INTENSITY;", // Use resolution.y for scanline density
-                    "   col *= 1.0 - (scanline * SCANLINE_DARKEN);", // Apply stronger scanline effect
+                    "   col.rgb *= 1.0 - (scanline * SCANLINE_DARKEN);", // Apply stronger scanline effect
                     "   return col;",
                     "}",
 
@@ -100,12 +100,12 @@ public class NTSCCombinedEffect extends Effect {
 
                     // Apply NTSC effect and scanlines
                     "   vec3 ntscColor = applyNTSC(warpedUV);", // Apply NTSC effect
-                    "   vec3 scanlineColor = applyScanlines(warpedUV);", // Apply scanline effect
+                    "   vec4 scanlineColor = applyScanlines(warpedUV);", // Apply scanline effect
 
                     // Blend NTSC effect with scanlines and slight blur
-                    "   vec3 finalColor = mix(ntscColor, scanlineColor, 0.7);", // Blend with emphasis on scanlines
+                    "   vec3 finalColor = mix(ntscColor, scanlineColor.rgb, 0.7);", // Blend with emphasis on scanlines
 
-                    "   gl_FragColor = vec4(finalColor, 1.0);", // Final output
+                    "   gl_FragColor = vec4(finalColor, scanlineColor.a);", // Final output
                     "}"
             });
         }

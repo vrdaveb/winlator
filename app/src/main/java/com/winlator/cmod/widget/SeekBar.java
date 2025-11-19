@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
@@ -31,6 +32,7 @@ public class SeekBar extends AppCompatImageView {
     private final float thumbRadius;
     private final float thumbSize;
 
+    private boolean editing = false;
     private LinearGradient glossyEffectGradient;
     private float maxValue = 100.0f;
     private float minValue = 0.0f;
@@ -145,7 +147,7 @@ public class SeekBar extends AppCompatImageView {
         float centerY = getHeight() / 2.0f;
 
         // Set up the paint for the bar
-        paint.setColor(colorPrimary);
+        paint.setColor(isHovered()  ? colorSecondary : colorPrimary);
         paint.setStyle(Paint.Style.FILL);
 
         // Draw the background bar
@@ -158,7 +160,7 @@ public class SeekBar extends AppCompatImageView {
         float progressWidth = left + normalizedValue * (right - left);
 
         // Draw the progress bar
-        paint.setColor(colorSecondary);
+        paint.setColor(isHovered() ? colorPrimary : colorSecondary);
         rect.set(left, centerY - barHeight / 2, progressWidth, centerY + barHeight / 2);
         canvas.drawRoundRect(rect, barHeight / 2, barHeight / 2, paint);
 
@@ -190,6 +192,33 @@ public class SeekBar extends AppCompatImageView {
         paint.setShader(glossyEffectGradient);
         canvas.drawRoundRect(rect, barHeight / 2, barHeight / 2, paint);
         paint.setShader(null); // Reset the shader
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        float value = getValue();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_ENTER:
+                editing = !editing;
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                editing = false;
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (editing) {
+                    setValue(value - step);
+                    onValueChangeListener.onValueChangeListener(this, getValue());
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (editing) {
+                    setValue(value + step);
+                    onValueChangeListener.onValueChangeListener(this, getValue());
+                }
+                break;
+        }
+        return editing ? true : super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -232,9 +261,11 @@ public class SeekBar extends AppCompatImageView {
 
     // Change from private to public
     public int getThumbHoleColor() {
-        int r = Mathf.clamp(Color.red(colorSecondary) - 30, 0, 255);
-        int g = Mathf.clamp(Color.green(colorSecondary) - 30, 0, 255);
-        int b = Mathf.clamp(Color.blue(colorSecondary) - 30, 0, 255);
+        int color = isHovered() ? colorPrimary : colorSecondary;
+        if (editing) color = Color.BLUE;
+        int r = Mathf.clamp(Color.red(color) - 30, 0, 255);
+        int g = Mathf.clamp(Color.green(color) - 30, 0, 255);
+        int b = Mathf.clamp(Color.blue(color) - 30, 0, 255);
         return Color.rgb(r, g, b);
     }
 

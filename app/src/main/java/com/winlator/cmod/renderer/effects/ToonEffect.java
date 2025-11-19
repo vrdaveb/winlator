@@ -41,7 +41,7 @@ public class ToonEffect extends Effect {
                     "    float edgeThreshold = 0.2;", // Threshold to detect edges
                     "    vec2 offset = vec2(1.0) / resolution;", // Offset for neighboring pixels
 
-                    "    vec3 colorCenter = texture2D(screenTexture, uv).rgb;",
+                    "    vec4 colorCenter = texture2D(screenTexture, uv);",
                     "    vec3 colorLeft = texture2D(screenTexture, uv - vec2(offset.x, 0.0)).rgb;",
                     "    vec3 colorRight = texture2D(screenTexture, uv + vec2(offset.x, 0.0)).rgb;",
                     "    vec3 colorUp = texture2D(screenTexture, uv - vec2(0.0, offset.y)).rgb;",
@@ -55,10 +55,10 @@ public class ToonEffect extends Effect {
                     "    float edgeFactor = step(edgeThreshold, diffHorizontal + diffVertical);",
 
                     // If edge detected, darken the pixel to create an outline effect
-                    "    vec3 outlineColor = mix(colorCenter, vec3(0.0), edgeFactor);",
+                    "    vec3 outlineColor = mix(colorCenter.rgb, vec3(0.0), edgeFactor);",
 
                     // Set the final fragment color
-                    "    gl_FragColor = vec4(outlineColor, 1.0);",
+                    "    gl_FragColor = vec4(outlineColor, colorCenter.a);",
                     "}"
             });
         }

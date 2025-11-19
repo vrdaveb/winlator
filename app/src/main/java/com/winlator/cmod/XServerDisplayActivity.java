@@ -414,7 +414,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             menu.findItem(R.id.main_menu_motion_controls).setVisible(false);
             menu.findItem(R.id.main_menu_input_controls).setVisible(false);
             menu.findItem(R.id.main_menu_magnifier).setVisible(false);
-            menu.findItem(R.id.main_menu_screen_effects).setVisible(false);
             menu.findItem(R.id.main_menu_pip_mode).setVisible(false);
             menu.findItem(R.id.main_menu_touchpad_help).setVisible(false);
         } else {

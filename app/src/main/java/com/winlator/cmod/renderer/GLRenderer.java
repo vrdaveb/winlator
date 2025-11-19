@@ -48,6 +48,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     private String forceFullscreenWMClass = null;
     private boolean fullscreen = false;
     private boolean toggleFullscreen = false;
+    private boolean xrImmersive = false;
     public boolean viewportNeedsUpdate = true;
     private boolean cursorVisible = true;
     private boolean rootWindowDownsized = false;
@@ -119,12 +120,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
         }
 
-        drawFrame();
-    }
-
-    public void drawFrame() {
+        // Prepare XR frame
         boolean xrFrame = false;
-        boolean xrImmersive = false;
+        xrImmersive = false;
         if (XrActivity.isEnabled(null)) {
             XrActivity.updateControllers();
             fullscreen = XrActivity.getVR();
@@ -134,6 +132,22 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             fullscreen = false;
         }
 
+        // Apply all the effects using EffectComposer
+        if (effectComposer.hasEffects()) {
+            effectComposer.render();  // <-- This line applies the effects
+        } else {
+            drawFrame();
+        }
+
+        // Finalize XR frame if supported
+        if (xrFrame) {
+            renderDialog();
+            XrActivity.getInstance().endFrame();
+            xServerView.requestRender();
+        }
+    }
+
+    public void drawFrame() {
         // Update the viewport if necessary
         if (viewportNeedsUpdate && magnifierEnabled) {
             if (fullscreen) {
@@ -192,18 +206,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         // Disable scissor test if magnifier is disabled and not in fullscreen mode
         if (!magnifierEnabled && !fullscreen) {
             GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
-        }
-
-        // Apply all the effects using EffectComposer
-        if (effectComposer.hasEffects()) {
-            effectComposer.render();  // <-- This line applies the effects
-        }
-
-        // Finalize XR frame if supported
-        if (xrFrame) {
-            renderDialog();
-            XrActivity.getInstance().endFrame();
-            xServerView.requestRender();
         }
     }
 

@@ -110,9 +110,23 @@ public class ScreenEffectDialog extends ContentDialog {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        Runnable applyAll = () -> applyEffects(colorEffect, renderer, fxaaEffect, crtEffect, toonEffect, ntscEffect);
         Button resetButton = findViewById(R.id.BTReset);
         resetButton.setVisibility(View.VISIBLE);
-        resetButton.setOnClickListener(v -> resetSettings());
+        resetButton.setOnClickListener(view -> {
+            resetSettings();
+            applyAll.run();
+        });
+
+        // Apply changes immediatelly
+        cbEnableFXAA.setOnCheckedChangeListener((compoundButton, b) -> applyAll.run());
+        cbEnableCRTShader.setOnCheckedChangeListener((compoundButton, b) -> applyAll.run());
+        cbEnableToonShader.setOnCheckedChangeListener((compoundButton, b) -> applyAll.run());
+        cbEnableNTSCEffect.setOnCheckedChangeListener((compoundButton, b) -> applyAll.run());
+        sbBrightness.setOnValueChangeListener((seekBar, value) -> applyAll.run());
+        sbContrast.setOnValueChangeListener((seekBar, value) -> applyAll.run());
+        sbGamma.setOnValueChangeListener((seekBar, value) -> applyAll.run());
+        findViewById(R.id.BTCancel).setVisibility(View.GONE);
 
         findViewById(R.id.BTConfirm).setOnClickListener(v -> {
             Log.d(TAG, "BTConfirm clicked. Preparing to save profile and apply effects.");
@@ -267,6 +281,7 @@ public class ScreenEffectDialog extends ContentDialog {
 
     public void applyEffects(ColorEffect colorEffect, GLRenderer renderer, FXAAEffect fxaaEffect, CRTEffect crtEffect, ToonEffect toonEffect, NTSCCombinedEffect ntscEffect) {
         Log.d(TAG, "applyEffects() called");
+        renderer.getEffectComposer().removeAll();
 
         float brightness = sbBrightness.getValue();
         float contrast = sbContrast.getValue();
