@@ -59,20 +59,18 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
-    }
-    if (strcmp(gManufacturer, "META") == 0 || strcmp(gManufacturer, "OCULUS") == 0) {
-        memset(&xr_module_engine, 0, sizeof(xr_module_engine));
-        xr_module_engine.PlatformFlag[PLATFORM_CONTROLLER_QUEST] = true;
-        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
-        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
-        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
-    }
-    if (strcmp(gManufacturer, "PLAY FOR DREAM") == 0) {
+    } else if (strcmp(gManufacturer, "PLAY FOR DREAM") == 0) {
         memset(&xr_module_engine, 0, sizeof(xr_module_engine));
         xr_module_engine.PlatformFlag[PLATFORM_CONTROLLER_QUEST] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_INSTANCE] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
+    } else {
+        memset(&xr_module_engine, 0, sizeof(xr_module_engine));
+        xr_module_engine.PlatformFlag[PLATFORM_CONTROLLER_QUEST] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PASSTHROUGH] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
+        xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
     }
     xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_WIDTH] = width;
     xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT] = height;
