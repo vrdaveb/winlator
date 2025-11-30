@@ -320,15 +320,9 @@ public class SettingsFragment extends Fragment {
 
         final CheckBox cbUseXR = view.findViewById(R.id.CBUseXR);
         cbUseXR.setChecked(preferences.getBoolean("use_xr", true));
-        if (!XrActivity.isSupported()) {
-            cbUseXR.setVisibility(View.GONE);
-        }
 
         final CheckBox cbUsePT = view.findViewById(R.id.CBUsePT);
         cbUsePT.setChecked(preferences.getBoolean("use_pt", true));
-        if (!XrActivity.isSupported()) {
-            cbUsePT.setVisibility(View.GONE);
-        }
 
         final CheckBox cbEnableWineDebug = view.findViewById(R.id.CBEnableWineDebug);
         cbEnableWineDebug.setChecked(preferences.getBoolean("enable_wine_debug", false));

@@ -40,8 +40,6 @@ import static com.winlator.cmod.xr.XrInterface.ControllerButton;
  */
 
 public class XrActivity extends XServerDisplayActivity implements TextWatcher {
-    private static boolean isDeviceDetectionFinished = false;
-    private static boolean isDeviceSupported = false;
     private static boolean isEnabled = false;
     private static boolean isImmersive = false;
     private static boolean isSBS = false;
@@ -174,26 +172,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         if (context != null) {
             isEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("use_xr", true);
         }
-        return isSupported() && isEnabled;
-    }
-
-    public static boolean isSupported() {
-        if (!isDeviceDetectionFinished) {
-            if (Build.MANUFACTURER.compareToIgnoreCase("META") == 0) {
-                isDeviceSupported = true;
-            }
-            if (Build.MANUFACTURER.compareToIgnoreCase("OCULUS") == 0) {
-                isDeviceSupported = true;
-            }
-            if (Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0) {
-                isDeviceSupported = true;
-            }
-            if (Build.MANUFACTURER.compareToIgnoreCase("PLAY FOR DREAM") == 0) {
-                isDeviceSupported = true;
-            }
-            isDeviceDetectionFinished = true;
-        }
-        return isDeviceSupported;
+        return isEnabled;
     }
 
     @Override
