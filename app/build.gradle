@@ -33,7 +33,7 @@ android {
         targetSdkVersion 28
 
         versionCode 20
-        versionName "Cmod-v13.1"
+        versionName "arf-01"
 
         // External native build from Winlator
         externalNativeBuild {
@@ -113,6 +113,7 @@ dependencies {
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'com.google.android.material:material:1.6.1'
 }
+
 
 
 
