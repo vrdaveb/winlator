@@ -121,7 +121,6 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         XrInputUpdate(&xr_module_engine, &xr_module_input);
 
         // Set render canvas
-        int mode = immersive || xr_vr ? RENDER_MODE_MONO_6DOF : RENDER_MODE_MONO_SCREEN;
         xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_CURVED] = xr_curvedScreen;
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = xr_curvedScreen ? 1.0f : 5.0f;
         xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE] = 1.1f;
@@ -130,8 +129,8 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
         xr_module_renderer.ConfigInt[CONFIG_PASSTHROUGH] = !immersive && !xr_vr && xr_usePassthrough;
         xr_module_renderer.ConfigInt[CONFIG_IMMERSIVE] = immersive && !xr_vr;
         xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC] = xr_vr;
-        xr_module_renderer.ConfigInt[CONFIG_MODE] = mode;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
+        xr_module_renderer.ConfigInt[CONFIG_VR] = immersive || xr_vr;
 
         // Recenter on the first frame
         static bool first_frame = true;

@@ -20,11 +20,11 @@ enum XrConfigFloat
 enum XrConfigInt
 {
     // switching between modes
-    CONFIG_MODE,
     CONFIG_FRAMESYNC,
     CONFIG_PASSTHROUGH,
     CONFIG_IMMERSIVE,
     CONFIG_SBS,
+    CONFIG_VR,
     // viewport setup
     CONFIG_VIEWPORT_CURVED,
     CONFIG_VIEWPORT_WIDTH,
@@ -34,14 +34,6 @@ enum XrConfigInt
 
     // end
     CONFIG_INT_MAX
-};
-
-enum XrRenderMode
-{
-    RENDER_MODE_MONO_SCREEN,
-    RENDER_MODE_STEREO_SCREEN,
-    RENDER_MODE_MONO_6DOF,
-    RENDER_MODE_STEREO_6DOF
 };
 
 struct XrRenderer {

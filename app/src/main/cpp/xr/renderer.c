@@ -255,13 +255,12 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     }
 
     int frame = renderer->FrameSync;
-    int mode = renderer->ConfigInt[CONFIG_MODE];
+    struct XrFramebuffer* framebuffer = &renderer->Framebuffer[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
     XrCompositionLayerProjectionView projection_layer_elements[2] = {};
-    if ((mode == RENDER_MODE_MONO_6DOF) || (mode == RENDER_MODE_STEREO_6DOF))
+    if (renderer->ConfigInt[CONFIG_VR])
     {
         renderer->ConfigFloat[CONFIG_MENU_YAW] = renderer->HmdOrientation.y;
 
-        struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
         if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
             XrColor4f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
             if ((color.g < 1) && (color.b < 1) && (color.a > 200)) {
@@ -276,12 +275,6 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             {
                 x += w;
             }
-            else if (mode != RENDER_MODE_MONO_6DOF)
-            {
-                framebuffer = &renderer->Framebuffer[eye];
-                pose = renderer->InvertedViewPose[eye][frame];
-            }
-;
             if (renderer->ConfigInt[CONFIG_IMMERSIVE]) {
                 XrVector3f roll_axis = {0, 0, 1};
                 XrVector3f rotation = XrQuaternionfEulerAngles(pose.orientation);
@@ -313,7 +306,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
         renderer->Layers[renderer->LayerCount++].projection = projection_layer;
     }
-    else if ((mode == RENDER_MODE_MONO_SCREEN) || (mode == RENDER_MODE_STEREO_SCREEN))
+    else
     {
         // Flat screen pose
         float distance = renderer->ConfigFloat[CONFIG_CANVAS_DISTANCE];
@@ -326,7 +319,6 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         XrVector3f yaw_axis = {0, 1, 0};
         XrQuaternionf pitch = XrQuaternionfCreateFromVectorAngle(pitch_axis, -menu_pitch);
         XrQuaternionf yaw = XrQuaternionfCreateFromVectorAngle(yaw_axis, menu_yaw);
-        struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
 
         if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED])
         {
@@ -357,17 +349,9 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                 cylinder_layer.subImage.imageRect.offset.x = w;
                 renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
             }
-            else if (mode == RENDER_MODE_MONO_SCREEN)
-            {
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
-                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
-            }
             else
             {
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-                cylinder_layer.subImage.swapchain = renderer->Framebuffer[1].Handle;
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
                 renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
             }
         } else {
@@ -397,24 +381,12 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                 quad_layer.subImage.imageRect.offset.x = w;
                 renderer->Layers[renderer->LayerCount++].quad = quad_layer;
             }
-            else if (mode == RENDER_MODE_MONO_SCREEN)
+            else
             {
                 quad_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
                 renderer->Layers[renderer->LayerCount++].quad = quad_layer;
             }
-            else
-            {
-                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-                quad_layer.subImage.swapchain = renderer->Framebuffer[1].Handle;
-                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-            }
         }
-    }
-    else
-    {
-        assert(false);
     }
 
     // Compose the layers for this frame.
@@ -432,9 +404,8 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     end_frame_info.layers = layers;
     OXR(xrEndFrame(engine->Session, &end_frame_info));
 
-    struct XrFramebuffer* frameBuffer = &renderer->Framebuffer[0];
-    frameBuffer->SwapchainIndex++;
-    frameBuffer->SwapchainIndex %= frameBuffer->SwapchainLength;
+    framebuffer->SwapchainIndex++;
+    framebuffer->SwapchainIndex %= framebuffer->SwapchainLength;
 }
 
 void XrRendererBindFramebuffer(struct XrRenderer* renderer)
