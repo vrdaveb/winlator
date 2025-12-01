@@ -275,6 +275,13 @@
                         android:layout_marginTop="8dp"
                         android:text="@string/use_pt" />
 
+                    <CheckBox
+                        android:id="@+id/CBUseCS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/use_curved_screen" />
+
                     <!-- First ever mod =D - Cursor Lock Checkbox. You now live with relative mouse mode, Bye, Felicia -->
 <!--                    <CheckBox-->
 <!--                        android:id="@+id/CBCursorLock"-->

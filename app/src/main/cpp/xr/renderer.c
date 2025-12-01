@@ -326,46 +326,90 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         XrVector3f yaw_axis = {0, 1, 0};
         XrQuaternionf pitch = XrQuaternionfCreateFromVectorAngle(pitch_axis, -menu_pitch);
         XrQuaternionf yaw = XrQuaternionfCreateFromVectorAngle(yaw_axis, menu_yaw);
-
-        // Setup quad layer
         struct XrFramebuffer* framebuffer = &renderer->Framebuffer[0];
-        XrCompositionLayerQuad quad_layer = {};
-        quad_layer.type = XR_TYPE_COMPOSITION_LAYER_QUAD;
-        quad_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
-        quad_layer.space = engine->CurrentSpace;
-        memset(&quad_layer.subImage, 0, sizeof(XrSwapchainSubImage));
-        quad_layer.subImage.imageRect.offset.x = x;
-        quad_layer.subImage.imageRect.offset.y = y;
-        quad_layer.subImage.imageRect.extent.width = w;
-        quad_layer.subImage.imageRect.extent.height = h;
-        quad_layer.subImage.swapchain = framebuffer->Handle;
-        quad_layer.subImage.imageArrayIndex = 0;
-        quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
-        quad_layer.pose.position = pos;
-        quad_layer.size.width = 6;
-        quad_layer.size.height = 6;
 
-        // Build the cylinder layer
-        if (renderer->ConfigInt[CONFIG_SBS])
+        if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED])
         {
-            quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-            renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-            quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-            quad_layer.subImage.imageRect.offset.x = w;
-            renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-        }
-        else if (mode == RENDER_MODE_MONO_SCREEN)
-        {
-            quad_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
-            renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-        }
-        else
-        {
-            quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-            renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-            quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-            quad_layer.subImage.swapchain = renderer->Framebuffer[1].Handle;
-            renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+            // Setup the cylinder layer
+            XrCompositionLayerCylinderKHR cylinder_layer = {};
+            cylinder_layer.type = XR_TYPE_COMPOSITION_LAYER_CYLINDER_KHR;
+            cylinder_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+            cylinder_layer.space = engine->CurrentSpace;
+            memset(&cylinder_layer.subImage, 0, sizeof(XrSwapchainSubImage));
+            cylinder_layer.subImage.imageRect.offset.x = x;
+            cylinder_layer.subImage.imageRect.offset.y = y;
+            cylinder_layer.subImage.imageRect.extent.width = w;
+            cylinder_layer.subImage.imageRect.extent.height = h;
+            cylinder_layer.subImage.swapchain = framebuffer->Handle;
+            cylinder_layer.subImage.imageArrayIndex = 0;
+            cylinder_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
+            cylinder_layer.pose.position = pos;
+            cylinder_layer.radius = 2.0f;
+            cylinder_layer.centralAngle = (float)(M_PI * 0.5);
+            cylinder_layer.aspectRatio = 1;
+
+            // Build the layer
+            if (renderer->ConfigInt[CONFIG_SBS])
+            {
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                cylinder_layer.subImage.imageRect.offset.x = w;
+                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+            }
+            else if (mode == RENDER_MODE_MONO_SCREEN)
+            {
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
+                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+            }
+            else
+            {
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                cylinder_layer.subImage.swapchain = renderer->Framebuffer[1].Handle;
+                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+            }
+        } else {
+            // Setup quad layer
+            XrCompositionLayerQuad quad_layer = {};
+            quad_layer.type = XR_TYPE_COMPOSITION_LAYER_QUAD;
+            quad_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+            quad_layer.space = engine->CurrentSpace;
+            memset(&quad_layer.subImage, 0, sizeof(XrSwapchainSubImage));
+            quad_layer.subImage.imageRect.offset.x = x;
+            quad_layer.subImage.imageRect.offset.y = y;
+            quad_layer.subImage.imageRect.extent.width = w;
+            quad_layer.subImage.imageRect.extent.height = h;
+            quad_layer.subImage.swapchain = framebuffer->Handle;
+            quad_layer.subImage.imageArrayIndex = 0;
+            quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
+            quad_layer.pose.position = pos;
+            quad_layer.size.width = 6;
+            quad_layer.size.height = 6;
+
+            // Build the layer
+            if (renderer->ConfigInt[CONFIG_SBS])
+            {
+                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                quad_layer.subImage.imageRect.offset.x = w;
+                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+            }
+            else if (mode == RENDER_MODE_MONO_SCREEN)
+            {
+                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
+                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+            }
+            else
+            {
+                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                quad_layer.subImage.swapchain = renderer->Framebuffer[1].Handle;
+                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+            }
         }
     }
     else

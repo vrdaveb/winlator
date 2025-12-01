@@ -11,6 +11,7 @@ struct XrEngine xr_module_engine;
 struct XrInput xr_module_input;
 struct XrRenderer xr_module_renderer;
 bool xr_initialized = false;
+bool xr_curvedScreen = false;
 bool xr_usePassthrough = false;
 bool xr_vr = false;
 float xr_fovx = 0;
@@ -121,7 +122,8 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
 
         // Set render canvas
         int mode = immersive || xr_vr ? RENDER_MODE_MONO_6DOF : RENDER_MODE_MONO_SCREEN;
-        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
+        xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_CURVED] = xr_curvedScreen;
+        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = xr_curvedScreen ? 1.0f : 5.0f;
         xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE] = 1.1f;
         if (xr_fovx > 1) xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVX] = xr_fovx;
         if (xr_fovy > 1) xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVY] = xr_fovy;
@@ -246,6 +248,11 @@ JNIEXPORT void JNICALL
 Java_com_winlator_cmod_XrActivity_nativeSetFoV(JNIEnv *env, jobject obj, jfloat x, jfloat y) {
     xr_fovx = x;
     xr_fovy = y;
+}
+
+JNIEXPORT void JNICALL
+Java_com_winlator_cmod_XrActivity_nativeSetCurvedScreen(JNIEnv *env, jobject obj, jboolean enabled) {
+    xr_curvedScreen = enabled;
 }
 
 JNIEXPORT void JNICALL

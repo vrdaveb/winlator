@@ -67,6 +67,7 @@ typedef union
 {
   XrCompositionLayerProjection projection;
   XrCompositionLayerQuad quad;
+  XrCompositionLayerCylinderKHR cylinder;
   XrCompositionLayerPassthroughFB passthrough;
 } XrCompositorLayer;
 

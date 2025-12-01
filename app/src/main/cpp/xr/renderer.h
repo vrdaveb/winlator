@@ -26,6 +26,7 @@ enum XrConfigInt
     CONFIG_IMMERSIVE,
     CONFIG_SBS,
     // viewport setup
+    CONFIG_VIEWPORT_CURVED,
     CONFIG_VIEWPORT_WIDTH,
     CONFIG_VIEWPORT_HEIGHT,
     // render status
