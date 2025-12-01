@@ -73,7 +73,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         usePassthrough = prefs.getBoolean("use_pt", true);
         nativeSetUsePT(usePassthrough);
 
-        boolean curvedScreen = prefs.getBoolean("use_cs", true);
+        boolean curvedScreen = prefs.getBoolean("use_cs", false);
         nativeSetCurvedScreen(curvedScreen);
     }
 
