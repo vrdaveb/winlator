@@ -7,6 +7,7 @@ enum XrConfigFloat
 {
     // 2D canvas positioning
     CONFIG_CANVAS_DISTANCE,
+    CONFIG_CANVAS_SIZE,
     CONFIG_MENU_PITCH,
     CONFIG_MENU_YAW,
     CONFIG_RECENTER_YAW,

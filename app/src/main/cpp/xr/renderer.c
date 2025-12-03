@@ -309,9 +309,16 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     else
     {
         // Flat screen pose
+        float radius = 1.0f;
+        float size = renderer->ConfigFloat[CONFIG_CANVAS_SIZE];
         float distance = renderer->ConfigFloat[CONFIG_CANVAS_DISTANCE];
         float menu_pitch = ToRadians(renderer->ConfigFloat[CONFIG_MENU_PITCH]);
         float menu_yaw = ToRadians(renderer->ConfigFloat[CONFIG_MENU_YAW]);
+        if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED]) {
+            radius *= size;
+            distance -= radius;
+            distance -= 3.0f; //approximately the same look like the flat screen
+        }
         XrVector3f pos = {renderer->InvertedViewPose[0][frame].position.x - sinf(menu_yaw) * cosf(menu_pitch) * distance,
                           renderer->InvertedViewPose[0][frame].position.y - sinf(menu_pitch) * distance,
                           renderer->InvertedViewPose[0][frame].position.z - cosf(menu_yaw) * cosf(menu_pitch) * distance};
@@ -336,7 +343,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             cylinder_layer.subImage.imageArrayIndex = 0;
             cylinder_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
             cylinder_layer.pose.position = pos;
-            cylinder_layer.radius = 2.0f;
+            cylinder_layer.radius = radius;
             cylinder_layer.centralAngle = (float)(M_PI * 0.5);
             cylinder_layer.aspectRatio = 1;
 
@@ -369,8 +376,8 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             quad_layer.subImage.imageArrayIndex = 0;
             quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
             quad_layer.pose.position = pos;
-            quad_layer.size.width = 6;
-            quad_layer.size.height = 6;
+            quad_layer.size.width = 4 * size;
+            quad_layer.size.height = 4 * size;
 
             // Build the layer
             if (renderer->ConfigInt[CONFIG_SBS])

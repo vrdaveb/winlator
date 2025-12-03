@@ -14,6 +14,7 @@ bool xr_initialized = false;
 bool xr_curvedScreen = false;
 bool xr_usePassthrough = false;
 bool xr_vr = false;
+float xr_aspect = 0;
 float xr_fovx = 0;
 float xr_fovy = 0;
 
@@ -74,7 +75,8 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
     }
     xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_WIDTH] = width;
-    xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT] = height;
+    xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT] = width; //Use square resolution
+    xr_aspect = (float)width / (float)height;
 
     // Get Java VM
     JavaVM* vm;
@@ -122,7 +124,8 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
 
         // Set render canvas
         xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_CURVED] = xr_curvedScreen;
-        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = xr_curvedScreen ? 1.0f : 5.0f;
+        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
+        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_SIZE] = xr_aspect;
         xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE] = 1.1f;
         if (xr_fovx > 1) xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVX] = xr_fovx;
         if (xr_fovy > 1) xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVY] = xr_fovy;
