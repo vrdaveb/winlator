@@ -22,6 +22,7 @@
         android:id="@+id/action_favorite_star"
         android:title="Favorite"
         android:icon="@drawable/ic_star_border"
+        android:visible="false"
     app:showAsAction="ifRoom" />
 
     <item
@@ -29,6 +30,7 @@
         android:title="Big Picture Mode"
         android:icon="@drawable/ic_big_picture_mode"
         android:color="#FFFFFF"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
 
