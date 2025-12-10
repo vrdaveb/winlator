@@ -255,143 +255,167 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     }
 
     int frame = renderer->FrameSync;
-    struct XrFramebuffer* framebuffer = &renderer->Framebuffer[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
+    bool backlight = renderer->ConfigInt[CONFIG_BACKLIGHT];
     XrCompositionLayerProjectionView projection_layer_elements[2] = {};
-    if (renderer->ConfigInt[CONFIG_VR])
-    {
-        renderer->ConfigFloat[CONFIG_MENU_YAW] = renderer->HmdOrientation.y;
-
-        if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
-            XrColor4f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
-            if ((color.g < 1) && (color.b < 1) && (color.a > 200)) {
-                frame = (int)(color.r + 0.5);
-            }
-        }
-
-        for (int eye = 0; eye < XrMaxNumEyes; eye++)
+    for (int fbo = (backlight ? 1 : 0); fbo >= 0; fbo--) {
+        struct XrFramebuffer* framebuffer = &renderer->Framebuffer[fbo];
+        if (renderer->ConfigInt[CONFIG_VR])
         {
-            XrPosef pose = renderer->InvertedViewPose[0][frame];
-            if (renderer->ConfigInt[CONFIG_SBS] && (eye == 1))
+            renderer->ConfigFloat[CONFIG_MENU_YAW] = renderer->HmdOrientation.y;
+
+            if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
+                XrColor4f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
+                if ((color.g < 1) && (color.b < 1) && (color.a > 200)) {
+                    frame = (int)(color.r + 0.5);
+                }
+            }
+
+            for (int eye = 0; eye < XrMaxNumEyes; eye++)
             {
-                x += w;
+                XrPosef pose = renderer->InvertedViewPose[0][frame];
+                if (renderer->ConfigInt[CONFIG_SBS] && (eye == 1))
+                {
+                    x += w;
+                }
+                if (renderer->ConfigInt[CONFIG_IMMERSIVE]) {
+                    XrVector3f roll_axis = {0, 0, 1};
+                    XrVector3f rotation = XrQuaternionfEulerAngles(pose.orientation);
+                    XrQuaternionf invRoll = XrQuaternionfCreateFromVectorAngle(roll_axis, ToRadians(rotation.z));
+                    pose.orientation = XrQuaternionfMultiply(pose.orientation, invRoll);
+                }
+
+                memset(&projection_layer_elements[eye], 0, sizeof(XrCompositionLayerProjectionView));
+                projection_layer_elements[eye].type = XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;
+                projection_layer_elements[eye].pose = pose;
+                projection_layer_elements[eye].fov = fov;
+
+                memset(&projection_layer_elements[eye].subImage, 0, sizeof(XrSwapchainSubImage));
+                projection_layer_elements[eye].subImage.swapchain = framebuffer->Handle;
+                projection_layer_elements[eye].subImage.imageRect.offset.x = x;
+                projection_layer_elements[eye].subImage.imageRect.offset.y = y;
+                projection_layer_elements[eye].subImage.imageRect.extent.width = w;
+                projection_layer_elements[eye].subImage.imageRect.extent.height = h;
+                projection_layer_elements[eye].subImage.imageArrayIndex = 0;
             }
-            if (renderer->ConfigInt[CONFIG_IMMERSIVE]) {
-                XrVector3f roll_axis = {0, 0, 1};
-                XrVector3f rotation = XrQuaternionfEulerAngles(pose.orientation);
-                XrQuaternionf invRoll = XrQuaternionfCreateFromVectorAngle(roll_axis, ToRadians(rotation.z));
-                pose.orientation = XrQuaternionfMultiply(pose.orientation, invRoll);
-            }
 
-            memset(&projection_layer_elements[eye], 0, sizeof(XrCompositionLayerProjectionView));
-            projection_layer_elements[eye].type = XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;
-            projection_layer_elements[eye].pose = pose;
-            projection_layer_elements[eye].fov = fov;
+            XrCompositionLayerProjection projection_layer = {};
+            projection_layer.type = XR_TYPE_COMPOSITION_LAYER_PROJECTION;
+            projection_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+            projection_layer.layerFlags |= XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
+            projection_layer.space = engine->CurrentSpace;
+            projection_layer.viewCount = XrMaxNumEyes;
+            projection_layer.views = projection_layer_elements;
 
-            memset(&projection_layer_elements[eye].subImage, 0, sizeof(XrSwapchainSubImage));
-            projection_layer_elements[eye].subImage.swapchain = framebuffer->Handle;
-            projection_layer_elements[eye].subImage.imageRect.offset.x = x;
-            projection_layer_elements[eye].subImage.imageRect.offset.y = y;
-            projection_layer_elements[eye].subImage.imageRect.extent.width = w;
-            projection_layer_elements[eye].subImage.imageRect.extent.height = h;
-            projection_layer_elements[eye].subImage.imageArrayIndex = 0;
+            renderer->Layers[renderer->LayerCount++].projection = projection_layer;
         }
-
-        XrCompositionLayerProjection projection_layer = {};
-        projection_layer.type = XR_TYPE_COMPOSITION_LAYER_PROJECTION;
-        projection_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
-        projection_layer.layerFlags |= XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
-        projection_layer.space = engine->CurrentSpace;
-        projection_layer.viewCount = XrMaxNumEyes;
-        projection_layer.views = projection_layer_elements;
-
-        renderer->Layers[renderer->LayerCount++].projection = projection_layer;
-    }
-    else
-    {
-        // Flat screen pose
-        float radius = 1.0f;
-        float size = renderer->ConfigFloat[CONFIG_CANVAS_SIZE];
-        float distance = renderer->ConfigFloat[CONFIG_CANVAS_DISTANCE];
-        float menu_pitch = ToRadians(renderer->ConfigFloat[CONFIG_MENU_PITCH]);
-        float menu_yaw = ToRadians(renderer->ConfigFloat[CONFIG_MENU_YAW]);
-        if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED]) {
-            radius *= size;
-            distance -= radius;
-            distance -= 3.0f; //approximately the same look like the flat screen
-        }
-        XrVector3f pos = {renderer->InvertedViewPose[0][frame].position.x - sinf(menu_yaw) * cosf(menu_pitch) * distance,
-                          renderer->InvertedViewPose[0][frame].position.y - sinf(menu_pitch) * distance,
-                          renderer->InvertedViewPose[0][frame].position.z - cosf(menu_yaw) * cosf(menu_pitch) * distance};
-        XrVector3f pitch_axis = {1, 0, 0};
-        XrVector3f yaw_axis = {0, 1, 0};
-        XrQuaternionf pitch = XrQuaternionfCreateFromVectorAngle(pitch_axis, -menu_pitch);
-        XrQuaternionf yaw = XrQuaternionfCreateFromVectorAngle(yaw_axis, menu_yaw);
-
-        if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED])
+        else
         {
-            // Setup the cylinder layer
-            XrCompositionLayerCylinderKHR cylinder_layer = {};
-            cylinder_layer.type = XR_TYPE_COMPOSITION_LAYER_CYLINDER_KHR;
-            cylinder_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
-            cylinder_layer.space = engine->CurrentSpace;
-            memset(&cylinder_layer.subImage, 0, sizeof(XrSwapchainSubImage));
-            cylinder_layer.subImage.imageRect.offset.x = x;
-            cylinder_layer.subImage.imageRect.offset.y = y;
-            cylinder_layer.subImage.imageRect.extent.width = w;
-            cylinder_layer.subImage.imageRect.extent.height = h;
-            cylinder_layer.subImage.swapchain = framebuffer->Handle;
-            cylinder_layer.subImage.imageArrayIndex = 0;
-            cylinder_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
-            cylinder_layer.pose.position = pos;
-            cylinder_layer.radius = radius;
-            cylinder_layer.centralAngle = (float)(M_PI * 0.5);
-            cylinder_layer.aspectRatio = 1;
+            // Flat screen pose
+            float radius = 1.0f;
+            float size = renderer->ConfigFloat[CONFIG_CANVAS_SIZE];
+            float distance = renderer->ConfigFloat[CONFIG_CANVAS_DISTANCE];
+            float menu_pitch = ToRadians(renderer->ConfigFloat[CONFIG_MENU_PITCH]);
+            float menu_yaw = ToRadians(renderer->ConfigFloat[CONFIG_MENU_YAW]);
+            if (fbo == 1) {
+                size *= 8;
+            }
+            if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED]) {
+                radius *= size;
+                distance -= radius;
+                distance -= 3.0f; //approximately the same look like the flat screen
+            }
+            XrVector3f pos = {renderer->InvertedViewPose[0][frame].position.x - sinf(menu_yaw) * cosf(menu_pitch) * distance,
+                              renderer->InvertedViewPose[0][frame].position.y - sinf(menu_pitch) * distance,
+                              renderer->InvertedViewPose[0][frame].position.z - cosf(menu_yaw) * cosf(menu_pitch) * distance};
+            XrVector3f pitch_axis = {1, 0, 0};
+            XrVector3f yaw_axis = {0, 1, 0};
+            XrQuaternionf pitch = XrQuaternionfCreateFromVectorAngle(pitch_axis, -menu_pitch);
+            XrQuaternionf yaw = XrQuaternionfCreateFromVectorAngle(yaw_axis, menu_yaw);
 
-            // Build the layer
-            if (renderer->ConfigInt[CONFIG_SBS])
+            if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED])
             {
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-                cylinder_layer.subImage.imageRect.offset.x = w;
-                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
-            }
-            else
-            {
-                cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
-                renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
-            }
-        } else {
-            // Setup quad layer
-            XrCompositionLayerQuad quad_layer = {};
-            quad_layer.type = XR_TYPE_COMPOSITION_LAYER_QUAD;
-            quad_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
-            quad_layer.space = engine->CurrentSpace;
-            memset(&quad_layer.subImage, 0, sizeof(XrSwapchainSubImage));
-            quad_layer.subImage.imageRect.offset.x = x;
-            quad_layer.subImage.imageRect.offset.y = y;
-            quad_layer.subImage.imageRect.extent.width = w;
-            quad_layer.subImage.imageRect.extent.height = h;
-            quad_layer.subImage.swapchain = framebuffer->Handle;
-            quad_layer.subImage.imageArrayIndex = 0;
-            quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
-            quad_layer.pose.position = pos;
-            quad_layer.size.width = 4 * size;
-            quad_layer.size.height = 4 * size;
+                // Setup the cylinder layer
+                XrCompositionLayerCylinderKHR cylinder_layer = {};
+                cylinder_layer.type = XR_TYPE_COMPOSITION_LAYER_CYLINDER_KHR;
+                cylinder_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+                cylinder_layer.space = engine->CurrentSpace;
+                memset(&cylinder_layer.subImage, 0, sizeof(XrSwapchainSubImage));
+                cylinder_layer.subImage.imageRect.offset.x = x;
+                cylinder_layer.subImage.imageRect.offset.y = y;
+                cylinder_layer.subImage.imageRect.extent.width = w;
+                cylinder_layer.subImage.imageRect.extent.height = h;
+                cylinder_layer.subImage.swapchain = framebuffer->Handle;
+                cylinder_layer.subImage.imageArrayIndex = 0;
+                cylinder_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
+                cylinder_layer.pose.position = pos;
+                cylinder_layer.radius = radius;
+                cylinder_layer.centralAngle = (float)(M_PI * 0.5);
+                cylinder_layer.aspectRatio = 1;
 
-            // Build the layer
-            if (renderer->ConfigInt[CONFIG_SBS])
-            {
-                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
-                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
-                quad_layer.subImage.imageRect.offset.x = w;
-                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
-            }
-            else
-            {
-                quad_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
-                renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                // Build the layer
+                if (renderer->ConfigInt[CONFIG_SBS])
+                {
+                    cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                    cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                    cylinder_layer.subImage.imageRect.offset.x = w;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                }
+                else
+                {
+                    cylinder_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].cylinder = cylinder_layer;
+                }
+            } else {
+                // Setup quad layer
+                XrCompositionLayerQuad quad_layer = {};
+                quad_layer.type = XR_TYPE_COMPOSITION_LAYER_QUAD;
+                quad_layer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+                quad_layer.space = engine->CurrentSpace;
+                memset(&quad_layer.subImage, 0, sizeof(XrSwapchainSubImage));
+                quad_layer.subImage.imageRect.offset.x = x;
+                quad_layer.subImage.imageRect.offset.y = y;
+                quad_layer.subImage.imageRect.extent.width = w;
+                quad_layer.subImage.imageRect.extent.height = h;
+                quad_layer.subImage.swapchain = framebuffer->Handle;
+                quad_layer.subImage.imageArrayIndex = 0;
+                quad_layer.pose.orientation = XrQuaternionfMultiply(pitch, yaw);
+                quad_layer.pose.position = pos;
+                quad_layer.size.width = 4 * size;
+                quad_layer.size.height = 4 * size;
+
+                // Build the layer
+                if (renderer->ConfigInt[CONFIG_SBS])
+                {
+                    quad_layer.eyeVisibility = XR_EYE_VISIBILITY_LEFT;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].quadFX = quad_layer;
+                    quad_layer.eyeVisibility = XR_EYE_VISIBILITY_RIGHT;
+                    quad_layer.subImage.imageRect.offset.x = w;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].quadFX = quad_layer;
+                }
+                else
+                {
+                    quad_layer.eyeVisibility = XR_EYE_VISIBILITY_BOTH;
+                    if (fbo == 0)
+                        renderer->Layers[renderer->LayerCount++].quad = quad_layer;
+                    else
+                        renderer->Layers[renderer->LayerCount++].quadFX = quad_layer;
+                }
             }
         }
     }
@@ -411,8 +435,11 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     end_frame_info.layers = layers;
     OXR(xrEndFrame(engine->Session, &end_frame_info));
 
-    framebuffer->SwapchainIndex++;
-    framebuffer->SwapchainIndex %= framebuffer->SwapchainLength;
+    for (int fbo = (backlight ? 1 : 0); fbo >= 0; fbo--) {
+        struct XrFramebuffer* framebuffer = &renderer->Framebuffer[fbo];
+        framebuffer->SwapchainIndex++;
+        framebuffer->SwapchainIndex %= framebuffer->SwapchainLength;
+    }
 }
 
 void XrRendererBindFramebuffer(struct XrRenderer* renderer)

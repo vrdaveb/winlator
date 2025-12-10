@@ -21,6 +21,7 @@ enum XrConfigFloat
 enum XrConfigInt
 {
     // switching between modes
+    CONFIG_BACKLIGHT,
     CONFIG_FRAMESYNC,
     CONFIG_PASSTHROUGH,
     CONFIG_IMMERSIVE,

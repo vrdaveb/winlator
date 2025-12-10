@@ -14,6 +14,7 @@ import com.winlator.cmod.contentdialog.ContentDialog;
 import com.winlator.cmod.math.Mathf;
 import com.winlator.cmod.math.XForm;
 import com.winlator.cmod.renderer.material.BGRMaterial;
+import com.winlator.cmod.renderer.material.BacklightMaterial;
 import com.winlator.cmod.renderer.material.CursorMaterial;
 import com.winlator.cmod.renderer.material.ShaderMaterial;
 import com.winlator.cmod.renderer.material.WindowMaterial;
@@ -39,6 +40,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public final VertexAttribute quadVertices = new VertexAttribute("position", 2);
     private final float[] tmpXForm1 = XForm.getInstance();
     private final float[] tmpXForm2 = XForm.getInstance();
+    private final BacklightMaterial backlightMaterial = new BacklightMaterial();
     private final BGRMaterial bgrMaterial = new BGRMaterial();
     private final CursorMaterial cursorMaterial = new CursorMaterial();
     private final WindowMaterial windowMaterial = new WindowMaterial();
@@ -128,7 +130,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             XrActivity.updateControllers();
             fullscreen = XrActivity.getVR();
             xrImmersive = XrActivity.getImmersive() || fullscreen;
-            xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS());
+            xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS(), XrActivity.hasBacklight());
         } else {
             fullscreen = false;
         }
@@ -143,6 +145,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         // Finalize XR frame if supported
         if (xrFrame) {
             renderDialog();
+            if (XrActivity.hasBacklight()) {
+                XrActivity.getInstance().switchFBO(1);
+                renderWindows(backlightMaterial,true);
+            }
             XrActivity.getInstance().endFrame();
             xServerView.requestRender();
         }
@@ -199,7 +205,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         }
 
         // Render windows without effects
-        renderWindows(xrImmersive);
+        renderWindows(windowMaterial, xrImmersive);
 
         // Render cursor if enabled
         if (cursorVisible && !rootWindowDownsized) renderCursor();
@@ -284,10 +290,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         }
     }
 
-    private void renderWindows(boolean forceFullscreen) {
-        windowMaterial.use();
-        GLES20.glUniform2f(windowMaterial.getUniformLocation("viewSize"), xServer.screenInfo.width, xServer.screenInfo.height);
-        quadVertices.bind(windowMaterial.programId);
+    private void renderWindows(ShaderMaterial material, boolean forceFullscreen) {
+        material.use();
+        GLES20.glUniform2f(material.getUniformLocation("viewSize"), xServer.screenInfo.width, xServer.screenInfo.height);
+        quadVertices.bind(material.programId);
 
         boolean singleWindow = forceFullscreen;
         try (XLock lock = xServer.lock(XServer.Lockable.DRAWABLE_MANAGER)) {
@@ -301,10 +307,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             }
             if (singleWindow && !renderableWindows.isEmpty()) {
                 RenderableWindow window = renderableWindows.get(renderableWindows.size() - 1);
-                renderDrawable(window.content, window.rootX, window.rootY, windowMaterial, true);
+                renderDrawable(window.content, window.rootX, window.rootY, material, true);
             } else {
                 for (RenderableWindow window : renderableWindows) {
-                    renderDrawable(window.content, window.rootX, window.rootY, windowMaterial, window.forceFullscreen);
+                    renderDrawable(window.content, window.rootX, window.rootY, material, window.forceFullscreen);
                 }
             }
         }

@@ -44,6 +44,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isImmersive = false;
     private static boolean isSBS = false;
     private static boolean isVR = false;
+    private static boolean useBacklight = false;
     private static boolean usePassthrough = false;
     private static boolean[] currentButtons = new boolean[ControllerButton.values().length];
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
@@ -70,6 +71,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        useBacklight = prefs.getBoolean("use_bl", false);
         usePassthrough = prefs.getBoolean("use_pt", true);
         nativeSetUsePT(usePassthrough);
 
@@ -167,6 +169,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public static boolean getVR() {
         return isVR && ContentDialog.getFrontInstance() == null;
     }
+
+    public static boolean hasBacklight() { return useBacklight && !isImmersive && !isVR; }
 
     public static boolean isActive() {
         return Math.abs(System.currentTimeMillis() - lastActive) < 5000;
@@ -453,8 +457,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();
-    public native boolean beginFrame(boolean immersive, boolean sbs);
+    public native boolean beginFrame(boolean immersive, boolean sbs, boolean backlight);
     public native void endFrame();
+    public native void switchFBO(int index);
 
     // Input
     public native float[] getAxes();
