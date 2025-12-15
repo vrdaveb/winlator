@@ -61,6 +61,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public int surfaceWidth;
     public int surfaceHeight;
     private final EffectComposer effectComposer;
+    private long timestampStart = 0;
 
     public GLRenderer(XServerView xServerView, XServer xServer) {
         this.xServerView = xServerView;
@@ -312,6 +313,17 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             } else {
                 for (RenderableWindow window : renderableWindows) {
                     renderDrawable(window.content, window.rootX, window.rootY, material, window.forceFullscreen);
+                }
+            }
+
+            //autoclose app when there are no windows
+            if (timestampStart == 0) {
+                if (!renderableWindows.isEmpty()) {
+                    timestampStart = System.currentTimeMillis();
+                }
+            } else if ((System.currentTimeMillis() - timestampStart > 3000) && renderableWindows.isEmpty()) {
+                if (XrActivity.isEnabled(null)) {
+                    XrActivity.getInstance().finish();
                 }
             }
         }
