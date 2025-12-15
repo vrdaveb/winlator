@@ -127,10 +127,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         boolean xrFrame = false;
         xrImmersive = false;
         if (XrActivity.isEnabled(null)) {
-            XrActivity.updateControllers();
             fullscreen = XrActivity.getVR();
             xrImmersive = XrActivity.getImmersive() || fullscreen;
-            xrFrame = XrActivity.getInstance().beginFrame(xrImmersive, XrActivity.getSBS(), XrActivity.hasBacklight());
+            xrFrame = XrActivity.getInstance().initFrame(xrImmersive, XrActivity.getSBS(), XrActivity.hasBacklight());
+            XrActivity.updateControllers();
+            XrActivity.getInstance().bindFBO(0);
         } else {
             fullscreen = false;
         }
@@ -146,7 +147,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (xrFrame) {
             renderDialog();
             if (XrActivity.hasBacklight()) {
-                XrActivity.getInstance().switchFBO(1);
+                XrActivity.getInstance().bindFBO(1);
                 renderWindows(backlightMaterial,true);
             }
             XrActivity.getInstance().endFrame();

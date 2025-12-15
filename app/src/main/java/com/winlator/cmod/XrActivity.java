@@ -457,9 +457,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();
-    public native boolean beginFrame(boolean immersive, boolean sbs, boolean backlight);
+    public native boolean initFrame(boolean immersive, boolean sbs, boolean backlight);
+    public native void bindFBO(int index);
     public native void endFrame();
-    public native void switchFBO(int index);
 
     // Input
     public native float[] getAxes();

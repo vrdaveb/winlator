@@ -109,7 +109,7 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
     return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT];
 }
 
-JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean backlight) {
+JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean backlight) {
     // Ensure we are using correct refresh rate
     int refreshRate = 72;
     static int lastRefresh = 0;
@@ -143,22 +143,22 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_beginFrame(JNIEnv *
             first_frame = false;
         }
 
-        // Lock framebuffer
-        XrRendererBeginFrame(&xr_module_renderer, 0);
+        // Reset framebuffer
+        XrRendererBeginFrame(&xr_module_renderer, -1);
 
         return true;
     }
     return false;
 }
 
+JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_bindFBO(JNIEnv *env, jobject obj, jint fboIndex) {
+    XrRendererEndFrame(&xr_module_renderer);
+    XrRendererBeginFrame(&xr_module_renderer, fboIndex);
+}
+
 JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_endFrame(JNIEnv *env, jobject obj) {
     XrRendererEndFrame(&xr_module_renderer);
     XrRendererFinishFrame(&xr_module_engine, &xr_module_renderer);
-}
-
-JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_switchFBO(JNIEnv *env, jobject obj, jint fboIndex) {
-    XrRendererEndFrame(&xr_module_renderer);
-    XrRendererBeginFrame(&xr_module_renderer, fboIndex);
 }
 
 JNIEXPORT jfloatArray JNICALL Java_com_winlator_cmod_XrActivity_getAxes(JNIEnv *env, jobject obj) {

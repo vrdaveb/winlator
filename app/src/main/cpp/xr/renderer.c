@@ -207,13 +207,17 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 void XrRendererBeginFrame(struct XrRenderer* renderer, int fbo_index)
 {
     renderer->ConfigInt[CONFIG_CURRENT_FBO] = fbo_index;
-    XrFramebufferAcquire(&renderer->Framebuffer[fbo_index]);
+    if (fbo_index >= 0) {
+        XrFramebufferAcquire(&renderer->Framebuffer[fbo_index]);
+    }
 }
 
 void XrRendererEndFrame(struct XrRenderer* renderer)
 {
     int fbo_index = renderer->ConfigInt[CONFIG_CURRENT_FBO];
-    XrFramebufferRelease(&renderer->Framebuffer[fbo_index]);
+    if (fbo_index >= 0) {
+        XrFramebufferRelease(&renderer->Framebuffer[fbo_index]);
+    }
 }
 
 void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
