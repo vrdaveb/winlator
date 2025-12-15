@@ -321,7 +321,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             float menu_pitch = ToRadians(renderer->ConfigFloat[CONFIG_MENU_PITCH]);
             float menu_yaw = ToRadians(renderer->ConfigFloat[CONFIG_MENU_YAW]);
             if (fbo == 1) {
-                size *= 8;
+                size *= 3;
             }
             if (renderer->ConfigInt[CONFIG_VIEWPORT_CURVED]) {
                 radius *= size;

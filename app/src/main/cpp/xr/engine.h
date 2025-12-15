@@ -44,7 +44,7 @@ enum
 };
 enum
 {
-  XrMaxLayerCount = 4
+  XrMaxLayerCount = 6
 };
 enum
 {
