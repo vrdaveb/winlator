@@ -227,12 +227,12 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
 
         // different color space correction
         switch (r) {
-            //for resolutions 2560, 1920
-            case 28: case 36: r = 48; break;
-            case 57: case 72: r = 96; break;
-            case 85: case 107: r = 144; break;
-            case 114: case 143: r = 192; break;
-            case 142: case 179: r = 240; break;
+            //for resolutions 2560x2560, 1920x1920, 1920x1080
+            case 28: case 36: case 41: r = 48; break;
+            case 57: case 72: case 83: r = 96; break;
+            case 85: case 107: case 124: r = 144; break;
+            case 114: case 143: case 166: r = 192; break;
+            case 142: case 179: case 207: r = 240; break;
         }
 
         // apply the values
