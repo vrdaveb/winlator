@@ -218,11 +218,24 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     }
 
     public void processFramesync(Drawable drawable) {
+        // get sync pixel
         ByteBuffer buffer = drawable.getImage((short)0, (short)0, (short)1, (short)1);
         int b = buffer.get(0) & 0xFF;
         int g = buffer.get(1) & 0xFF;
         int r = buffer.get(2) & 0xFF;
         int a = buffer.get(3) & 0xFF;
+
+        // different color space correction
+        switch (r) {
+            //for resolutions 2560, 1920
+            case 28: case 36: r = 48; break;
+            case 57: case 72: r = 96; break;
+            case 85: case 107: r = 144; break;
+            case 114: case 143: r = 192; break;
+            case 142: case 179: r = 240; break;
+        }
+
+        // apply the values
         nativeSetFramesync(r, g, b, a);
     }
 

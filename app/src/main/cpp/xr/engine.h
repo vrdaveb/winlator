@@ -40,6 +40,10 @@ void OXRCheckErrors(XrResult result, const char* file, int line);
 
 enum
 {
+    XrFrameSyncStep = 48
+};
+enum
+{
     XrMaxFrameSync = 256
 };
 enum

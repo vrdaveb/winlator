@@ -183,7 +183,8 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
     float fovx = 0;
     float fovy = 0;
-    renderer->FrameSync = (renderer->FrameSync + 1) % XrMaxFrameSync;
+    renderer->FrameSync = renderer->FrameSync + XrFrameSyncStep;
+    if (renderer->FrameSync >= XrMaxFrameSync) renderer->FrameSync = 0;
     for (int eye = 0; eye < XrMaxNumEyes; eye++) {
         fovx += fabs(renderer->Projections[eye].fov.angleDown - renderer->Projections[eye].fov.angleUp) / 2.0f;
         fovy += fabs(renderer->Projections[eye].fov.angleRight - renderer->Projections[eye].fov.angleLeft) / 2.0f;
