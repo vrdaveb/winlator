@@ -37,6 +37,8 @@ import static com.winlator.cmod.xr.XrInterface.ControllerAxis;
 import static com.winlator.cmod.xr.XrInterface.ControllerButton;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
@@ -61,6 +63,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static String lastText = "";
     private static float mouseSpeed = 1;
     private static final float[] smoothedMouse = new float[2];
+    private static ArrayList<Integer> framesyncMapping = new ArrayList<Integer>();
     private static XrActivity instance;
     private static XrAPI xrAPI = null;
 
@@ -225,14 +228,24 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         int r = buffer.get(2) & 0xFF;
         int a = buffer.get(3) & 0xFF;
 
-        // different color space correction
-        switch (r) {
-            //for resolutions 2560x2560, 1920x1920, 1920x1080
-            case 28: case 36: case 41: r = 48; break;
-            case 57: case 72: case 83: r = 96; break;
-            case 85: case 107: case 124: r = 144; break;
-            case 114: case 143: case 166: r = 192; break;
-            case 142: case 179: case 207: r = 240; break;
+        //define framesync behavior (the same as in xr/engine.h)
+        int step = 48;
+        int limit = 256;
+        int expectedLength = (limit / step) + 1;
+
+        //automatically find mapping for current color space
+        if (framesyncMapping.size() < expectedLength) {
+            if (!framesyncMapping.contains(r)) {
+                framesyncMapping.add(r);
+                framesyncMapping.sort(Comparator.comparingInt(i -> i));
+            }
+            return;
+        } else if (framesyncMapping.size() == expectedLength) {
+            if (!framesyncMapping.contains(r)) {
+                framesyncMapping.clear();
+                return;
+            }
+            r = framesyncMapping.indexOf(r) * step;
         }
 
         // apply the values
