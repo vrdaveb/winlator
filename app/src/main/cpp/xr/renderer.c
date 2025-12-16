@@ -447,12 +447,6 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
     end_frame_info.layerCount = renderer->LayerCount;
     end_frame_info.layers = layers;
     OXR(xrEndFrame(engine->Session, &end_frame_info));
-
-    for (int fbo = (backlight ? 1 : 0); fbo >= 0; fbo--) {
-        struct XrFramebuffer* framebuffer = &renderer->Framebuffer[fbo];
-        framebuffer->SwapchainIndex++;
-        framebuffer->SwapchainIndex %= framebuffer->SwapchainLength;
-    }
 }
 
 void XrRendererBindFramebuffer(struct XrRenderer* renderer)
