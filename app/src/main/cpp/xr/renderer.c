@@ -206,10 +206,14 @@ bool XrRendererInitFrame(struct XrEngine* engine, struct XrRenderer* renderer)
 
 void XrRendererBeginFrame(struct XrRenderer* renderer, int fbo_index)
 {
-    renderer->ConfigInt[CONFIG_CURRENT_FBO] = fbo_index;
     if (fbo_index >= 0) {
-        XrFramebufferAcquire(&renderer->Framebuffer[fbo_index]);
+        if (renderer->ConfigInt[CONFIG_CURRENT_FBO] != fbo_index) {
+            XrFramebufferAcquire(&renderer->Framebuffer[fbo_index]);
+        } else {
+            XrFramebufferSetCurrent(&renderer->Framebuffer[fbo_index]);
+        }
     }
+    renderer->ConfigInt[CONFIG_CURRENT_FBO] = fbo_index;
 }
 
 void XrRendererEndFrame(struct XrRenderer* renderer)
@@ -268,9 +272,13 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             renderer->ConfigFloat[CONFIG_MENU_YAW] = renderer->HmdOrientation.y;
 
             if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
-                XrColor4f color = XrFramebufferGetPixel(framebuffer, 0, h - 1);
-                if ((color.g < 1) && (color.b < 1) && (color.a > 200)) {
-                    frame = (int)(color.r + 0.5);
+                int r = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
+                int g = renderer->ConfigInt[CONFIG_FRAMESYNC_G];
+                int b = renderer->ConfigInt[CONFIG_FRAMESYNC_B];
+                int a = renderer->ConfigInt[CONFIG_FRAMESYNC_A];
+                if ((g < 1) && (b < 1) && (a > 200))
+                {
+                    frame = r;
                 }
             }
 

@@ -33,6 +33,10 @@ enum XrConfigInt
     CONFIG_VIEWPORT_HEIGHT,
     // render status
     CONFIG_CURRENT_FBO,
+    CONFIG_FRAMESYNC_R,
+    CONFIG_FRAMESYNC_G,
+    CONFIG_FRAMESYNC_B,
+    CONFIG_FRAMESYNC_A,
 
     // end
     CONFIG_INT_MAX

@@ -273,6 +273,14 @@ Java_com_winlator_cmod_XrActivity_nativeSetUseVR(JNIEnv *env, jobject obj, jbool
     xr_vr = enabled;
 }
 
+JNIEXPORT void JNICALL
+Java_com_winlator_cmod_XrActivity_nativeSetFramesync(JNIEnv *env, jobject obj, jint r, jint g, jint b, jint a) {
+    xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC_R] = r;
+    xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC_G] = g;
+    xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC_B] = b;
+    xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC_A] = a;
+}
+
 JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_vibrateController(JNIEnv *env, jobject obj, int duration, int chan, float intensity) {
     XrInputVibrate(&xr_module_input, duration, chan, intensity);
 }

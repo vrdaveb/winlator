@@ -25,6 +25,7 @@ import com.winlator.cmod.xr.XrAPI;
 import com.winlator.cmod.xr.RuntimeMeta;
 import com.winlator.cmod.xr.RuntimePFD;
 import com.winlator.cmod.xr.RuntimePico;
+import com.winlator.cmod.xserver.Drawable;
 import com.winlator.cmod.xserver.Keyboard;
 import com.winlator.cmod.xserver.Pointer;
 import com.winlator.cmod.xserver.XKeycode;
@@ -34,6 +35,8 @@ import com.winlator.cmod.xserver.XServer;
 import static com.winlator.cmod.xr.XrInterface.AppInput;
 import static com.winlator.cmod.xr.XrInterface.ControllerAxis;
 import static com.winlator.cmod.xr.XrInterface.ControllerButton;
+
+import java.nio.ByteBuffer;
 
 /*
     WinlatorXR implementation by lvonasek (https://github.com/lvonasek)
@@ -65,6 +68,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void nativeSetCurvedScreen(boolean enabled);
     public native void nativeSetUsePT(boolean enabled);
     public native void nativeSetUseVR(boolean enabled);
+    public native void nativeSetFramesync(int r, int g, int b, int a);
     public native void sendManufacturer(String manufacturer);
 
     @Override
@@ -211,6 +215,15 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 nativeSetUsePT(usePassthrough);
                 break;
         }
+    }
+
+    public void processFramesync(Drawable drawable) {
+        ByteBuffer buffer = drawable.getImage((short)0, (short)0, (short)1, (short)1);
+        int b = buffer.get(0) & 0xFF;
+        int g = buffer.get(1) & 0xFF;
+        int r = buffer.get(2) & 0xFF;
+        int a = buffer.get(3) & 0xFF;
+        nativeSetFramesync(r, g, b, a);
     }
 
     public static void openIntent(Activity context, int containerId, String path) {

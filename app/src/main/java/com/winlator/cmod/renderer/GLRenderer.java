@@ -273,6 +273,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         synchronized (drawable.renderLock) {
             Texture texture = drawable.getTexture();
             texture.updateFromDrawable(drawable);
+            if (XrActivity.isEnabled(null) && XrActivity.getVR()) {
+                XrActivity.getInstance().processFramesync(drawable);
+            }
 
             if (forceFullscreen) {
                 short newHeight = (short)Math.min(xServer.screenInfo.height, ((float)xServer.screenInfo.width / drawable.width) * drawable.height);

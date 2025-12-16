@@ -21,7 +21,6 @@ void XrFramebufferDestroy(struct XrFramebuffer *framebuffer);
 void XrFramebufferAcquire(struct XrFramebuffer *framebuffer);
 void XrFramebufferRelease(struct XrFramebuffer *framebuffer);
 void XrFramebufferSetCurrent(struct XrFramebuffer *framebuffer);
-XrColor4f XrFramebufferGetPixel(struct XrFramebuffer *framebuffer, int x, int y);
 
 #if XR_USE_GRAPHICS_API_OPENGL_ES
 bool XrFramebufferCreateGL(struct XrFramebuffer *framebuffer, XrSession session, int width, int height);
