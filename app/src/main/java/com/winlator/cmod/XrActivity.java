@@ -229,7 +229,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         int a = buffer.get(3) & 0xFF;
 
         //define framesync behavior (the same as in xr/engine.h)
-        int step = 48;
+        int step = 24;
         int limit = 256;
         int expectedLength = (limit / step) + 1;
 
