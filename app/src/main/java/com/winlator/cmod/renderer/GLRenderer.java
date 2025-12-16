@@ -364,7 +364,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             if (dialog != null) {
                 Drawable drawable = dialog.getDrawable();
                 if (drawable != null) {
-                    float scale = Build.MANUFACTURER.toUpperCase().compareTo("PICO") == 0 ? 0.3f : 0.4f;
+                    float scale = xServer.screenInfo.width / 1500.0f;
                     int offsetX = (int) ((xServer.screenInfo.width - drawable.width * scale) / 2);
                     int offsetY = (int) ((xServer.screenInfo.height - drawable.height * scale) / 2);
                     renderDrawable(drawable, offsetX, offsetY, bgrMaterial, false, scale);
