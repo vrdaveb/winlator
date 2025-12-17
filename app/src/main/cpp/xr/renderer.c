@@ -281,7 +281,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                 {
                     static int framesync[2] = {};
                     int targetFBO = renderer->ConfigInt[CONFIG_FRAMESYNC_B] > 0 ? 1 : 0;
-                    if ((renderer->ConfigInt[CONFIG_FRAMESYNC_G] < 1) && (renderer->ConfigInt[CONFIG_FRAMESYNC_A] > 200))
+                    if ((renderer->ConfigInt[CONFIG_FRAMESYNC_G] < 1) && (renderer->ConfigInt[CONFIG_FRAMESYNC_A] > 0))
                     {
                         framesync[targetFBO] = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
                     }
