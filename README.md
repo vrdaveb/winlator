@@ -39,13 +39,17 @@ Our XrAPI provides developers with a way to replace OpenVR or OpenXR in their ap
 ### XrAPI 0.2 specification
 The Windows app/game has to sent data on localhost:7278 as string of float numbers separated by space:
 ```
-L_HAPTICS, R_HAPTICS, MODE_VR, MODE_SBS, HMD_FOVX, HMD_FOVY
+L_HAPTICS, R_HAPTICS, MODE_VR, MODE_3D, HMD_FOVX, HMD_FOVY
 ```
 
 * The haptic values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
 * The VR mode is 1 to enable, 0 to disable. To receive HMD and controllers data, the VR mode has to be enabled.
-* The SBS mode is 1 to enable, 0 to disable. When enabled the left half of the container is drawn to left eye and right half to right eye.
+* The 3D mode is 2 for alternate-eye-rendering, 1 for side-by-side, 0 to disable.
 * If FOV values are higher than 1 then it forces a custom Field-of-View values in degrees. This is need by apps and games where the variable FOV isn't supported.
+
+3D modes:
+* alternate-eye-rendering - set blue framesync pixel to 0 when rendering left eye, 255 when rendering right eye, quickly swapping left and right eye brings 3D effect
+* side-by-side - the left half of the container is drawn to left eye and right half to right eye
 
 The data transfered over UDP starts with an array of float numbers separated by space, the values are:
 ```
@@ -113,6 +117,7 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
 
