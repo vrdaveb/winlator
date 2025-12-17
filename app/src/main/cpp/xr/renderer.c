@@ -272,19 +272,22 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
         {
             renderer->ConfigFloat[CONFIG_MENU_YAW] = renderer->HmdOrientation.y;
 
-            if (renderer->ConfigInt[CONFIG_FRAMESYNC]) {
-                int r = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
-                int g = renderer->ConfigInt[CONFIG_FRAMESYNC_G];
-                int b = renderer->ConfigInt[CONFIG_FRAMESYNC_B];
-                int a = renderer->ConfigInt[CONFIG_FRAMESYNC_A];
-                if ((g < 1) && (b < 1) && (a > 200))
-                {
-                    frame = r;
-                }
-            }
-
             for (int eye = 0; eye < XrMaxNumEyes; eye++)
             {
+                if (renderer->ConfigInt[CONFIG_AER]) {
+                    framebuffer = &renderer->Framebuffer[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
+                }
+                if (renderer->ConfigInt[CONFIG_FRAMESYNC])
+                {
+                    static int framesync[2] = {};
+                    int targetFBO = renderer->ConfigInt[CONFIG_FRAMESYNC_B] > 0 ? 1 : 0;
+                    if ((renderer->ConfigInt[CONFIG_FRAMESYNC_G] < 1) && (renderer->ConfigInt[CONFIG_FRAMESYNC_A] > 200))
+                    {
+                        framesync[targetFBO] = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
+                    }
+                    frame = framesync[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
+                }
+
                 XrPosef pose = renderer->InvertedViewPose[0][frame];
                 if (renderer->ConfigInt[CONFIG_SBS] && (eye == 1))
                 {

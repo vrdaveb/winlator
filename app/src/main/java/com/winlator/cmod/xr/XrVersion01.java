@@ -76,7 +76,7 @@ public class XrVersion01 implements XrInterface {
     @Override
     public float getValue(@NonNull XrAPI.AppInput index) {
         return switch (index) {
-            case MODE_SBS -> new File(dir, FLAG_SBS).exists() ? 1 : 0;
+            case MODE_3D -> new File(dir, FLAG_SBS).exists() ? 1 : 0;
             case MODE_VR -> new File(dir, FLAG_VR).exists() ? 1 : 0;
             default -> input[index.ordinal()];
         };

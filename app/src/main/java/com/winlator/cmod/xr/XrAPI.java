@@ -77,6 +77,10 @@ public class XrAPI implements XrInterface, Runnable {
         return impl != null ? impl.getValue(index) : 0.0f;
     }
 
+    public int getIntValue(@NonNull AppInput index) {
+        return (int)(getValue(index) + 0.5f);
+    }
+
     public void setValue(@NonNull AppInput index, float value) {
         if (impl != null) {
             impl.setValue(index, value);

@@ -25,6 +25,7 @@ enum XrConfigInt
     CONFIG_FRAMESYNC,
     CONFIG_PASSTHROUGH,
     CONFIG_IMMERSIVE,
+    CONFIG_AER,
     CONFIG_SBS,
     CONFIG_VR,
     // viewport setup

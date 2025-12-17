@@ -47,6 +47,7 @@ import java.util.Comparator;
 public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isEnabled = false;
     private static boolean isImmersive = false;
+    private static boolean isAER = false;
     private static boolean isSBS = false;
     private static boolean isVR = false;
     private static boolean useBacklight = false;
@@ -169,6 +170,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         return isImmersive && ContentDialog.getFrontInstance() == null;
     }
 
+    public static boolean getAER() {
+        return isAER && ContentDialog.getFrontInstance() == null;
+    }
     public static boolean getSBS() {
         return isSBS && ContentDialog.getFrontInstance() == null;
     }
@@ -205,6 +209,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                         View input = instance.findViewById(R.id.XRTextInput);
                         input.setVisibility(View.VISIBLE);
                         isVR = false;
+                        isAER = false;
                         isSBS = false;
                         isImmersive = false;
                         instance.resetText();
@@ -246,6 +251,11 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 return;
             }
             r = framesyncMapping.indexOf(r) * step;
+        }
+
+        // choose target framebuffer
+        if (getAER()) {
+            bindFBO(b > 0 ? 1 : 0);
         }
 
         // apply the values
@@ -301,7 +311,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 float fovx = xrAPI.getValue(AppInput.HMD_FOVX);
                 float fovy = xrAPI.getValue(AppInput.HMD_FOVY);
                 getInstance().nativeSetFoV(fovx, fovy);
-                isSBS = xrAPI.getValue(AppInput.MODE_SBS) > 0.5f;
+                isAER = xrAPI.getIntValue(AppInput.MODE_3D) == 2;
+                isSBS = xrAPI.getIntValue(AppInput.MODE_3D) == 1;
                 xrAPI.send(xrAPI.encode(axes, buttons, 0));
             } else {
                 xrAPI.updateImplementation();
@@ -496,7 +507,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();
-    public native boolean initFrame(boolean immersive, boolean sbs, boolean backlight);
+    public native boolean initFrame(boolean immersive, boolean sbs, boolean aer, boolean backlight);
     public native void bindFBO(int index);
     public native void endFrame();
 

@@ -109,7 +109,7 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
     return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT];
 }
 
-JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean backlight) {
+JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer, jboolean backlight) {
     // Ensure we are using correct refresh rate
     int refreshRate = 72;
     static int lastRefresh = 0;
@@ -133,6 +133,7 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *e
         xr_module_renderer.ConfigInt[CONFIG_PASSTHROUGH] = !immersive && !xr_vr && xr_usePassthrough;
         xr_module_renderer.ConfigInt[CONFIG_IMMERSIVE] = immersive && !xr_vr;
         xr_module_renderer.ConfigInt[CONFIG_FRAMESYNC] = xr_vr;
+        xr_module_renderer.ConfigInt[CONFIG_AER] = aer;
         xr_module_renderer.ConfigInt[CONFIG_SBS] = sbs;
         xr_module_renderer.ConfigInt[CONFIG_VR] = immersive || xr_vr;
 

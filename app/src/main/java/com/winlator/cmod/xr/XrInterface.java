@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 public interface XrInterface {
 
     enum AppInput {
-        L_HAPTICS, R_HAPTICS, MODE_VR, MODE_SBS, HMD_FOVX, HMD_FOVY
+        L_HAPTICS, R_HAPTICS, MODE_VR, MODE_3D, HMD_FOVX, HMD_FOVY
     }
 
     // Order of the enum has to be the as in xr/main.cpp
