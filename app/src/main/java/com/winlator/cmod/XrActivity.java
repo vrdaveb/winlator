@@ -255,7 +255,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
 
         // choose target framebuffer
         if (getAER()) {
-            bindFBO(b > 0 ? 1 : 0);
+            int targetFBO = b > 0 ? 1 : 0;
+            bindFBO(1 - targetFBO);
+            //TODO:render the last frame for the other eye
+            bindFBO(targetFBO);
         }
 
         // apply the values

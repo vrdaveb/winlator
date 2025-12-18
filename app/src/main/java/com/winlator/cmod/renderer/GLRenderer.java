@@ -52,6 +52,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     private boolean fullscreen = false;
     private boolean toggleFullscreen = false;
     private boolean xrImmersive = false;
+    private boolean xrFrameReady = false;
     public boolean viewportNeedsUpdate = true;
     private boolean cursorVisible = true;
     private boolean rootWindowDownsized = false;
@@ -131,7 +132,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (XrActivity.isEnabled(null)) {
             fullscreen = XrActivity.getVR();
             xrImmersive = XrActivity.getImmersive() || fullscreen;
-            xrFrame = XrActivity.getInstance().initFrame(xrImmersive, XrActivity.getSBS(), XrActivity.getAER(), XrActivity.hasBacklight());
+            xrFrameReady = xrFrame = XrActivity.getInstance().initFrame(xrImmersive, XrActivity.getSBS(), XrActivity.getAER(), XrActivity.hasBacklight());
             XrActivity.updateControllers();
             if (!XrActivity.getAER()) {
                 XrActivity.getInstance().bindFBO(0);
@@ -154,6 +155,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
                 XrActivity.getInstance().bindFBO(1);
                 renderWindows(backlightMaterial,true);
             }
+            xrFrameReady = false;
             XrActivity.getInstance().endFrame();
             xServerView.requestRender();
         }
@@ -276,8 +278,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         synchronized (drawable.renderLock) {
             Texture texture = drawable.getTexture();
             texture.updateFromDrawable(drawable);
-            if (XrActivity.isEnabled(null) && XrActivity.getVR()) {
+            if (XrActivity.isEnabled(null) && XrActivity.getVR() && xrFrameReady) {
                 XrActivity.getInstance().processFramesync(drawable);
+                xrFrameReady = false;
             }
 
             if (forceFullscreen) {

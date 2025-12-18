@@ -275,7 +275,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
             for (int eye = 0; eye < XrMaxNumEyes; eye++)
             {
                 if (renderer->ConfigInt[CONFIG_AER]) {
-                    framebuffer = &renderer->Framebuffer[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
+                    framebuffer = &renderer->Framebuffer[eye];
                 }
                 if (renderer->ConfigInt[CONFIG_FRAMESYNC])
                 {
