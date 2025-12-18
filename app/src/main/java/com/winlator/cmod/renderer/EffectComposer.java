@@ -46,16 +46,11 @@ public class EffectComposer {
     }
 
     public synchronized void addEffect(Effect effect) {
-        if (!effects.contains(effect)) {
-            effects.add(effect);
-//            Log.d(TAG, "Effect added: " + effect.getClass().getSimpleName());
-        } else {
-//            Log.d(TAG, "Effect already present: " + effect.getClass().getSimpleName());
-        }
+        removeEffect(effect.getClass());
+        effects.add(effect);
         // Move this call to the end of a batch effect addition or modification to prevent immediate rendering
         renderer.xServerView.requestRender();
     }
-
 
 
     // Gets an effect by its class type
@@ -85,12 +80,20 @@ public class EffectComposer {
 
     // Removes a specific effect from the composer
     public synchronized void removeEffect(Effect effect) {
-        if (effects.remove(effect)) {
-//            Log.d(TAG, "Effect removed: " + effect.getClass().getSimpleName());
-        } else {
-//            Log.d(TAG, "Effect not found for removal: " + effect.getClass().getSimpleName());
-        }
+        removeEffect(effect.getClass());
         renderer.xServerView.requestRender();
+    }
+
+    public synchronized void removeEffect(Class cls) {
+        ArrayList<Effect> toRemove = new ArrayList<>();
+        for (Effect e : effects) {
+            if (e.getClass() == cls) {
+                toRemove.add(e);
+            }
+        }
+        for (Effect e : toRemove) {
+            effects.remove(e);
+        }
     }
 
     // Renders all the effects in the composer

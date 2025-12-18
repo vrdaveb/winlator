@@ -28,6 +28,8 @@
                     <ImageButton android:id="@id/BTRemoveProfile" android:layout_marginRight="0.0dip" android:src="@drawable/icon_remove" style="@style/ListMenuButton" />
                 </LinearLayout>
             </LinearLayout>
+            <CheckBox android:id="@+id/CBEnableBloom" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="@string/enable_bloom" />
+            <CheckBox android:id="@+id/CBEnableFakeReflections" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="@string/enable_fake_reflections" />
             <CheckBox android:id="@+id/CBEnableFXAA" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="@string/enable_fxaa" />
             <CheckBox android:id="@+id/CBEnableCRTShader" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/enable_crt_shader" />
             <CheckBox android:id="@+id/CBEnableToonShader" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/enable_toon_shader" />

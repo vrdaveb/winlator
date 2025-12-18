@@ -104,9 +104,11 @@ import com.winlator.cmod.math.XForm;
 import com.winlator.cmod.midi.MidiHandler;
 import com.winlator.cmod.midi.MidiManager;
 import com.winlator.cmod.renderer.GLRenderer;
+import com.winlator.cmod.renderer.effects.BloomEffect;
 import com.winlator.cmod.renderer.effects.CRTEffect;
 import com.winlator.cmod.renderer.effects.ColorEffect;
 import com.winlator.cmod.renderer.effects.FXAAEffect;
+import com.winlator.cmod.renderer.effects.FakeReflectionsEffect;
 import com.winlator.cmod.renderer.effects.NTSCCombinedEffect;
 import com.winlator.cmod.renderer.effects.ToonEffect;
 import com.winlator.cmod.widget.FrameRating;
@@ -1461,11 +1463,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 dlg.setOnConfirmCallback(() -> {
                     GLRenderer r = xServerView.getRenderer();
                     ColorEffect color = r.getEffectComposer().getEffect(ColorEffect.class);
-                    FXAAEffect fxaa = r.getEffectComposer().getEffect(FXAAEffect.class);
-                    CRTEffect crt   = r.getEffectComposer().getEffect(CRTEffect.class);
-                    ToonEffect toon = r.getEffectComposer().getEffect(ToonEffect.class);
-                    NTSCCombinedEffect ntsc = r.getEffectComposer().getEffect(NTSCCombinedEffect.class);
-                    dlg.applyEffects(color, r, fxaa, crt, toon, ntsc);
+                    dlg.applyEffects(color, r);
                 });
                 dlg.show();
                 drawerLayout.closeDrawers();
