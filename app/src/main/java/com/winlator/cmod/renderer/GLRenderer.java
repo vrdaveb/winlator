@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.winlator.cmod.R;
@@ -61,7 +62,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public int surfaceWidth;
     public int surfaceHeight;
     private final EffectComposer effectComposer;
-    private long timestampStart = 0;
+    private long timestampHadWindow = Long.MAX_VALUE;
 
     public GLRenderer(XServerView xServerView, XServer xServer) {
         this.xServerView = xServerView;
@@ -322,11 +323,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             }
 
             //autoclose app when there are no windows
-            if (timestampStart == 0) {
-                if (!renderableWindows.isEmpty()) {
-                    timestampStart = System.currentTimeMillis();
-                }
-            } else if ((System.currentTimeMillis() - timestampStart > 3000) && renderableWindows.isEmpty()) {
+            if (!renderableWindows.isEmpty()) {
+                timestampHadWindow = System.currentTimeMillis();
+            }  else if ((System.currentTimeMillis() - timestampHadWindow > 1000)) {
                 if (XrActivity.isEnabled(null)) {
                     XrActivity.getInstance().finish();
                 }
@@ -366,7 +365,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             if (dialog != null) {
                 Drawable drawable = dialog.getDrawable();
                 if (drawable != null) {
-                    float scale = xServer.screenInfo.width / 1500.0f;
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    XrActivity.getInstance().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    float scale = (Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0 ? 0.75f : 0.9f);
+                    scale *= (float)Math.min(xServer.screenInfo.width, xServer.screenInfo.height);
+                    scale /= (float)Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
                     int offsetX = (int) ((xServer.screenInfo.width - drawable.width * scale) / 2);
                     int offsetY = (int) ((xServer.screenInfo.height - drawable.height * scale) / 2);
                     renderDrawable(drawable, offsetX, offsetY, bgrMaterial, false, scale);
