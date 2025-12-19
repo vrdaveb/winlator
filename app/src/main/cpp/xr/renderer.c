@@ -285,7 +285,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                     {
                         framesync[targetFBO] = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
                     }
-                    frame = framesync[eye];
+                    frame = renderer->ConfigInt[CONFIG_AER] ? framesync[eye] : framesync[0];
                 }
 
                 XrPosef pose = renderer->InvertedViewPose[0][frame];
