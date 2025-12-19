@@ -33,7 +33,7 @@ android {
         targetSdkVersion 28
 
         versionCode 21
-        versionName "arf-03"
+        versionName "arf-04"
 
         // External native build from Winlator
         externalNativeBuild {
