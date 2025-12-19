@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.Display;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -58,6 +59,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
+    private static int lastFrameSync = 0;
     private static long lastMouseUpdate = 0;
     private static short lastMouseX = 0;
     private static short lastMouseY = 0;
@@ -225,7 +227,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         }
     }
 
-    public void processFramesync(Drawable drawable) {
+    public Pair<Boolean, Integer> processFramesync(Drawable drawable) {
         // get sync pixel
         ByteBuffer buffer = drawable.getImage((short)0, (short)0, (short)1, (short)1);
         int b = buffer.get(0) & 0xFF;
@@ -244,25 +246,20 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 framesyncMapping.add(r);
                 framesyncMapping.sort(Comparator.comparingInt(i -> i));
             }
-            return;
+            return new Pair<>(false, b);
         } else if (framesyncMapping.size() == expectedLength) {
             if (!framesyncMapping.contains(r)) {
                 framesyncMapping.clear();
-                return;
+                return new Pair<>(false, b);
             }
             r = framesyncMapping.indexOf(r) * step;
         }
 
-        // choose target framebuffer
-        if (getAER()) {
-            int targetFBO = b > 0 ? 1 : 0;
-            bindFBO(1 - targetFBO);
-            //TODO:render the last frame for the other eye
-            bindFBO(targetFBO);
-        }
-
         // apply the values
         nativeSetFramesync(r, g, b, a);
+        Pair<Boolean, Integer> output = new Pair<>(lastFrameSync != r, b > 0 ? 1 : 0);
+        lastFrameSync = r;
+        return output;
     }
 
     public static void openIntent(Activity context, int containerId, String path) {

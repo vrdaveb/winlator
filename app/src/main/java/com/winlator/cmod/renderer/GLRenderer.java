@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 
 import com.winlator.cmod.R;
 import com.winlator.cmod.XrActivity;
@@ -64,6 +65,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public int surfaceHeight;
     private final EffectComposer effectComposer;
     private long timestampHadWindow = Long.MAX_VALUE;
+
+    private Texture[] lastTexture = {new Texture(), new Texture()};
+    private short lastTextureWidth = 0;
+    private short lastTextureHeight = 0;
 
     public GLRenderer(XServerView xServerView, XServer xServer) {
         this.xServerView = xServerView;
@@ -276,29 +281,61 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
     private void renderDrawable(Drawable drawable, int x, int y, ShaderMaterial material, boolean forceFullscreen, float scale) {
         synchronized (drawable.renderLock) {
-            Texture texture = drawable.getTexture();
-            texture.updateFromDrawable(drawable);
-            if (XrActivity.isEnabled(null) && XrActivity.getVR() && xrFrameReady) {
-                XrActivity.getInstance().processFramesync(drawable);
-                xrFrameReady = false;
-            }
-
             if (forceFullscreen) {
                 short newHeight = (short)Math.min(xServer.screenInfo.height, ((float)xServer.screenInfo.width / drawable.width) * drawable.height);
                 short newWidth = (short)(((float)newHeight / drawable.height) * drawable.width);
                 XForm.set(tmpXForm1, (xServer.screenInfo.width - newWidth) * 0.5f, (xServer.screenInfo.height - newHeight) * 0.5f, newWidth, newHeight);
             }
             else XForm.set(tmpXForm1, x, y, drawable.width * scale, drawable.height * scale);
-
             XForm.multiply(tmpXForm1, tmpXForm1, tmpXForm2);
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.getTextureId());
-            GLES20.glUniform1i(material.getUniformLocation("texture"), 0);
-            GLES20.glUniform1fv(material.getUniformLocation("xform"), tmpXForm1.length, tmpXForm1, 0);
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, quadVertices.count());
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+            if (XrActivity.isEnabled(null) && XrActivity.getVR() && xrFrameReady) {
+                Pair<Boolean, Integer> framesync = XrActivity.getInstance().processFramesync(drawable);
+                xrFrameReady = false;
+                if (XrActivity.getAER()) {
+                    renderAER(drawable, material, framesync.first, framesync.second);
+                    return;
+                }
+            }
+
+            Texture texture = drawable.getTexture();
+            texture.updateFromDrawable(drawable);
+            renderTexture(texture, material);
         }
+    }
+
+    private void renderAER(Drawable drawable, ShaderMaterial material, boolean shouldUpdate, int targetFBO) {
+        if ((lastTextureWidth != drawable.width) || (lastTextureHeight != drawable.height)) {
+            for (int i = 0; i < lastTexture.length; i++) {
+                lastTexture[i].destroy();
+                lastTexture[i] = new Texture();
+            }
+            lastTextureWidth = drawable.width;
+            lastTextureHeight = drawable.height;
+        }
+
+        if (shouldUpdate) {
+            lastTexture[targetFBO].setNeedsUpdate(true);
+            lastTexture[targetFBO].updateFromDrawable(drawable);
+        }
+
+        for (int i = 0; i < lastTexture.length; i++) {
+            XrActivity.getInstance().bindFBO(i);
+            if (lastTexture[i].isAllocated()) {
+                renderTexture(lastTexture[i], material);
+            }
+        }
+        XrActivity.getInstance().bindFBO(-1);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+    }
+
+    private void renderTexture(Texture texture, ShaderMaterial material) {
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.getTextureId());
+        GLES20.glUniform1i(material.getUniformLocation("texture"), 0);
+        GLES20.glUniform1fv(material.getUniformLocation("xform"), tmpXForm1.length, tmpXForm1, 0);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, quadVertices.count());
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
     private void renderWindows(ShaderMaterial material, boolean forceFullscreen) {

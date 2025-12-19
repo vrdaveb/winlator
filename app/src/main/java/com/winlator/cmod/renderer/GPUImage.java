@@ -98,7 +98,8 @@ public class GPUImage extends Texture {
         final short size = 8;
         GPUImage gpuImage = new GPUImage(size, size);
         gpuImage.allocateTexture(size, size, null);
-        supported = gpuImage.hardwareBufferPtr != 0 && gpuImage.imageKHRPtr != 0 && gpuImage.virtualData != null;
+        //TODO:figure out how to support GPUImage in AER
+        supported = false;//gpuImage.hardwareBufferPtr != 0 && gpuImage.imageKHRPtr != 0 && gpuImage.virtualData != null;
         gpuImage.destroy();
     }
 

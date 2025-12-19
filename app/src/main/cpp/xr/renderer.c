@@ -285,7 +285,7 @@ void XrRendererFinishFrame(struct XrEngine* engine, struct XrRenderer* renderer)
                     {
                         framesync[targetFBO] = renderer->ConfigInt[CONFIG_FRAMESYNC_R];
                     }
-                    frame = framesync[renderer->ConfigInt[CONFIG_CURRENT_FBO]];
+                    frame = framesync[eye];
                 }
 
                 XrPosef pose = renderer->InvertedViewPose[0][frame];
@@ -457,7 +457,9 @@ void XrRendererBindFramebuffer(struct XrRenderer* renderer)
     if (!renderer->Initialized)
         return;
     int fbo_index = renderer->ConfigInt[CONFIG_CURRENT_FBO];
-    XrFramebufferSetCurrent(&renderer->Framebuffer[fbo_index]);
+    if (fbo_index >= 0) {
+        XrFramebufferSetCurrent(&renderer->Framebuffer[fbo_index]);
+    }
 }
 
 
