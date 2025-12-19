@@ -40,7 +40,7 @@ void OXRCheckErrors(XrResult result, const char* file, int line);
 
 enum
 {
-    XrFrameSyncStep = 24
+    XrFrameSyncStep = 12
 };
 enum
 {
