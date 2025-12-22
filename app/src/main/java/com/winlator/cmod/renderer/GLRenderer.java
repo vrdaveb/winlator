@@ -107,6 +107,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (XrActivity.isEnabled(null)) {
             XrActivity activity = XrActivity.getInstance();
             String res = activity.getContainer().getScreenSize();
+
+            if (activity.hasShortcut()) {
+                res = activity.getShortcutSize();
+            }
+
             String[] parts = res.split("x");
             width = Short.parseShort(parts[0]);
             height = Short.parseShort(parts[1]);

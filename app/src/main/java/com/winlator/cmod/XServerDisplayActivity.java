@@ -2744,6 +2744,22 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         return container;
     }
 
+    public boolean hasShortcut() {
+        if (shortcut != null) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public String getShortcutSize() {
+        if (shortcut != null) {
+            return shortcut.getExtra("screenSize", container.getScreenSize());
+        }
+
+        return "";
+    }
+
     public void setDXWrapper(String dxwrapper) {
         this.dxwrapper = dxwrapper;
     }
