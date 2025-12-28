@@ -48,7 +48,7 @@ enum
 };
 enum
 {
-  XrMaxLayerCount = 6
+  XrMaxLayerCount = 3
 };
 enum
 {
@@ -71,9 +71,6 @@ typedef union
 {
   XrCompositionLayerProjection projection;
   XrCompositionLayerQuad quad;
-  XrCompositionLayerCylinderKHR cylinder;
-  XrCompositionLayerQuad quadFX;
-  XrCompositionLayerCylinderKHR cylinderFX;
   XrCompositionLayerPassthroughFB passthrough;
 } XrCompositorLayer;
 

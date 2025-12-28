@@ -16,7 +16,6 @@ import com.winlator.cmod.contentdialog.ContentDialog;
 import com.winlator.cmod.math.Mathf;
 import com.winlator.cmod.math.XForm;
 import com.winlator.cmod.renderer.material.BGRMaterial;
-import com.winlator.cmod.renderer.material.BacklightMaterial;
 import com.winlator.cmod.renderer.material.CursorMaterial;
 import com.winlator.cmod.renderer.material.ShaderMaterial;
 import com.winlator.cmod.renderer.material.WindowMaterial;
@@ -42,7 +41,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     public final VertexAttribute quadVertices = new VertexAttribute("position", 2);
     private final float[] tmpXForm1 = XForm.getInstance();
     private final float[] tmpXForm2 = XForm.getInstance();
-    private final BacklightMaterial backlightMaterial = new BacklightMaterial();
     private final BGRMaterial bgrMaterial = new BGRMaterial();
     private final CursorMaterial cursorMaterial = new CursorMaterial();
     private final WindowMaterial windowMaterial = new WindowMaterial();
@@ -142,7 +140,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         if (XrActivity.isEnabled(null)) {
             fullscreen = XrActivity.getVR();
             xrImmersive = XrActivity.getImmersive() || fullscreen;
-            xrFrameReady = xrFrame = XrActivity.getInstance().initFrame(xrImmersive, XrActivity.getSBS(), XrActivity.getAER(), XrActivity.hasBacklight());
+            xrFrameReady = xrFrame = XrActivity.getInstance().initFrame(xrImmersive, XrActivity.getSBS(), XrActivity.getAER());
             XrActivity.updateControllers();
             if (!XrActivity.getAER()) {
                 XrActivity.getInstance().bindFBO(0);
@@ -161,10 +159,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         // Finalize XR frame if supported
         if (xrFrame) {
             renderDialog();
-            if (XrActivity.hasBacklight()) {
-                XrActivity.getInstance().bindFBO(1);
-                renderWindows(backlightMaterial,true);
-            }
             xrFrameReady = false;
             XrActivity.getInstance().endFrame();
             xServerView.requestRender();

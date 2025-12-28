@@ -21,7 +21,6 @@ enum XrConfigFloat
 enum XrConfigInt
 {
     // switching between modes
-    CONFIG_BACKLIGHT,
     CONFIG_FRAMESYNC,
     CONFIG_PASSTHROUGH,
     CONFIG_IMMERSIVE,
@@ -29,7 +28,6 @@ enum XrConfigInt
     CONFIG_SBS,
     CONFIG_VR,
     // viewport setup
-    CONFIG_VIEWPORT_CURVED,
     CONFIG_VIEWPORT_WIDTH,
     CONFIG_VIEWPORT_HEIGHT,
     // render status

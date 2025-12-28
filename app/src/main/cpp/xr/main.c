@@ -11,7 +11,6 @@ struct XrEngine xr_module_engine;
 struct XrInput xr_module_input;
 struct XrRenderer xr_module_renderer;
 bool xr_initialized = false;
-bool xr_curvedScreen = false;
 bool xr_usePassthrough = false;
 bool xr_vr = false;
 float xr_aspect = 0;
@@ -109,7 +108,7 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
     return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT];
 }
 
-JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer, jboolean backlight) {
+JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer) {
     // Ensure we are using correct refresh rate
     int refreshRate = 72;
     static int lastRefresh = 0;
@@ -123,8 +122,6 @@ JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *e
         XrInputUpdate(&xr_module_engine, &xr_module_input);
 
         // Set render canvas
-        xr_module_renderer.ConfigInt[CONFIG_BACKLIGHT] = backlight;
-        xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_CURVED] = xr_curvedScreen;
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_SIZE] = xr_aspect;
         xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE] = 1.1f;
@@ -257,11 +254,6 @@ JNIEXPORT void JNICALL
 Java_com_winlator_cmod_XrActivity_nativeSetFoV(JNIEnv *env, jobject obj, jfloat x, jfloat y) {
     xr_fovx = x;
     xr_fovy = y;
-}
-
-JNIEXPORT void JNICALL
-Java_com_winlator_cmod_XrActivity_nativeSetCurvedScreen(JNIEnv *env, jobject obj, jboolean enabled) {
-    xr_curvedScreen = enabled;
 }
 
 JNIEXPORT void JNICALL

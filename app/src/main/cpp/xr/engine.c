@@ -30,7 +30,6 @@ void XrEngineInit(struct XrEngine* engine, void* system, const char* name, int v
 #ifdef XR_USE_GRAPHICS_API_OPENGL_ES
     extensions[count++] = XR_KHR_OPENGL_ES_ENABLE_EXTENSION_NAME;
 #endif
-    extensions[count++] = XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME;
 #ifdef ANDROID
     if (engine->PlatformFlag[PLATFORM_EXTENSION_INSTANCE]) {
         extensions[count++] = XR_KHR_ANDROID_CREATE_INSTANCE_EXTENSION_NAME;

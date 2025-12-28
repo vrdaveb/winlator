@@ -51,7 +51,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isAER = false;
     private static boolean isSBS = false;
     private static boolean isVR = false;
-    private static boolean useBacklight = false;
     private static boolean usePassthrough = false;
     private static boolean[] currentButtons = new boolean[ControllerButton.values().length];
     private static final KeyCharacterMap chars = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
@@ -71,7 +70,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static XrAPI xrAPI = null;
 
     public native void nativeSetFoV(float x, float y);
-    public native void nativeSetCurvedScreen(boolean enabled);
     public native void nativeSetUsePT(boolean enabled);
     public native void nativeSetUseVR(boolean enabled);
     public native void nativeSetFramesync(int r, int g, int b, int a);
@@ -81,12 +79,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        useBacklight = prefs.getBoolean("use_bl", false);
         usePassthrough = prefs.getBoolean("use_pt", true);
         nativeSetUsePT(usePassthrough);
-
-        boolean curvedScreen = prefs.getBoolean("use_cs", false);
-        nativeSetCurvedScreen(curvedScreen);
     }
 
     @Override
@@ -182,8 +176,6 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public static boolean getVR() {
         return isVR && ContentDialog.getFrontInstance() == null;
     }
-
-    public static boolean hasBacklight() { return useBacklight && !isImmersive && !isVR; }
 
     public static boolean isActive() {
         return Math.abs(System.currentTimeMillis() - lastActive) < 5000;
@@ -507,7 +499,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();
-    public native boolean initFrame(boolean immersive, boolean sbs, boolean aer, boolean backlight);
+    public native boolean initFrame(boolean immersive, boolean sbs, boolean aer);
     public native void bindFBO(int index);
     public native void endFrame();
 
