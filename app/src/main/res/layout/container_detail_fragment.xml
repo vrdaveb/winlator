@@ -880,6 +880,39 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="@string/cpu_level" />
+                <Spinner
+                    style="@style/ComboBox"
+                    android:layout_width="match_parent"
+                    android:id="@+id/SCPULevel"
+                    android:entries="@array/xr_level_entries"
+                    android:spinnerMode="dialog"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gpu_level" />
+                <Spinner
+                    style="@style/ComboBox"
+                    android:layout_width="match_parent"
+                    android:id="@+id/SGPULevel"
+                    android:entries="@array/xr_level_entries"
+                    android:spinnerMode="dialog"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/refresh_rate" />
+                <Spinner
+                    style="@style/ComboBox"
+                    android:layout_width="match_parent"
+                    android:id="@+id/SRefreshRate"
+                    android:entries="@array/xr_refresh_entries"
+                    android:spinnerMode="dialog"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/primary_controller" />
                 <Spinner
                     style="@style/ComboBox"

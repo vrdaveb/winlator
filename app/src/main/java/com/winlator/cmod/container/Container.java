@@ -77,6 +77,9 @@ public class Container {
     private String midiSoundFont = "";
     private int inputType = WinHandler.DEFAULT_INPUT_TYPE;
     private String lc_all = "";
+    private int cpuLevel = 75;
+    private int gpuLevel = 75;
+    private int refreshRate = 72;
     private int primaryController = 1;
     private String controllerMapping = new String(new char[XrControllerMapping.values().length]);
     private String fexcoreVersion = DefaultVersion.FEXCORE;
@@ -191,6 +194,24 @@ public class Container {
 
     public void setLC_ALL(String lc_all) {
         this.lc_all = lc_all;
+    }
+
+    public int getCpuLevel() { return cpuLevel; }
+
+    public void setCpuLevel(int cpuLevel) {
+        this.cpuLevel = cpuLevel;
+    }
+
+    public int getGpuLevel() { return gpuLevel; }
+
+    public void setGpuLevel(int gpuLevel) {
+        this.gpuLevel = gpuLevel;
+    }
+
+    public int getRefreshRate() { return refreshRate; }
+
+    public void setRefreshRate(int refreshRate) {
+        this.refreshRate = refreshRate;
     }
 
     public int getPrimaryController() {
@@ -453,6 +474,9 @@ public class Container {
             data.put("rcfileId", rcfileId);
             data.put("midiSoundFont", midiSoundFont);
             data.put("lc_all", lc_all);
+            data.put("cpuLevel", cpuLevel);
+            data.put("gpuLevel", gpuLevel);
+            data.put("refreshRate", refreshRate);
             data.put("primaryController", primaryController);
             data.put("controllerMapping", controllerMapping);
             data.put("gstreamerWorkaround", gstreamerWorkaround);
@@ -559,6 +583,15 @@ public class Container {
                     break;
                 case "lc_all" :
                     setLC_ALL(data.getString(key));
+                    break;
+                case "cpuLevel" :
+                    setCpuLevel(data.getInt(key));
+                    break;
+                case "gpuLevel" :
+                    setGpuLevel(data.getInt(key));
+                    break;
+                case "refreshRate" :
+                    setRefreshRate(data.getInt(key));
                     break;
                 case "primaryController" :
                     setPrimaryController(data.getInt(key));

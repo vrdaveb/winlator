@@ -435,6 +435,9 @@
     <string name="use_xr">Use OpenXR integration</string>
     <string name="use_pt">Use Passthrough</string>
     <string name="xr" translatable="false">XR</string>
+    <string name="cpu_level">CPU level</string>
+    <string name="gpu_level">GPU level</string>
+    <string name="refresh_rate">Refresh rate</string>
     <string name="primary_controller">Primary controller</string>
     <string name="left_controller">Left controller</string>
     <string name="right_controller">Right controller</string>

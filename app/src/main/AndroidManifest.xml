@@ -184,12 +184,6 @@
             android:name="android.allow_multiple_resumed_activities"
             android:value="true" />
         <meta-data
-            android:name="com.oculus.dualcorecpuset"
-            android:value="true" />
-        <meta-data
-            android:name="com.oculus.trade_cpu_for_gpu_amount"
-            android:value="-1" />
-        <meta-data
             android:name="com.oculus.supportedDevices"
             android:value="quest2|questpro|quest3|quest3s"/>
         <meta-data

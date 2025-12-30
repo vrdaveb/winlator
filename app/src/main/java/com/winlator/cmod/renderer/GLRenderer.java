@@ -113,7 +113,11 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             String[] parts = res.split("x");
             width = Short.parseShort(parts[0]);
             height = Short.parseShort(parts[1]);
-            activity.init(width, height);
+
+            int cpuLevel = activity.getContainer().getCpuLevel();
+            int gpuLevel = activity.getContainer().getGpuLevel();
+            int refresh = activity.getContainer().getRefreshRate();
+            activity.init(width, height, refresh, cpuLevel, gpuLevel);
             height = width; ////Use square resolution
             GLES20.glViewport(0, 0, width, height);
             magnifierEnabled = false;

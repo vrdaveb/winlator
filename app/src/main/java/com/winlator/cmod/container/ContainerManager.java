@@ -62,11 +62,11 @@ public class ContainerManager {
         containers.clear();
         maxContainerId = 0;
 
-        try {
-            File[] files = homeDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
+        File[] files = homeDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    try {
                         if (file.getName().startsWith(ImageFs.USER + "-")) {
                             Container container = new Container(
                                     Integer.parseInt(file.getName().replace(ImageFs.USER + "-", "")), this
@@ -78,11 +78,11 @@ public class ContainerManager {
                             containers.add(container);
                             maxContainerId = Math.max(maxContainerId, container.id);
                         }
+                    } catch (Exception e) {
+                        Log.e("ContainerManager", "Error loading containers", e);
                     }
                 }
             }
-        } catch (JSONException | NullPointerException e) {
-            Log.e("ContainerManager", "Error loading containers", e);
         }
     }
 

@@ -321,6 +321,17 @@
         <item>FEXCore</item>
         <item>Box64</item>
     </string-array>
+    <string-array name="xr_level_entries">
+        <item>0 Power saving</item>
+        <item>25 Low</item>
+        <item>50 High</item>
+        <item>75 Boost</item>
+    </string-array>
+    <string-array name="xr_refresh_entries">
+        <item>60 (Quest 2 only)</item>
+        <item>72</item>
+        <item>90</item>
+    </string-array>
     <string-array name="wine_entries">
         <item>proton-9.0-x86_64</item>
         <item>proton-9.0-arm64ec</item>

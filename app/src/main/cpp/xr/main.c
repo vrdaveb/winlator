@@ -47,7 +47,8 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_sendManufacturer(JNIEnv
     (*env)->ReleaseStringUTFChars(env, manufacturer, nativeStr);
 }
 
-JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobject obj, jint width, jint height) {
+JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobject obj, jint width, jint height,
+                                                              jint refresh, jint cpu, jint gpu) {
 
     // Do not allow second initialization
     if (xr_initialized) {
@@ -73,6 +74,9 @@ JNIEXPORT void JNICALL Java_com_winlator_cmod_XrActivity_init(JNIEnv *env, jobje
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE] = true;
         xr_module_engine.PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE] = true;
     }
+    xr_module_renderer.ConfigInt[CONFIG_LEVEL_CPU] = cpu;
+    xr_module_renderer.ConfigInt[CONFIG_LEVEL_GPU] = gpu;
+    xr_module_renderer.ConfigInt[CONFIG_FRAMERATE] = refresh;
     xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_WIDTH] = width;
     xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT] = width; //Use square resolution
     xr_aspect = (float)width / (float)height;
@@ -109,14 +113,6 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
 }
 
 JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer) {
-    // Ensure we are using correct refresh rate
-    int refreshRate = 72;
-    static int lastRefresh = 0;
-    if (lastRefresh != refreshRate) {
-        lastRefresh = refreshRate;
-        XrRendererSetRefreshRate(&xr_module_engine, refreshRate);
-    }
-
     if (XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
         // Update controllers state
         XrInputUpdate(&xr_module_engine, &xr_module_input);

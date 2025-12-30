@@ -477,6 +477,19 @@ void XrRendererHandleSessionStateChanges(struct XrEngine* engine, struct XrRende
         renderer->SessionActive = (result == XR_SUCCESS);
         ALOGV("Session active = %d", renderer->SessionActive);
 
+        if (renderer->SessionActive && engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE])
+        {
+            int refresh = renderer->ConfigInt[CONFIG_FRAMERATE];
+            if (!pfnRequestDisplayRefreshRate)
+            {
+                OXR(xrGetInstanceProcAddr(
+                        engine->Instance,
+                        "xrRequestDisplayRefreshRateFB",
+                        (PFN_xrVoidFunction*)(&pfnRequestDisplayRefreshRate)));
+            }
+            OXR(pfnRequestDisplayRefreshRate(engine->Session, 72.0f));
+            OXR(pfnRequestDisplayRefreshRate(engine->Session, (float)refresh));
+        }
 #ifdef ANDROID
         if (renderer->SessionActive && engine->PlatformFlag[PLATFORM_EXTENSION_PERFORMANCE])
         {
@@ -484,10 +497,10 @@ void XrRendererHandleSessionStateChanges(struct XrEngine* engine, struct XrRende
             OXR(xrGetInstanceProcAddr(engine->Instance, "xrPerfSettingsSetPerformanceLevelEXT",
                                       (PFN_xrVoidFunction*)(&pfnPerfSettingsSetPerformanceLevelEXT)));
 
-            OXR(pfnPerfSettingsSetPerformanceLevelEXT(
-                    engine->Session, XR_PERF_SETTINGS_DOMAIN_CPU_EXT, XR_PERF_SETTINGS_LEVEL_BOOST_EXT));
-            OXR(pfnPerfSettingsSetPerformanceLevelEXT(
-                    engine->Session, XR_PERF_SETTINGS_DOMAIN_GPU_EXT, XR_PERF_SETTINGS_LEVEL_BOOST_EXT));
+            int cpuLevel = renderer->ConfigInt[CONFIG_LEVEL_CPU];
+            int gpuLevel = renderer->ConfigInt[CONFIG_LEVEL_GPU];
+            OXR(pfnPerfSettingsSetPerformanceLevelEXT(engine->Session, XR_PERF_SETTINGS_DOMAIN_CPU_EXT, cpuLevel));
+            OXR(pfnPerfSettingsSetPerformanceLevelEXT(engine->Session, XR_PERF_SETTINGS_DOMAIN_GPU_EXT, gpuLevel));
 
             PFN_xrSetAndroidApplicationThreadKHR pfnSetAndroidApplicationThreadKHR = NULL;
             OXR(xrGetInstanceProcAddr(engine->Instance, "xrSetAndroidApplicationThreadKHR",
@@ -574,40 +587,5 @@ void XrRendererHandleXrEvents(struct XrEngine* engine, struct XrRenderer* render
                 ALOGV("xrPollEvent: Unknown event");
                 break;
         }
-    }
-}
-
-int XrRendererGetRefreshRate(struct XrEngine* engine)
-{
-    if (engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE])
-    {
-        if (!pfnGetDisplayRefreshRate)
-        {
-            OXR(xrGetInstanceProcAddr(
-                    engine->Instance,
-                    "xrGetDisplayRefreshRateFB",
-                    (PFN_xrVoidFunction*)(&pfnGetDisplayRefreshRate)));
-        }
-
-        float currentDisplayRefreshRate = 0.0f;
-        OXR(pfnGetDisplayRefreshRate(engine->Session, &currentDisplayRefreshRate));
-        return (int)currentDisplayRefreshRate;
-    }
-    return 72;
-}
-
-void XrRendererSetRefreshRate(struct XrEngine* engine, int refresh)
-{
-    if (engine->PlatformFlag[PLATFORM_EXTENSION_REFRESHRATE])
-    {
-        if (!pfnRequestDisplayRefreshRate)
-        {
-            OXR(xrGetInstanceProcAddr(
-                    engine->Instance,
-                    "xrRequestDisplayRefreshRateFB",
-                    (PFN_xrVoidFunction*)(&pfnRequestDisplayRefreshRate)));
-        }
-        OXR(pfnRequestDisplayRefreshRate(engine->Session, 72.0f));
-        OXR(pfnRequestDisplayRefreshRate(engine->Session, (float)refresh));
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.Scanner;
 
 public class StringUtils {
     public static String removeEndSlash(String value) {
@@ -29,6 +30,13 @@ public class StringUtils {
 
     public static String parseIdentifier(Object text) {
         return text.toString().toLowerCase(Locale.ENGLISH).replaceAll(" *\\(([^\\)]+)\\)$", "").replaceAll("( \\+ )+| +", "-");
+    }
+
+    public static int parseInt(Object text) {
+        Scanner sc = new Scanner(text.toString());
+        int output = sc.nextInt();
+        sc.close();
+        return output;
     }
 
     public static String parseNumber(Object text) {
