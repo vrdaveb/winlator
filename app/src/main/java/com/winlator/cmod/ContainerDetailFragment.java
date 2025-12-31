@@ -852,6 +852,7 @@ public class ContainerDetailFragment extends Fragment {
             if (strWidth.matches("[0-9]+") && strHeight.matches("[0-9]+")) {
                 int width = Integer.parseInt(strWidth);
                 int height = Integer.parseInt(strHeight);
+                if (width < height) width = height; //Portrait resolutions are not supported
                 if ((width % 2) == 0 && (height % 2) == 0) return width+"x"+height;
             }
         }
