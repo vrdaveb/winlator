@@ -370,7 +370,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
                 timestampHadWindow = System.currentTimeMillis();
             }  else if ((System.currentTimeMillis() - timestampHadWindow > 1000)) {
                 if (XrActivity.isEnabled(null)) {
-                    XrActivity.getInstance().finish();
+                    XrActivity.getInstance().runOnUiThread(() -> XrActivity.getInstance().closeSession());
                 }
             }
         }
