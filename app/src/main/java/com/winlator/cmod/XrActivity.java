@@ -300,9 +300,9 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 udpThread.setDaemon(true);
                 udpThread.start();
             }
-            isVR = xrAPI.getValue(AppInput.MODE_VR) > 0.5f;
+            isVR = xrAPI.getIntValue(AppInput.MODE_VR) == 1;
             getInstance().nativeSetUseVR(isVR);
-            if (isVR) {
+            if (xrAPI.getIntValue(AppInput.MODE_VR) > 0) {
                 float fovx = xrAPI.getValue(AppInput.HMD_FOVX);
                 float fovy = xrAPI.getValue(AppInput.HMD_FOVY);
                 getInstance().nativeSetFoV(fovx, fovy);
