@@ -308,18 +308,18 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     }
 
     private void renderAER(Drawable drawable, ShaderMaterial material, boolean shouldUpdate, int targetFBO) {
-        if ((lastTextureWidth != drawable.width) || (lastTextureHeight != drawable.height)) {
+        if ((lastTextureWidth != drawable.getStride()) || (lastTextureHeight != drawable.height)) {
             for (int i = 0; i < lastTexture.length; i++) {
                 lastTexture[i].destroy();
                 lastTexture[i] = new Texture();
             }
-            lastTextureWidth = drawable.width;
+            lastTextureWidth = drawable.getStride();
             lastTextureHeight = drawable.height;
         }
 
         if (shouldUpdate) {
             lastTexture[targetFBO].setNeedsUpdate(true);
-            lastTexture[targetFBO].updateFromDrawable(drawable);
+            lastTexture[targetFBO].updateFromBuffer(drawable.getData(), drawable.getStride(), drawable.height);
         }
 
         for (int i = 0; i < lastTexture.length; i++) {

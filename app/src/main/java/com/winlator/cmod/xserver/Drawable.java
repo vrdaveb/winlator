@@ -61,7 +61,7 @@ public class Drawable extends XResource {
         this.data = data;
     }
 
-    private short getStride() {
+    public short getStride() {
         return texture instanceof GPUImage ? ((GPUImage)texture).getStride() : width;
     }
 
