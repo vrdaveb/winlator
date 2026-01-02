@@ -50,6 +50,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static boolean isImmersive = false;
     private static boolean isAER = false;
     private static boolean isSBS = false;
+    private static boolean isUDP = false;
     private static boolean isVR = false;
     private static boolean usePassthrough = false;
     private static boolean[] currentButtons = new boolean[ControllerButton.values().length];
@@ -300,9 +301,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 udpThread.setDaemon(true);
                 udpThread.start();
             }
+            isUDP = xrAPI.getIntValue(AppInput.MODE_VR) > 0;
             isVR = xrAPI.getIntValue(AppInput.MODE_VR) == 1;
             getInstance().nativeSetUseVR(isVR);
-            if (xrAPI.getIntValue(AppInput.MODE_VR) > 0) {
+            if (isUDP) {
                 float fovx = xrAPI.getValue(AppInput.HMD_FOVX);
                 float fovy = xrAPI.getValue(AppInput.HMD_FOVY);
                 getInstance().nativeSetFoV(fovx, fovy);
@@ -375,7 +377,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
 
             // Mouse control with head
             Pointer mouse = instance.getXServer().pointer;
-            if (isImmersive) {
+            if (isImmersive && !isUDP) {
                 float angle2px = instance.getXServer().screenInfo.width * 0.05f / f;
                 dx = getAngleDiff(lastAxes[ControllerAxis.HMD_YAW.ordinal()], axes[ControllerAxis.HMD_YAW.ordinal()]) * angle2px;
                 dy = getAngleDiff(lastAxes[ControllerAxis.HMD_PITCH.ordinal()], axes[ControllerAxis.HMD_PITCH.ordinal()]) * angle2px;
