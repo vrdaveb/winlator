@@ -69,8 +69,12 @@ public class XrAPI implements XrInterface, Runnable {
         }
     }
 
-    public byte[] encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
-        return impl != null ? impl.encode(axes, buttons, clientIndex) : new byte[0];
+    public String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
+        return impl != null ? impl.encode(axes, buttons, clientIndex) : "";
+    }
+
+    public String getFlags() {
+        return impl != null ? impl.getFlags() : "";
     }
 
     public float getValue(@NonNull AppInput index) {
@@ -153,6 +157,7 @@ public class XrAPI implements XrInterface, Runnable {
                 //Decide which implementation to use
                 if (version.startsWith("0.1")) impl = new XrVersion01(new File(PATH_API));
                 if (version.startsWith("0.2")) impl = new XrVersion02();
+                if (version.startsWith("0.3")) impl = new XrVersion03();
             } catch (Exception e) {
                 System.err.println("Error reading version file: " + e.getMessage());
             }

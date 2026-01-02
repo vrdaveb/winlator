@@ -38,6 +38,7 @@ import static com.winlator.cmod.xr.XrInterface.ControllerAxis;
 import static com.winlator.cmod.xr.XrInterface.ControllerButton;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -313,7 +314,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                     isAER = mode3D == 2;
                     isSBS = mode3D == 1;
                 }
-                xrAPI.send(xrAPI.encode(axes, buttons, 0));
+                String data = xrAPI.encode(axes, buttons, 0) + xrAPI.getFlags();
+                xrAPI.send(data.getBytes(StandardCharsets.US_ASCII));
             } else {
                 xrAPI.updateImplementation();
             }

@@ -23,7 +23,8 @@ public interface XrInterface {
     }
 
     void dataReceived(@NonNull String message);
-    byte[] encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex);
+    String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex);
+    String getFlags();
     float getValue(@NonNull AppInput index);
     void setValue(@NonNull AppInput index, float value);
 }

@@ -3,7 +3,6 @@ package com.winlator.cmod.xr;
 import androidx.annotation.NonNull;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class XrVersion01 implements XrInterface {
@@ -35,7 +34,7 @@ public class XrVersion01 implements XrInterface {
     }
 
     @Override
-    public byte[] encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
+    public String encode(@NonNull float[] axes, @NonNull boolean[] buttons, int clientIndex) {
         StringBuilder binary = new StringBuilder();
         for (boolean button : buttons) {
             binary.append(button ? "T" : "F");
@@ -70,7 +69,11 @@ public class XrVersion01 implements XrInterface {
                 " " + String.format(Locale.US, "%.2f", axes[XrAPI.ControllerAxis.HMD_FOVX.ordinal()]) +
                 " " + String.format(Locale.US, "%.2f", axes[XrAPI.ControllerAxis.HMD_FOVY.ordinal()]) +
                 " " + String.format(Locale.US, "%d", (int)axes[XrAPI.ControllerAxis.HMD_SYNC.ordinal()]) +
-                " " + binary).getBytes(StandardCharsets.US_ASCII);
+                " " + binary);
+    }
+
+    public String getFlags() {
+        return "";
     }
 
     @Override
