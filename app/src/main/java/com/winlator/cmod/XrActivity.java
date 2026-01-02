@@ -306,8 +306,11 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                 float fovx = xrAPI.getValue(AppInput.HMD_FOVX);
                 float fovy = xrAPI.getValue(AppInput.HMD_FOVY);
                 getInstance().nativeSetFoV(fovx, fovy);
-                isAER = xrAPI.getIntValue(AppInput.MODE_3D) == 2;
-                isSBS = xrAPI.getIntValue(AppInput.MODE_3D) == 1;
+                int mode3D = xrAPI.getIntValue(AppInput.MODE_3D);
+                if (mode3D >= 0) {
+                    isAER = mode3D == 2;
+                    isSBS = mode3D == 1;
+                }
                 xrAPI.send(xrAPI.encode(axes, buttons, 0));
             } else {
                 xrAPI.updateImplementation();
