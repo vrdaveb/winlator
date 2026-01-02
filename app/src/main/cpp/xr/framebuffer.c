@@ -31,9 +31,6 @@ void XrFramebufferDestroy(struct XrFramebuffer *framebuffer)
 
 void XrFramebufferAcquire(struct XrFramebuffer *framebuffer)
 {
-    framebuffer->SwapchainIndex++;
-    framebuffer->SwapchainIndex %= framebuffer->SwapchainLength;
-
     XrSwapchainImageAcquireInfo acquire_info = {XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO, NULL};
     OXR(xrAcquireSwapchainImage(framebuffer->Handle, &acquire_info, &framebuffer->SwapchainIndex));
 
