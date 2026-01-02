@@ -36,7 +36,7 @@ Our XrAPI provides developers with a way to replace OpenVR or OpenXR in their ap
 4) Windows app have to render value of HMD_SYNC as shade of red (in sRGB colorspace) into top-left corner.
 5) Information about used headset is written into Z:\tmp\xr\system (manufacturer, product, Android version, security patch version).
 
-### XrAPI 0.2 specification
+### XrAPI 0.3 specification
 The Windows app/game has to sent data on localhost:7278 as string of float numbers separated by space:
 ```
 L_HAPTICS, R_HAPTICS, MODE_VR, MODE_3D, HMD_FOVX, HMD_FOVY
@@ -44,7 +44,7 @@ L_HAPTICS, R_HAPTICS, MODE_VR, MODE_3D, HMD_FOVX, HMD_FOVY
 
 * The haptic values indicates length in frames how long should controller vibrate (the first value is for left controller and the second for the right one).
 * The VR mode is 1 to enable, 0 to disable. To receive HMD and controllers data, the VR mode has to be enabled.
-* The 3D mode is 2 for alternate-eye-rendering, 1 for side-by-side, 0 to disable.
+* The 3D mode is 2 for alternate-eye-rendering, 1 for side-by-side, 0 for flat screen, -1 to give user the control.
 * If FOV values are higher than 1 then it forces a custom Field-of-View values in degrees. This is need by apps and games where the variable FOV isn't supported.
 
 3D modes:
@@ -62,6 +62,11 @@ next is a string containing characters T (for TRUE) and F (for FALSE). This stri
 ```
 L_GRIP, L_MENU, L_THUMBSTICK_PRESS, L_THUMBSTICK_LEFT, L_THUMBSTICK_RIGHT, L_THUMBSTICK_UP, L_THUMBSTICK_DOWN, L_TRIGGER, L_X, L_Y,
 R_A, R_B, R_GRIP, R_THUMBSTICK_PRESS, R_THUMBSTICK_LEFT, R_THUMBSTICK_RIGHT, R_THUMBSTICK_UP, R_THUMBSTICK_DOWN, R_TRIGGER
+```
+
+next is a string containing characters T (for TRUE) and F (for FALSE). This string represents the XR flags in order:
+```
+Immersive, SBS
 ```
 
 ### Code examples
@@ -117,6 +122,7 @@ Winlator is an Android application that lets you to run Windows (x86_64) applica
 Many thanks to [ptitSeb](https://github.com/ptitSeb) (Box86/Box64), [Danylo](https://blogs.igalia.com/dpiliaiev/tags/mesa/) (Turnip), [alexvorxx](https://github.com/alexvorxx) (Mods/Tips) and others.
 
 Thank you to all the people who believe in this project.
+
 
 
 
