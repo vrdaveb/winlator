@@ -405,9 +405,12 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
                 if (drawable != null) {
                     DisplayMetrics displayMetrics = new DisplayMetrics();
                     XrActivity.getInstance().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    float scale = (Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0 ? 0.75f : 0.9f);
+                    float scale = (Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0 ? 0.75f : 1.25f);
                     scale *= (float)Math.min(xServer.screenInfo.width, xServer.screenInfo.height);
                     scale /= (float)Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+                    if (drawable.width * scale > xServer.screenInfo.width) {
+                        scale = xServer.screenInfo.width / (float)drawable.width;
+                    }
                     int offsetX = (int) ((xServer.screenInfo.width - drawable.width * scale) / 2);
                     int offsetY = (int) ((xServer.screenInfo.height - drawable.height * scale) / 2);
                     renderDrawable(drawable, offsetX, offsetY, bgrMaterial, false, scale);
