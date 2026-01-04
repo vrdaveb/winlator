@@ -73,6 +73,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static XrAPI xrAPI = null;
 
     public native void nativeSetFoV(float x, float y);
+    public native void nativeSetCurvedScreen(boolean enabled);
     public native void nativeSetUsePT(boolean enabled);
     public native void nativeSetUseVR(boolean enabled);
     public native void nativeSetFramesync(int r, int g, int b, int a);
@@ -84,6 +85,8 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         usePassthrough = prefs.getBoolean("use_pt", true);
         nativeSetUsePT(usePassthrough);
+        boolean curvedScreen = prefs.getBoolean("use_cs", false);
+        nativeSetCurvedScreen(curvedScreen);
     }
 
     @Override

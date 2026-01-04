@@ -32,6 +32,7 @@ enum XrConfigInt
     CONFIG_LEVEL_CPU,
     CONFIG_LEVEL_GPU,
     // viewport setup
+    CONFIG_VIEWPORT_CURVED,
     CONFIG_VIEWPORT_WIDTH,
     CONFIG_VIEWPORT_HEIGHT,
     // render status
