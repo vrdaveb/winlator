@@ -60,6 +60,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     private static final boolean[] lastButtons = new boolean[ControllerButton.values().length];
     private static long lastActive = 0;
     private static long lastDialogShown = 0;
+    private static float lastDistance = 5;
     private static int lastFrameSync = 0;
     private static long lastMouseUpdate = 0;
     private static short lastMouseX = 0;
@@ -182,6 +183,10 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
         return isVR && ContentDialog.getFrontInstance() == null;
     }
 
+    public static float getDistance() {
+        return lastDistance;
+    }
+
     public static boolean isActive() {
         return Math.abs(System.currentTimeMillis() - lastActive) < 5000;
     }
@@ -216,6 +221,15 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
                         input.requestFocus();
                     });
                 }).start();
+                break;
+            case R.id.main_menu_magnifier:
+                lastDistance -= 1.0f;
+                if (lastDistance < 0.5f) {
+                    lastDistance = 5.0f;
+                }
+                break;
+            case R.id.main_menu_task_manager:
+                getWinHandler().exec("taskmgr.exe");
                 break;
             case R.id.xr_passthrough:
                 usePassthrough = !usePassthrough;
@@ -509,7 +523,7 @@ public class XrActivity extends XServerDisplayActivity implements TextWatcher {
     public native void bindFramebuffer();
     public native int getWidth();
     public native int getHeight();
-    public native boolean initFrame(boolean immersive, boolean sbs, boolean aer);
+    public native boolean initFrame(boolean immersive, boolean sbs, boolean aer, float distance);
     public native void bindFBO(int index);
     public native void endFrame();
 

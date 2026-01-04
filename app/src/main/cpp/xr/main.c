@@ -112,13 +112,13 @@ JNIEXPORT jint JNICALL Java_com_winlator_cmod_XrActivity_getHeight(JNIEnv *env, 
     return xr_module_renderer.ConfigInt[CONFIG_VIEWPORT_HEIGHT];
 }
 
-JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer) {
+JNIEXPORT jboolean JNICALL Java_com_winlator_cmod_XrActivity_initFrame(JNIEnv *env, jobject obj, jboolean immersive, jboolean sbs, jboolean aer, jfloat distance) {
     if (XrRendererInitFrame(&xr_module_engine, &xr_module_renderer)) {
         // Update controllers state
         XrInputUpdate(&xr_module_engine, &xr_module_input);
 
         // Set render canvas
-        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = 5.0f;
+        xr_module_renderer.ConfigFloat[CONFIG_CANVAS_DISTANCE] = distance;
         xr_module_renderer.ConfigFloat[CONFIG_CANVAS_SIZE] = xr_aspect;
         xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOV_SCALE] = 1.1f;
         if (xr_fovx > 1) xr_module_renderer.ConfigFloat[CONFIG_VIEWPORT_FOVX] = xr_fovx;

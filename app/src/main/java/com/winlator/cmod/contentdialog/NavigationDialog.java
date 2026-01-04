@@ -48,8 +48,9 @@ public class NavigationDialog extends ContentDialog {
             layout.setPadding(padding, padding, padding, padding);
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setOnClickListener(view -> {
-                context.onNavigationItemSelected(item);
-                dismiss();
+                if (context.onNavigationItemSelected(item)) {
+                    dismiss();
+                }
             });
 
             layout.setOnFocusChangeListener((view, focused) -> {

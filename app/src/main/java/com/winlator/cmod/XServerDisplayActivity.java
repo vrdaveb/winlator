@@ -415,7 +415,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             menu.findItem(R.id.main_menu_controller_assignment).setVisible(false);
             menu.findItem(R.id.main_menu_motion_controls).setVisible(false);
             menu.findItem(R.id.main_menu_input_controls).setVisible(false);
-            menu.findItem(R.id.main_menu_magnifier).setVisible(false);
             menu.findItem(R.id.main_menu_pip_mode).setVisible(false);
             menu.findItem(R.id.main_menu_touchpad_help).setVisible(false);
         } else {
@@ -1441,7 +1440,10 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 return true;
 
             case R.id.main_menu_magnifier:
-                if (magnifierView == null) {
+                if (XrActivity.isEnabled(null)) {
+                    XrActivity.getInstance().callMenuAction(id);
+                    return false;
+                } else if (magnifierView == null) {
                     FrameLayout container = findViewById(R.id.FLXServerDisplay);
                     magnifierView = new MagnifierView(this);
                     magnifierView.setZoomButtonCallback(value -> {
@@ -1472,7 +1474,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             // ---- SYSTEM group ----
             case R.id.main_menu_task_manager:
                 if (XrActivity.isEnabled(this)) {
-                    XrActivity.getInstance().getWinHandler().exec("taskmgr.exe");
+                    XrActivity.getInstance().callMenuAction(id);
                 } else {
                     new TaskManagerDialog(this).show();
                 }
