@@ -18,9 +18,15 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.IntRange;
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final byte EDIT_INPUT_CONTROLS_REQUEST_CODE = 3;
     public static final byte OPEN_DIRECTORY_REQUEST_CODE = 4;
     private DrawerLayout drawerLayout;
+    private GridLayout gridLayout;
     public final PreloaderDialog preloaderDialog = new PreloaderDialog(this);
     private boolean editInputControls = false;
     private int selectedProfileId;
@@ -130,12 +137,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.NavigationView);
         navigationView.setNavigationItemSelectedListener(this);
 
+        gridLayout = findViewById(R.id.NavigationGrid);
+        setNavigationGrid();
+
         setSupportActionBar(findViewById(R.id.Toolbar));
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
+        /*if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.icon_action_bar_menu);
-        }
+        }*/
 
         // Determine text color based on dark mode
         int textColor = isDarkMode ? Color.WHITE : Color.BLACK;
@@ -175,6 +185,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         }
+    }
+
+    private void setNavigationGrid() {
+        Context context = getBaseContext();
+        NavigationView navigation = findViewById(R.id.NavigationView);
+        Menu menu = navigation.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            if (!item.isVisible()) {
+                continue;
+            }
+
+            int padding = dpToPx(5, context);
+            LinearLayout layout = new LinearLayout(context);
+            layout.setPadding(padding, padding, padding, padding);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setOnClickListener(view -> {
+                onNavigationItemSelected(item);
+            });
+
+            layout.setOnFocusChangeListener((view, focused) -> {
+                if (focused) {
+                    layout.setBackgroundColor(Color.GRAY);
+                } else {
+                    layout.setBackgroundColor(Color.TRANSPARENT);
+                }
+            });
+
+            int size = dpToPx(32, context);
+            View icon = new View(context);
+            item.getIcon().setTint(Color.WHITE);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.gravity = Gravity.CENTER_HORIZONTAL;
+            icon.setLayoutParams(lp);
+            icon.setBackground(item.getIcon());
+            layout.addView(icon);
+
+            int width = dpToPx(80, context);
+            TextView text = new TextView(context);
+            text.setLayoutParams(new ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
+            text.setText(item.getTitle());
+            text.setTextColor(Color.WHITE);
+            text.setGravity(Gravity.CENTER);
+            text.setLines(2);
+            layout.addView(text);
+
+            gridLayout.addView(layout);
+        }
+    }
+
+    public int dpToPx(float dp, Context context){
+        return (int) (dp * context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     /**

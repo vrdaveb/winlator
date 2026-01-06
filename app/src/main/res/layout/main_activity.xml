@@ -25,8 +25,22 @@
         <FrameLayout
             android:id="@+id/FLFragmentContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary">
+
+            <GridLayout
+                android:id="@+id/NavigationGrid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:paddingTop="5dp"/>
+        </RelativeLayout>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -35,6 +49,7 @@
         android:layout_gravity="start"
         android:id="@+id/NavigationView"
         android:fitsSystemWindows="true"
+        android:visibility="gone"
         app:headerLayout="@layout/main_menu_header"
         app:itemIconTint="@color/colorAccent"
         app:menu="@menu/main_menu"/>
