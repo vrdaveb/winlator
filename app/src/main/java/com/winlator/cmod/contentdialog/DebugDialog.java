@@ -29,7 +29,7 @@ public class DebugDialog extends ContentDialog implements Callback<String> {
         setTitle(context.getString(R.string.logs));
         logView = findViewById(R.id.LogView);
         
-        logView.getLayoutParams().width = (int)UnitUtils.dpToPx(UnitUtils.pxToDp(AppUtils.getScreenWidth()) * 0.7f);
+        logView.getLayoutParams().width = (int)UnitUtils.dpToPx(UnitUtils.pxToDp(AppUtils.getScreenWidth()) * 0.5f);
 
         findViewById(R.id.BTCancel).setVisibility(View.GONE);
 
