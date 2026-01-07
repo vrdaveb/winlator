@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         gridLayout = findViewById(R.id.NavigationGrid);
-        setNavigationGrid();
+        MenuItem toOpen = setNavigationGrid();
 
         setSupportActionBar(findViewById(R.id.Toolbar));
         ActionBar actionBar = getSupportActionBar();
@@ -185,9 +185,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         }
+
+        if (toOpen != null) {
+            onNavigationItemSelected(toOpen);
+        }
     }
 
-    private void setNavigationGrid() {
+    private MenuItem setNavigationGrid() {
+        MenuItem output = null;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String tab = sharedPreferences.getString("tab_last", "");
+
         Context context = getBaseContext();
         NavigationView navigation = findViewById(R.id.NavigationView);
         Menu menu = navigation.getMenu();
@@ -203,7 +211,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setOnClickListener(view -> {
                 onNavigationItemSelected(item);
+                SharedPreferences.Editor e = sharedPreferences.edit();
+                e.putString("tab_last", item.getTitle().toString());
+                e.commit();
             });
+            if (item.getTitle().toString().compareTo(tab) == 0) {
+                output = item;
+            }
 
             layout.setOnFocusChangeListener((view, focused) -> {
                 if (focused) {
@@ -233,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             gridLayout.addView(layout);
         }
+        return output;
     }
 
     public int dpToPx(float dp, Context context){
@@ -487,13 +502,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         List<Fragment> fragments = fragmentManager.getFragments();
         for (Fragment fragment : fragments) {
-            if (fragment instanceof ContainersFragment && fragment.isVisible()) {
-                finish();
-                return;
+            if (fragment instanceof ContainerDetailFragment && fragment.isVisible()) {
+                show(new ContainersFragment(), true);  // Pass `true` to trigger the reverse animation
             }
         }
-
-        show(new ContainersFragment(), true);  // Pass `true` to trigger the reverse animation
     }
 
     public void setOpenFileCallback(Callback<Uri> openFileCallback) {
