@@ -86,6 +86,7 @@ public class SettingsFragment extends Fragment {
     private PreloaderDialog preloaderDialog;
     public static final String DEFAULT_EXPORT_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/Winlator/Frontend";
     private SharedPreferences preferences;
+    private View saveButton;
 
 	// Disable or enable True Mouse Control
 //	private CheckBox cbCursorLock;
@@ -395,7 +396,9 @@ public class SettingsFragment extends Fragment {
         });
 
 //        int finalSelectedIndex = selectedIndex;
-        view.findViewById(R.id.BTConfirm).setOnClickListener((v) -> {
+            saveButton = view.findViewById(R.id.BTConfirm);
+            saveButton.setVisibility(View.GONE);
+            saveButton.setOnClickListener((v) -> {
             SharedPreferences.Editor editor = preferences.edit();
 
             editor.putBoolean("dark_mode", cbDarkMode.isChecked());
@@ -456,6 +459,10 @@ public class SettingsFragment extends Fragment {
 
 
         return view;
+    }
+
+    public void save() {
+        saveButton.callOnClick();
     }
 
     private void updateTheme(boolean isDarkMode) {

@@ -91,6 +91,7 @@ public class ContainerDetailFragment extends Fragment {
     private PreloaderDialog preloaderDialog;
     private JSONArray gpuCards;
     private Callback<String> openDirectoryCallback;
+    private View saveButton;
 
     private static boolean isDarkMode;
 
@@ -559,7 +560,9 @@ public class ContainerDetailFragment extends Fragment {
         }
 
         // Set up confirm button
-        view.findViewById(R.id.BTConfirm).setOnClickListener((v) -> {
+        saveButton = view.findViewById(R.id.BTConfirm);
+        saveButton.setVisibility(isEditMode() ? View.GONE : View.VISIBLE);
+        saveButton.setOnClickListener((v) -> {
             try {
                 // Capture and set container properties based on UI inputs
                 String name = etName.getText().toString();
@@ -822,6 +825,12 @@ public class ContainerDetailFragment extends Fragment {
             Spinner sMouseWarpOverride = view.findViewById(R.id.SMouseWarpOverride);
             sMouseWarpOverride.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, mouseWarpOverrideList));
             AppUtils.setSpinnerSelectionFromValue(sMouseWarpOverride, registryEditor.getStringValue("Software\\Wine\\DirectInput", "MouseWarpOverride", "disable"));
+        }
+    }
+
+    public void save() {
+        if (isEditMode()) {
+            saveButton.callOnClick();
         }
     }
 
