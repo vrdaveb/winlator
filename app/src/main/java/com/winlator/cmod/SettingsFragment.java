@@ -461,6 +461,12 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onPause() {
+        save();
+        super.onPause();
+    }
+
     public void save() {
         saveButton.callOnClick();
     }

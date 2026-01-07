@@ -828,6 +828,12 @@ public class ContainerDetailFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        save();
+        super.onPause();
+    }
+
     public void save() {
         if (isEditMode()) {
             saveButton.callOnClick();

@@ -585,18 +585,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
 
-        List<Fragment> fragments = fragmentManager.getFragments();
-        for (Fragment fragment : fragments) {
-            if (fragment instanceof ContainerDetailFragment && fragment.isVisible()) {
-                ((ContainerDetailFragment)fragment).save();
-                break;
-            }
-            if (fragment instanceof SettingsFragment && fragment.isVisible()) {
-                ((SettingsFragment)fragment).save();
-                break;
-            }
-        }
-
         switch (item.getItemId()) {
             case R.id.main_menu_shortcuts:
                 show(new ShortcutsFragment(), false);  // Forward animation
