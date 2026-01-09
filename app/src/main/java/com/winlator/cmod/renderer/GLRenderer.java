@@ -108,6 +108,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
             String[] parts = res.split("x");
             width = Short.parseShort(parts[0]);
             height = Short.parseShort(parts[1]);
+            if (width < 1280) {
+                height = 1280 * height / width;
+                width = 1280;
+            }
 
             int cpuLevel = activity.getContainer().getCpuLevel();
             int gpuLevel = activity.getContainer().getGpuLevel();
