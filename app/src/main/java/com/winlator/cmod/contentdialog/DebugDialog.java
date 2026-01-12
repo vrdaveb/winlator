@@ -1,6 +1,7 @@
 package com.winlator.cmod.contentdialog;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -29,8 +30,12 @@ public class DebugDialog extends ContentDialog implements Callback<String> {
         setTitle(context.getString(R.string.logs));
         logView = findViewById(R.id.LogView);
 
-        logView.getLayoutParams().width = 1024;
-        logView.getLayoutParams().height = 1024;
+        if (Build.MANUFACTURER.compareToIgnoreCase("PICO") == 0) {
+            logView.getLayoutParams().width = (int)UnitUtils.dpToPx(UnitUtils.pxToDp(AppUtils.getScreenWidth()) * 0.5f);
+        } else {
+            logView.getLayoutParams().width = 1024;
+            logView.getLayoutParams().height = 1024;
+        }
 
         findViewById(R.id.BTCancel).setVisibility(View.GONE);
 
