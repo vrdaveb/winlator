@@ -93,6 +93,7 @@ public class ContainerDetailFragment extends Fragment {
     private Callback<String> openDirectoryCallback;
     private View saveButton;
 
+    private boolean autosave;
     private static boolean isDarkMode;
 
     private ImageFs imageFs;
@@ -829,8 +830,16 @@ public class ContainerDetailFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        autosave = true;
+    }
+
+    @Override
     public void onPause() {
-        save();
+        if (autosave) {
+            save();
+        }
         super.onPause();
     }
 
@@ -1101,6 +1110,11 @@ public class ContainerDetailFragment extends Fragment {
             applyDarkThemeToButton(btSearch);
 
             itemView.findViewById(R.id.BTSearch).setOnClickListener((v) -> {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                SharedPreferences.Editor e = sharedPreferences.edit();
+                e.putString("tab_last", "");
+                e.commit();
+                autosave = false;
                 openDirectoryCallback = (path) -> {
                     drive[1] = path;
                     editText.setText(path);
